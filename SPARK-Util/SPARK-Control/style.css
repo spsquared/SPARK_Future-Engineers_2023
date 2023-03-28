@@ -1,0 +1,357 @@
+body {
+    overflow: hidden;
+}
+div {
+    font-family: sans-serif;
+}
+img {
+    -webkit-user-drag: none;
+}
+
+#banner1 {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    height: 80px;
+    image-rendering: pixelated;
+}
+#banner2 {
+    position: absolute;
+    top: 16px;
+    left: 336px;
+    height: 80px;
+    image-rendering: pixelated;
+}
+
+#eventLog {
+    position: absolute;
+    top: 104px;
+    left: 0px;
+    width: 350px;
+    height: calc(100vh - 140px);
+    border-right: 4px solid black;
+    border-top: 4px solid black;
+    padding: 16px 16px;
+    font: 32px black sans-serif;
+}
+#eventLogBody {
+    position: absolute;
+    top: 64px;
+    left: 0px;
+    width: 100%;
+    height: calc(100% - 68px);
+    border-top: 4px solid black;
+    font-size: 20px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.logBlock {
+    width: 382px;
+    background-color: lightgray;
+    padding: 4px 16px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+.connectNow {
+    width: 158px;
+    height: 24px;
+    margin-left: 16px;
+    font: 12px sans-serif;
+    font-weight: bolder;
+    border: 4px outset white;
+    background-color: red;
+    cursor: pointer;
+}
+.connectNow:active {
+    border-style: inset;
+}
+
+#joystick {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 300px;
+    height: 300px;
+    background-color: grey;
+    clip-path: inset(0 0 0 0 round 40px 40px 40px 40px);
+    user-select: none;
+}
+#joystickPin {
+    position: absolute;
+    bottom: 114px;
+    right: 114px;
+    width: 72px;
+    height: 72px;
+    border: 4px solid black;
+    border-radius: 50%;
+    background-color: lightgray;
+    transform: translate(4px, 4px);
+    cursor: move;
+    z-index: 1;
+}
+#sliderX {
+    position: absolute;
+    bottom: 140px;
+    right: 0px;
+    width: 300px;
+    height: 20px;
+    background-color: black;
+}
+#sliderY {
+    position: absolute;
+    bottom: 0px;
+    right: 140px;
+    width: 20px;
+    height: 300px;
+    background-color: black;
+}
+
+#captureButtons {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 300px;
+    align-content: center;
+}
+.largeButton {
+    width: 276px;
+    height: 32px;
+    margin: 12px 12px;
+    margin-bottom: 0px;
+    font: 12px sans-serif;
+    font-weight: bolder;
+    border: 4px outset darkgray;
+    cursor: pointer;
+}
+.largeButton:active {
+    border-style: inset;
+}
+#captureButton {
+    background-color: lightskyblue;
+}
+#captureFilterButton {
+    background-color: gold;
+}
+#captureStreamButton {
+    background-color: lightgreen;
+}
+#captureFilterStreamButton {
+    background-color: lightgreen;
+}
+#streamButton {
+    background-color: lightgreen;
+}
+#filterStreamButton {
+    background-color: lightgreen;
+}
+#viewButton {
+    background-color: lightskyblue;
+}
+#viewFilterButton {
+    background-color: gold;
+}
+#predictionButton {
+    background-color: orange;
+}
+
+#filterAdjust {
+    position: absolute;
+    top: 0px;
+    left: 450px;
+    padding-top: 16px;
+}
+.slider {
+    appearance: none;
+    width: 196px;
+    height: 10px;
+    background-color: lightgray;
+    border: 2px solid black;
+    margin-right: 2px;
+}
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid black;
+    cursor: grab;
+}
+.slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+}
+.sliderH::-webkit-slider-thumb {
+    background-color: hsl(var(--hue), 100%, 50%);
+}
+.sliderS::-webkit-slider-thumb {
+    background-color: hsl(var(--hue), var(--saturation), 50%);
+}
+.sliderV::-webkit-slider-thumb {
+    background-color: hsl(var(--hue), var(--saturation), var(--value));
+}
+
+#captureDisplay {
+    position: absolute;
+    bottom: 8px;
+    left: 400px;
+    width: 544px;
+    height: 366px;
+}
+#displayBack {
+    position: absolute;
+    bottom: 0px;
+    left: 8px;
+    width: 48px;
+    height: 48px;
+    background-color: lightgray;
+    font-size: 40px;
+    border: none;
+    cursor: pointer;
+}
+#displayBack:hover {
+    background-color: #E0E0E0;
+}
+#displayBack:active {
+    background-color: #CCCCCC;
+}
+#displayForwards {
+    position: absolute;
+    bottom: 0px;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+    background-color: lightgray;
+    font-size: 40px;
+    border: none;
+    cursor: pointer;
+}
+#displayForwards:hover {
+    background-color: #E0E0E0;
+}
+#displayForwards:active {
+    background-color: #CCCCCC;
+}
+#historySlider {
+    position: absolute;
+    bottom: 4px;
+    left: 66px;
+    width: 400px;
+    height: 32px;
+}
+#historySlider::-webkit-slider-thumb {
+    width: 24px;
+    height: 48px;
+    background-color: darkgrey;
+}
+#displayBlock {
+    position: absolute;
+    bottom: 56px;
+    left: 0px;
+    width: 544px;
+    height: 308px;
+}
+#displayImg {
+    position: absolute;
+    top: -0.5px;
+    left: -0.5px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    image-rendering: pixelated;
+    background-color: black;
+}
+#canvas {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    border: 2px solid black;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+#canvas2 {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 100%;
+    height: 100%;
+    border: 2px solid transparent;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+#fps {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 8px 8px;
+    font: 28px sans-serif white;
+    color: white;
+    background-color: #0005;
+}
+#valueDisplayBlock {
+    position: absolute;
+    bottom: 364px;
+    width: 100%;
+}
+#download {
+    height: 24px;
+    width: 150px;
+    margin-top: 0px;
+    background-color: skyblue;
+    cursor: pointer;
+}
+#download2 {
+    height: 24px;
+    width: 150px;
+    margin-top: 0px;
+    background-color: skyblue;
+    cursor: pointer;
+}
+#download3 {
+    height: 24px;
+    width: 150px;
+    margin-top: 0px;
+    background-color: skyblue;
+    cursor: pointer;
+}
+#maxHistoryLabel {
+    display: inline-block;
+}
+#maxHistory {
+    display: inline-block;
+    width: 50px;
+}
+#displayFullscreen {
+    width: 150px;
+    height: 24px;
+    margin: 0px;
+}
+#valueDisplay2Block {
+    position: absolute;
+    right: -256px;
+    bottom: 16px;
+    width: 250px;
+}
+
+#emergencyStop {
+    width: 100%;
+    height: 48px;
+    font: 20px sans-serif;
+    font-weight: bolder;
+    background-color: red;
+    border: 4px outset gray;
+    cursor: pointer;
+}
+#emergencyStop:active {
+    border-style: inset;
+}
+#disconnect {
+    width: 100%;
+    height: 48px;
+    font: 20px sans-serif;
+    font-weight: bolder;
+    background-color: red;
+    border: 4px outset gray;
+    cursor: pointer;
+}
+#disconnect:active {
+    border-style: inset;
+}

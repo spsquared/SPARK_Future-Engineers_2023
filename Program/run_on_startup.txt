@@ -1,0 +1,5 @@
+true
+the first line should either
+say "false" or "true"
+set to "true" to enable
+run-on-startup

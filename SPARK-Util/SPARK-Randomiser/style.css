@@ -1,0 +1,80 @@
+body {
+    overflow: hidden;
+}
+div {
+    font-family: sans-serif;
+}
+img {
+    -webkit-user-drag: none;
+}
+
+.largeButton {
+    width: 268px;
+    height: 32px;
+    margin: 16px 16px;
+    margin-bottom: 0px;
+    font: 12px sans-serif;
+    font-weight: bolder;
+    border: 4px outset darkgray;
+    cursor: pointer;
+}
+.largeButton:active {
+    border-style: inset;
+}
+
+#banner1 {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    height: 80px;
+    image-rendering: pixelated;
+}
+#banner2 {
+    position: absolute;
+    top: 16px;
+    left: 336px;
+    height: 80px;
+    image-rendering: pixelated;
+}
+
+#randomiseWithoutPillars {
+    position: absolute;
+    top: 104px;
+    left: 0px;
+}
+#randomiseWithPillars {
+    position: absolute;
+    top: 152px;
+    left: 0px;
+}
+#randomiseWeirdly {
+    position: absolute;
+    top: 200px;
+    left: 0px;
+}
+#randomiseGaruder {
+    position: absolute;
+    top: 248px;
+    left: 0px;
+}
+#reset {
+    position: absolute;
+    top: 296px;
+    left: 0px;
+}
+
+#canvas {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+#rickastley {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100vh;
+}
