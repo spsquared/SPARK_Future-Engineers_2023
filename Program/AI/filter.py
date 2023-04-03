@@ -16,6 +16,10 @@ gM = greenMax = (110, 255, 255)
 bm = blueMin = (100, 70, 70)
 bM = blueMax = (140, 255, 255)
 
+#fix gr ey
+graym  = greyMax = (150, 150, 151)
+ggreyM = grayMin = (20 ,19   , 20)
+
 # wall constants
 LEFT = 0
 CENTER = 1
