@@ -755,16 +755,17 @@ document.getElementById('disconnect').onclick = async () => {
     let rickrolls = [];
     let ready = 0;
     for (let i = 0; i < 100; i++) {
-        let rickroll = new Audio('./null.mp3');
-        // let rickroll = new Audio('./SPARK.mp3');
-        // let rickroll = new Audio('./RUSH E.mp3');
-        // let rickroll = new Audio('./Kitsune2 - Rainbow Tylenol.mp3');
-        // let rickroll = new Audio('./Rainbow Trololol.mp3');
-        // let rickroll = new Audio('./Minecraft_ Villager Sound Effect.mp3');
-        // let rickroll = new Audio('./07-The Magus.mp3');
-        // let rickroll = new Audio('./127 - Official Meadow Guarder Song.mp3');
-        // let rickroll = new Audio('./The Meadow - Official Meadow Guarder Song.mp3');
-        // let rickroll = new Audio('./The Oasis - Official Meadow Guarder Song.mp3');
+        let rickroll = new Audio('./sounds/null.mp3');
+        // let rickroll = new Audio('./sounds/SPARK.mp3');
+        // let rickroll = new Audio('./sounds/RUSH E.mp3');
+        // let rickroll = new Audio('./sounds/Kitsune2 - Rainbow Tylenol.mp3');
+        // let rickroll = new Audio('./sounds/Rainbow Trololol.mp3');
+        // let rickroll = new Audio('./sounds/Minecraft_ Villager Sound Effect.mp3');
+        // let rickroll = new Audio('./sounds/Dramatic Vine_Instagram Boom - Sound Effect (HD).mp3');
+        // let rickroll = new Audio('./sounds/07-The Magus.mp3');
+        // let rickroll = new Audio('./sounds/127 - Official Meadow Guarder Song.mp3');
+        // let rickroll = new Audio('./sounds/The Meadow - Official Meadow Guarder Song.mp3');
+        // let rickroll = new Audio('./sounds/The Oasis - Official Meadow Guarder Song.mp3');
         rickroll.preload = true;
         rickroll.addEventListener('loadeddata', () => {
             ready++;

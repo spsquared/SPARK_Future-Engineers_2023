@@ -4,7 +4,7 @@ import time
 
 # general io module
 
-path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
+path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 running = False
 thread = None
