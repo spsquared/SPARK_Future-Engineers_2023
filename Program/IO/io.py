@@ -69,12 +69,13 @@ def setStatusBlink(blink: int):
     global statusBlink
     # 0 = off
     # 1 = solid
-    # 2 = green
+    # 2 = flashing
     statusBlink = blink
+# add yellow light?
 
 def error():
     global errorRunning
-    if errorRunning == False:
+    if errorRunning == False and running == True:
         errorRunning = True
         def blink():
             while True:

@@ -46,7 +46,7 @@ def read():
     return currentImage
 
 # single image save
-def capture(filter = None, server = None, drive = None):
+def capture(filter = None, server: server = None, drive: drive = None):
     global currentImage
     try:
         name = str(round(time.time()*1000))
