@@ -21,7 +21,7 @@ Located below is the documentation, and a link to the build instructions.
     * [Operating System](#operating-system)
     * [Programming Language](#programming-language)
     * [IO](#io)
-    * [Image Processing and Predictions](#image-predictions)
+    * [Input Processing](#input-processing)
         * [TBD](/)
     * [SPARK Control Panel](#spark-control)
 * [Team Photos](#team-photos)
@@ -65,11 +65,12 @@ Located below is the documentation, and a link to the build instructions.
 * [12 Tooth 48 Pitch Pinion Gear with Set Screw](https://www.amazon.com/Traxxas-PINION-PITCH-SCREW-2428/dp/B00EFXMUO2)
 * [78 Tooth Spur Gear 48 Pitch](https://www.amazon.com/Kimbrough-Pitch-Spur-Gear-78T/dp/B0006O1QVM)
 * 20-24 gauge wire
-* M3 nylon screws
-* M3 nylon standoffs
+* M3 nylon screws (6mm)
+* M3 nylon standoffs (6mm works best)
 * M3 nylon nuts
 * M3 nuts
-* Countersunk, cap head M3 screws (6mm, 33mm)
+* Countersunk, cap head M3 screws (6mm and 8mm work best)
+* Socket cap head M3x40mm screws [(like these)](https://www.amazon.com/Alloy-Steel-Socket-Screws-Black/dp/B00W97R5KU)
 * Differential lubrication
 
 You will need (at least) the following tools:
@@ -85,7 +86,7 @@ You will need (at least) the following tools:
 
 ## Assembly
 
-*designed in-house!*
+*designed by us! very unconventional, rewrite this section.*
 
 #### **For a detailed build guide, go to [ASSEMBLY.md](./ASSEMBLY.md)**
 
@@ -112,7 +113,7 @@ We used Jetson Nano's operating system, which is Ubuntu 18.04. It has been chang
 
 ## **Programming Language**
 
-All our code is in python (except the SPARK Control Panel and SPARK Randomizer, those are HTML/JS/CSS applications used for development). We use *add list*.
+All our code is in python (except the SPARK Control Panel and SPARK Randomizer, those are HTML/JS/CSS applications used for development). We use the following packages: ***add list***.
 
 The **entire** `Program` directory must be uploaded in order for the program to run. Make sure the directory in `path` in `/Program/IO/io.py` is set correctly (you can use any existing directory with a `lock.txt`, but the uploaded folder is recommended)
 
@@ -124,11 +125,11 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 ## **IO**
 
-*detail IO processes (camera input, motor output)
+*detail IO processes (camera and IMU input, motor output)*
 
 ***
 
-## **Image Predictions**
+## **Input Processing**
 
 All the code for image filtering and predictions can be found in `/Program/AI/filter.py`.
 

@@ -3,67 +3,46 @@ from threading import Thread
 from IO import io
 import time
 
-# drive module for controlling throttle and steering output
+# drive module for controlling throttle and steering
 
 # setup
-t = GPIO.PWM(32, 500)
-s = GPIO.PWM(33, 200)
+throttleFreq = 500
+steeringFreq = 200
+throttle = GPIO.PWM(32, throttleFreq)
+steering = GPIO.PWM(33, steeringFreq)
 
-# pwm min max and speed
-thrBACK = 70
-thrMIN = 75
-thrMAX = 80
-thrBACK2 = 1_400_000
-thrMIN2 = 1_500_000
-thrMAX2 = 1_550_000
-strMAX = 47
-strMIN = 28
-strTRIM = 8
-# throttle feathering
-# thrFeaFREQ = 10
-# thrFeaDiv = 20
+# pwm min max active times
+throttleRev = 1_400_000
+throttleStop = 1_500_000
+throttleFwd = 1_550_000
+steeringRange = 300_000
+steeringLeft = 1_500_000 + steeringRange
+steeringRight = 1_500_000 - steeringRange
+steeringTrim = 0
 # control variables
 targetThrottle = 0
 targetSteering = 0
-currThrottle = 0
-currSteering = 0
-steerSpeed = 0.3
 # control loop
-tickrate = 200
+refreshRate = 200
 running = False
 controlThread = None
 
 def start():
-    global controlThread, running
+    global controlThread, running, throttle, steering
     if running == False:
-        # begin
         running = True
-        t.start(thrMIN)
-        s.start((strMIN+strMAX)/2)
+        throttle.start(0)
+        steering.start(0)
         def loop():
+            global running, refreshRate, targetThrottle, targetSteering, throttle, steering, throttleRev, throttleStop, throttleFwd, steeringRight, steeringLeft, steeringTrim, steeringRange
             try:
-                # global running, t, s, currThrottle, currSteering, targetThrottle, targetSteering, thrFeaFREQ, thrFeaDiv, tickrate
-                global running, t, s, currThrottle, currSteering, targetThrottle, targetSteering, steerSpeed, tickrate
-                # timer = 0
                 while running:
                     start = time.time()
-                    # convert throttle to active time
-                    # thrFeaACT = math.floor(abs(targetThrottle)/20)/thrFeaDiv
-                    # if timer >= 1: timer = 0
-                    # if timer <= thrFeaACT and thrFeaACT < 1 and targetThrottle > 10: currThrottle = 100
-                    # elif targetThrottle < -10 or thrFeaACT >= 1: currThrottle = targetThrottle
-                    # else: currThrottle = 0
-                    currThrottle = targetThrottle
-                    currSteering = targetSteering*steerSpeed + currSteering*(1-steerSpeed)
-                    # apply throttle and steering
-                    if (currThrottle < 0): t.ChangeDutyCycle((currThrottle/100)*(thrMIN-thrBACK)+thrMIN)
-                    else: t.ChangeDutyCycle((currThrottle/100)*(thrMAX-thrMIN)+thrMIN)
-                    # if (currThrottle < 0): GPIO._set_pwm_duty_cycle(t._ch_info, (currThrottle/100)*(thrMIN2-thrBACK2)+thrMIN2)
-                    # else: GPIO._set_pwm_duty_cycle(t._ch_info, (currThrottle/100)*(thrMAX-thrMIN)+thrMIN)
-                    s.ChangeDutyCycle((currSteering/100.0)*((strMAX-strMIN)/2)+((strMIN+strMAX)/2)+(strTRIM/10))
-                    # advance timer
-                    # timer += thrFeaFREQ/tickrate
-                    time.sleep(max((1/tickrate)-(time.time()-start), 0))
+                    # apply throttle and steering based on percent to range formula
+                    if (targetThrottle < 0): GPIO._set_pwm_duty_cycle(throttle._ch_info, (targetThrottle / 100) * (throttleStop - throttleRev) + throttleStop)
+                    else: GPIO._set_pwm_duty_cycle(throttle._ch_info, (targetThrottle / 100) * (throttleFwd - throttleStop) + throttleStop)
+                    GPIO._set_pwm_duty_cycle(steering._ch_info, (targetSteering / 100) * ((steeringLeft - steeringRight) / 2) + (steeringLeft + steeringRight) + ((steeringTrim / 100) * steeringRange))
+                    time.sleep(max((1/refreshRate)-(time.time()-start), 0))
             except Exception as err:
                 print(err)
                 io.error()
@@ -73,14 +52,12 @@ def start():
     return False
 
 def stop():
-    global running, controlThread
+    global running, controlThread, throttle, steering
     if running == True:
         running = False
         controlThread.join()
-        t.ChangeDutyCycle(thrMIN)
-        s.ChangeDutyCycle((strMIN+strMAX)/2)
-        t.stop()
-        s.stop()
+        throttle.stop()
+        steering.stop()
         return True
     return False
 
@@ -99,5 +76,5 @@ def trim(trim: int):
 
 # get current
 def currentSteering():
-    global currSteering
-    return -currSteering
+    global targetSteering
+    return -targetSteering

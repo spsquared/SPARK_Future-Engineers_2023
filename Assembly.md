@@ -123,3 +123,7 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
 ```
 
 Reboot the Jetson NANO again
+
+### Camera fixes
+
+You may encounter pink fringing on the cameras. If this happens, follow [this thread](https://forums.developer.nvidia.com/t/li-imx219-mipi-ff-nano-h136-pink-tint-problem/163533/10) to fix it.

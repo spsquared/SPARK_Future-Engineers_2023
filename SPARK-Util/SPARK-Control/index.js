@@ -59,7 +59,7 @@ async function playSound() {
     if (first) {
         for (let i = 0; i < 10; i++) {
             await new Promise(function(resolve, reject) {
-                let ping = new Audio('ping.mp3');
+                let ping = new Audio('./sounds/ping.mp3');
                 ping.preload = true;
                 ping.addEventListener('loadeddata', function() {
                     pendingsounds.push(ping);
@@ -71,7 +71,7 @@ async function playSound() {
     }
     pendingsounds[0].play();
     pendingsounds.shift();
-    let ping = new Audio('ping.mp3');
+    let ping = new Audio('./sounds/ping.mp3');
     ping.preload = true;
     ping.addEventListener('loadeddata', function() {
         pendingsounds.push(ping);
