@@ -58,7 +58,7 @@ img {
     margin-left: 16px;
     font: 12px sans-serif;
     font-weight: bolder;
-    border: 4px outset white;
+    border: 4px outset crimson;
     background-color: red;
     cursor: pointer;
 }

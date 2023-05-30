@@ -13,24 +13,24 @@ Located below is the documentation, and a link to the build instructions.
 ***
 
 # Contents
-* [Hardware Overview](#the-hardware)
+* [Hardware](#hardware-documentation)
     * [Parts List](#parts-list)
     * [Assembly Instructions & Diagrams](#assembly)
     * [Photos](#photos)
-* [Software Overview](#the-software)
+* [Software](#software-documentation)
     * [Operating System](#operating-system)
     * [Programming Language](#programming-language)
     * [IO](#io)
     * [Input Processing](#input-processing)
         * [TBD](/)
     * [SPARK Control Panel](#spark-control)
-* [Team Photos](#team-photos)
-* [Demonstration Video](#demonstration-video)
+* [Team Photos!!](#team-photos)
+* [Demonstrations](#demonstration-video)
 * [LiPo Battery Safety Notice](#lipo-battery-safety-notice)
 
 ***
 
-# **The Hardware**
+# **Hardware Documentation**
 
 ## Parts List
 ***INCOMPLETE***
@@ -105,7 +105,13 @@ Here is a simple electromechanical schematic for how the electronics are wired:
 
 ***
 
-# **The Software**
+# **Uploading & Using SPARK-Util tools**
+
+TODO
+
+*nodejs server is not needed*
+
+# **Software Documentation**
 
 ## **Operating System**
 

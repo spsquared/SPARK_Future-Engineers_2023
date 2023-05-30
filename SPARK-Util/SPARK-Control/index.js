@@ -1,3 +1,7 @@
+window.addEventListener('error', (e) => {
+    // appendLog(`An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
+    appendLog('An error occured!');
+});
 const ip = '192.168.1.151';
 
 socket = new WebSocket('ws://' + ip + ':4040');
@@ -18,7 +22,7 @@ function send(event, data) {
         }));
     }
 };
-socket.onmessage = function(e) {
+socket.onmessage = function (e) {
     if (e.data != 'ping') {
         let json = JSON.parse(e.data);
         for (let i in callbacks) {
@@ -28,11 +32,11 @@ socket.onmessage = function(e) {
         }
     }
 };
-socket.onopen = function() {
+socket.onopen = function () {
     connected = true;
     appendLog('Connected!', 'lime');
 };
-socket.onclose = function() {
+socket.onclose = function () {
     connected = false;
     if (autoReconnect) toReconnect = true;
     appendLog('Connection closed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
@@ -58,10 +62,10 @@ let first = true;
 async function playSound() {
     if (first) {
         for (let i = 0; i < 10; i++) {
-            await new Promise(function(resolve, reject) {
+            await new Promise(function (resolve, reject) {
                 let ping = new Audio('./sounds/ping.mp3');
                 ping.preload = true;
-                ping.addEventListener('loadeddata', function() {
+                ping.addEventListener('loadeddata', function () {
                     pendingsounds.push(ping);
                     resolve();
                 });
@@ -73,7 +77,7 @@ async function playSound() {
     pendingsounds.shift();
     let ping = new Audio('./sounds/ping.mp3');
     ping.preload = true;
-    ping.addEventListener('loadeddata', function() {
+    ping.addEventListener('loadeddata', function () {
         pendingsounds.push(ping);
     });
 };
@@ -87,19 +91,19 @@ function appendLog(text, color) {
     log.appendChild(div);
     if (scroll) log.scrollTop = log.scrollHeight;
 };
-addListener('message', function(data) {
+addListener('message', function (data) {
     playSound();
     appendLog(data);
 });
 
 // keys
-document.onkeydown = function(e) {
+document.onkeydown = function (e) {
     const key = e.key.toLowerCase();
-    send('key', {key: key});
+    send('key', { key: key });
 };
-document.onkeyup = function(e) {
+document.onkeyup = function (e) {
     const key = e.key.toUpperCase();
-    send('key', {key: key});
+    send('key', { key: key });
 };
 
 // joystick
@@ -112,13 +116,13 @@ let grabbing = false;
 let grabbingtouch = false;
 let throttle = 0;
 let steering = 0;
-joystick.onmousedown = function(e) {
+joystick.onmousedown = function (e) {
     grabbing = true;
 };
-joystick.addEventListener('touchstart', function(e) {
+joystick.addEventListener('touchstart', function (e) {
     grabbingtouch = true;
-}, {passive: true});
-document.onmouseup = function(e) {
+}, { passive: true });
+document.onmouseup = function (e) {
     if (grabbing) {
         grabbing = false;
         joystickPin.style.right = '114px';
@@ -127,10 +131,10 @@ document.onmouseup = function(e) {
         sliderY.style.right = '140px';
         throttle = 0;
         steering = 0;
-        send('joystick', {throttle: 0, steering: 0});
+        send('joystick', { throttle: 0, steering: 0 });
     }
 };
-document.addEventListener('touchend', function(e) {
+document.addEventListener('touchend', function (e) {
     if (grabbingtouch) {
         grabbingtouch = false;
         joystickPin.style.right = '110px';
@@ -139,10 +143,10 @@ document.addEventListener('touchend', function(e) {
         sliderY.style.right = '140px';
         throttle = 0;
         steering = 0;
-        send('joystick', {throttle: 0, steering: 0});
+        send('joystick', { throttle: 0, steering: 0 });
     }
-}, {passive: true});
-document.addEventListener('touchcancel', function(e) {
+}, { passive: true });
+document.addEventListener('touchcancel', function (e) {
     if (grabbingtouch) {
         grabbingtouch = false;
         joystickPin.style.right = '114px';
@@ -151,38 +155,38 @@ document.addEventListener('touchcancel', function(e) {
         sliderY.style.right = '140px';
         throttle = 0;
         steering = 0;
-        send('joystick', {throttle: 0, steering: 0});
+        send('joystick', { throttle: 0, steering: 0 });
     }
-}, {passive: true});
-document.onmousemove = function(e) {
+}, { passive: true });
+document.onmousemove = function (e) {
     if (grabbing) {
-        let x = Math.max(-110, Math.min(e.clientX-window.innerWidth+150, 110));
-        let y = Math.max(-110, Math.min(e.clientY-window.innerHeight+150, 110));
-        throttle = Math.round(-y*90/99);
-        steering = Math.round(x*90/99);
-        joystickPin.style.bottom = 114-y + 'px';
-        joystickPin.style.right = 114-x + 'px';
-        sliderX.style.bottom = 140-y + 'px';
-        sliderY.style.right = 140-x + 'px';
+        let x = Math.max(-110, Math.min(e.clientX - window.innerWidth + 150, 110));
+        let y = Math.max(-110, Math.min(e.clientY - window.innerHeight + 150, 110));
+        throttle = Math.round(-y * 90 / 99);
+        steering = Math.round(x * 90 / 99);
+        joystickPin.style.bottom = 114 - y + 'px';
+        joystickPin.style.right = 114 - x + 'px';
+        sliderX.style.bottom = 140 - y + 'px';
+        sliderY.style.right = 140 - x + 'px';
     }
 };
-document.addEventListener('touchmove', function(e) {
+document.addEventListener('touchmove', function (e) {
     if (grabbingtouch) {
         for (let i in e.touches) {
             if (joystick.contains(e.touches[i].target)) {
-                let x = Math.max(-110, Math.min(e.touches[i].clientX-window.innerWidth+150, 110));
-                let y = Math.max(-110, Math.min(e.touches[i].clientY-window.innerHeight+150, 110));
-                throttle = Math.round(-y*90/99);
-                steering = Math.round(x*90/99);
-                joystickPin.style.bottom = 114-y + 'px';
-                joystickPin.style.right = 114-x + 'px';
-                sliderX.style.bottom = 140-y + 'px';
-                sliderY.style.right = 140-x + 'px';
+                let x = Math.max(-110, Math.min(e.touches[i].clientX - window.innerWidth + 150, 110));
+                let y = Math.max(-110, Math.min(e.touches[i].clientY - window.innerHeight + 150, 110));
+                throttle = Math.round(-y * 90 / 99);
+                steering = Math.round(x * 90 / 99);
+                joystickPin.style.bottom = 114 - y + 'px';
+                joystickPin.style.right = 114 - x + 'px';
+                sliderX.style.bottom = 140 - y + 'px';
+                sliderY.style.right = 140 - x + 'px';
                 break;
             }
         }
     }
-}, {passive: true});
+}, { passive: true });
 
 // controllers
 let trim = 0;
@@ -193,8 +197,8 @@ function updateControllers() {
     for (let i in controllers) {
         if (controllers[i] instanceof Gamepad) {
             let controller = controllers[i];
-            throttle = Math.round(controller.axes[1]*-100);
-            steering = Math.round((controller.axes[2]-trim2)*100)-trim;
+            throttle = Math.round(controller.axes[1] * -100);
+            steering = Math.round((controller.axes[2] - trim2) * 100) - trim;
             if (controller.buttons[8].pressed && pressedbuttons.indexOf(8) == -1) {
                 if (controller.buttons[7].pressed) document.getElementById('captureFilterButton').click();
                 else document.getElementById('captureButton').click();
@@ -222,33 +226,33 @@ function updateControllers() {
             } else if (!controller.buttons[1].pressed && pressedbuttons.indexOf(1) != -1) {
                 pressedbuttons.splice(pressedbuttons.indexOf(1), 1);
             }
-            joystickPin.style.bottom = 114-(controller.axes[1]*110) + 'px';
-            joystickPin.style.right = 114-(controller.axes[2]*110) + 'px';
-            sliderX.style.bottom = 140-(controller.axes[1]*110) + 'px';
-            sliderY.style.right = 140-(controller.axes[2]*110) + 'px';
+            joystickPin.style.bottom = 114 - (controller.axes[1] * 110) + 'px';
+            joystickPin.style.right = 114 - (controller.axes[2] * 110) + 'px';
+            sliderX.style.bottom = 140 - (controller.axes[1] * 110) + 'px';
+            sliderY.style.right = 140 - (controller.axes[2] * 110) + 'px';
             break;
         }
     }
 };
-setInterval(function() {
+setInterval(function () {
     updateControllers()
 }, 25);
 
 // send
-setInterval(function() {
+setInterval(function () {
     if (throttle != 0 || steering != 0) {
-        send('joystick', {throttle: throttle, steering: steering});
+        send('joystick', { throttle: throttle, steering: steering });
     }
 }, 50);
 
 // capture
-document.getElementById('captureButton').onclick = function(e) {
+document.getElementById('captureButton').onclick = function (e) {
     send('capture', {});
 };
 let streaming = false;
-document.getElementById('captureStreamButton').onclick = function(e) {
+document.getElementById('captureStreamButton').onclick = function (e) {
     streaming = !streaming;
-    send('captureStream', {state: streaming});
+    send('captureStream', { state: streaming });
     if (streaming) {
         document.getElementById('captureStreamButton').innerText = 'STOP CAPTURE STREAM';
         document.getElementById('captureStreamButton').style.backgroundColor = 'lightcoral';
@@ -257,7 +261,7 @@ document.getElementById('captureStreamButton').onclick = function(e) {
         document.getElementById('captureStreamButton').style.backgroundColor = 'lightgreen';
     }
 };
-document.getElementById('captureFilterButton').onclick = function(e) {
+document.getElementById('captureFilterButton').onclick = function (e) {
     let arr = [];
     for (let i in sliders) {
         arr.push(sliders[i].value);
@@ -265,13 +269,13 @@ document.getElementById('captureFilterButton').onclick = function(e) {
     send('captureFilter', arr);
 };
 let filterstreaming = false;
-document.getElementById('captureFilterStreamButton').onclick = function(e) {
+document.getElementById('captureFilterStreamButton').onclick = function (e) {
     let arr = [];
     for (let i in sliders) {
         arr.push(sliders[i].value);
     }
     filterstreaming = !filterstreaming;
-    send('captureFilterStream', {colors: arr, state: filterstreaming});
+    send('captureFilterStream', { colors: arr, state: filterstreaming });
     if (filterstreaming) {
         document.getElementById('captureFilterStreamButton').innerText = 'STOP FILTERED CAPTURE STREAM';
         document.getElementById('captureFilterStreamButton').style.backgroundColor = 'lightcoral';
@@ -306,13 +310,13 @@ function updateSlider(i) {
     document.getElementById(sliders[i].id + 'indicator').innerText = sliders[i].value;
     if (sliders[i].id.includes('H')) {
         sliders[i].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i+3].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i+6].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 3].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 6].style.setProperty('--hue', sliders[i].value * 2);
     } else if (sliders[i].id.includes('S')) {
-        sliders[i].style.setProperty('--saturation', sliders[i].value*(100/255) + '%');
-        sliders[i+3].style.setProperty('--saturation', sliders[i].value*(100/255) + '%');
+        sliders[i].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
+        sliders[i + 3].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
     } else if (sliders[i].id.includes('V')) {
-        sliders[i].style.setProperty('--value', sliders[i].value*(50/255) + '%');
+        sliders[i].style.setProperty('--value', sliders[i].value * (50 / 255) + '%');
     }
 };
 function setColors(colors) {
@@ -336,9 +340,9 @@ document.getElementById('viewFilterButton').onclick = function (e) {
 };
 let streaming2 = false;
 let filterstreaming2 = false;
-document.getElementById('streamButton').onclick = function(e) {
+document.getElementById('streamButton').onclick = function (e) {
     streaming2 = !streaming2;
-    send('stream', {state: streaming2});
+    send('stream', { state: streaming2 });
     if (streaming2) {
         document.getElementById('streamButton').innerText = 'STOP STREAM';
         document.getElementById('streamButton').style.backgroundColor = 'lightcoral';
@@ -347,13 +351,13 @@ document.getElementById('streamButton').onclick = function(e) {
         document.getElementById('streamButton').style.backgroundColor = 'lightgreen';
     }
 };
-document.getElementById('filterStreamButton').onclick = function(e) {
+document.getElementById('filterStreamButton').onclick = function (e) {
     filterstreaming2 = !filterstreaming2;
     let arr = [];
     for (let i in sliders) {
         arr.push(sliders[i].value);
     }
-    send('filterstream', {colors: arr, state: filterstreaming2});
+    send('filterstream', { colors: arr, state: filterstreaming2 });
     if (filterstreaming2) {
         document.getElementById('filterStreamButton').innerText = 'STOP FILTERED STREAM';
         document.getElementById('filterStreamButton').style.backgroundColor = 'lightcoral';
@@ -364,7 +368,7 @@ document.getElementById('filterStreamButton').onclick = function(e) {
 };
 
 // prediction view
-document.getElementById('predictionButton').onclick = function(e) {
+document.getElementById('predictionButton').onclick = function (e) {
     send('prediction', {});
 };
 
@@ -466,11 +470,11 @@ function addCapture(img) {
     //     let procImg = imgRenderCanvas.toDataURL('image/png');
     // };
     history.unshift({
-        img: 'data:image/png;base64,'+img,
+        img: 'data:image/png;base64,' + img,
         blobs: [[], [], [], []],
         steer: [0, 'none', 0, 0],
         wall: {
-            heights:[]
+            heights: []
         },
         turns: [false, 0, 0],
         passed: 0
@@ -485,7 +489,7 @@ function addCapture(img) {
     drawn = false;
 
     let now = performance.now();
-    while(fpsTimes.length > 0 && fpsTimes[0] <= now - 1000){
+    while (fpsTimes.length > 0 && fpsTimes[0] <= now - 1000) {
         fpsTimes.shift();
     }
     fpsTimes.push(now);
@@ -502,56 +506,56 @@ function addBlobs(data) {
 };
 function drawBlobs() {
     let data = history[index].blobs;
-    ctx.clearRect(0,0,272,154);
-    for(let i of data[1]){
-        drawLightBlob(i,0);
+    ctx.clearRect(0, 0, 272, 154);
+    for (let i of data[1]) {
+        drawLightBlob(i, 0);
     }
-    for(let i of data[3]){
-        drawLightBlob(i,1);
+    for (let i of data[3]) {
+        drawLightBlob(i, 1);
     }
-    drawBlob(data[0],0);
-    drawBlob(data[2],1);
+    drawBlob(data[0], 0);
+    drawBlob(data[2], 1);
 };
-function drawBlob(blob,blobColor){
-    if(!blob){
+function drawBlob(blob, blobColor) {
+    if (!blob) {
         return;
     }
     ctx.beginPath();
-    if(blobColor === 0){
+    if (blobColor === 0) {
         ctx.strokeStyle = "#f00";
         ctx.fillStyle = "#F005";
     }
-    else{
+    else {
         ctx.strokeStyle = "#0f0"
         ctx.fillStyle = "#0F05";
     }
-    ctx.arc(blob[0],blob[1],blob[2] * 2, 0, 2 * Math.PI);
+    ctx.arc(blob[0], blob[1], blob[2] * 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
 };
-function drawLightBlob(blob,blobColor){
-    if(!blob){
+function drawLightBlob(blob, blobColor) {
+    if (!blob) {
         return;
     }
     ctx.beginPath();
-    if(blobColor === 0){
+    if (blobColor === 0) {
         ctx.strokeStyle = "#f00";
         ctx.fillStyle = "#F005";
     }
-    else{
+    else {
         ctx.strokeStyle = "#0f0"
         ctx.fillStyle = "#0F05";
     }
-    ctx.arc(blob[0],blob[1],blob[2] * 2, 0, 2 * Math.PI);
+    ctx.arc(blob[0], blob[1], blob[2] * 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
 };
-function addData(data){
+function addData(data) {
     index = 0;
     // steering data
     history[index].steer = data[0];
     // wall data
-    for(var i = 0;i<8;i+=1){
+    for (var i = 0; i < 8; i += 1) {
         history[index].wall.heights[i] = JSON.parse(data[1][i]);
     }
     // history[index].wall[0] = parseFloat(data[1]);
@@ -586,19 +590,19 @@ function showPredictions() {
 };
 function showWallData() {
     let data = history[index].wall.heights;
-    if(data.length === 0){
+    if (data.length === 0) {
         return;
     }
     canvas2.width = 272;
     canvas2.height = 154;
-    ctx2.clearRect(0,0,272,154);
+    ctx2.clearRect(0, 0, 272, 154);
     ctx2.fillStyle = '#FFF9';
-    for(let i = 0; i < 8; i++) {
-        for(var j = 0;j < 34;j++){
-            try{
-                ctx2.fillRect(i*34+                  j,78,1,data[i][j]);
+    for (let i = 0; i < 8; i++) {
+        for (var j = 0; j < 34; j++) {
+            try {
+                ctx2.fillRect(i * 34 + j, 78, 1, data[i][j]);
             }
-            catch(err){
+            catch (err) {
                 appendLog("'data'", '#c4c4c4');
             }
         }
@@ -615,22 +619,22 @@ function showTurnPassData() {
     passedPillar.innerText = history[index].passed;
 };
 function displayBack() {
-    index = Math.min(index+1, history.length-1);
+    index = Math.min(index + 1, history.length - 1);
     historySlider.max = history.length;
-    historySlider.value = history.length-index;
+    historySlider.value = history.length - index;
     displayTimer = performance.now();
     drawn = false;
 };
 function displayFront() {
-    index = Math.max(index-1, 0);
+    index = Math.max(index - 1, 0);
     historySlider.max = history.length;
-    historySlider.value = history.length-index;
+    historySlider.value = history.length - index;
     displayTimer = performance.now();
     drawn = false;
 };
 function displayChange() {
     historySlider.max = history.length;
-    index = history.length-parseInt(historySlider.value);
+    index = history.length - parseInt(historySlider.value);
     if (history[index]) {
         displayImg.src = history[index].img;
         drawBlobs();
@@ -692,11 +696,11 @@ addListener('capture', addCapture);
 addListener('blobs', addBlobs);
 addListener('values', addData);
 setInterval(() => {
-    while (performance.now()-fpsTimes[0] > 1000) fpsTimes.shift();
+    while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     FPS.innerHTML = 'FPS: ' + fpsTimes.length;
 }, 1000);
 setInterval(() => {
-    if (performance.now()-displayTimer >= displayDelay && !drawn) {
+    if (performance.now() - displayTimer >= displayDelay && !drawn) {
         drawn = true;
         displayChange();
     }
@@ -798,7 +802,7 @@ document.getElementById('disconnect').onclick = async () => {
                     return;
                 }
                 try {
-                    stupid.moveTo(Math.random()*(window.screen.availWidth-250), Math.random()*(window.screen.availHeight-242));
+                    stupid.moveTo(Math.random() * (window.screen.availWidth - 250), Math.random() * (window.screen.availHeight - 242));
                     stupid.resizeTo(250, 242);
                 } catch (err) {
                     clearInterval(bad);
@@ -812,9 +816,9 @@ document.getElementById('disconnect').onclick = async () => {
             let chars = 'AβCDEFGHIJKLMNOPQRSTUVWYZaβcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-=_+`~[]\\{}|;\':",./<>?';
             let random = '';
             for (let i = 0; i < 20; i++) {
-                random += chars.charAt(Math.floor(Math.random()*chars.length));
+                random += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            appendLog(random, `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})`);
+            appendLog(random, `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`);
         }
     }, 2);
     rickrolls[0].onended = () => {
@@ -826,15 +830,15 @@ document.getElementById('disconnect').onclick = async () => {
         document.getElementById('disconnect').click();
     };
 };
-document.addEventListener('keydown',(e) => {
+document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
 });
 
 // errors
-window.onerror = function(err) {
+window.onerror = function (err) {
     appendLog(err, '#f00f09');
 };
-document.onerror = function(err) {
+document.onerror = function (err) {
     appendLog(err, '#f00f09');
 };
 
@@ -843,14 +847,14 @@ async function animate(slider, backwards) {
         for (let i = parseInt(slider.min); i <= parseInt(slider.max); i++) {
             slider.value = i;
             slider.oninput();
-            await new Promise((resolve) => setTimeout(resolve, Math.random()*10));
+            await new Promise((resolve) => setTimeout(resolve, Math.random() * 10));
         }
         await animate(slider, false);
     } else {
         for (let i = parseInt(slider.max); i >= parseInt(slider.min); i--) {
             slider.value = i;
             slider.oninput();
-            await new Promise((resolve) => setTimeout(resolve, Math.random()*10));
+            await new Promise((resolve) => setTimeout(resolve, Math.random() * 10));
         }
         await animate(slider, true);
     }
@@ -858,25 +862,25 @@ async function animate(slider, backwards) {
 async function animateAll() {
     setInterval(() => {
         // document.body.style.backgroundColor = 'hsl(' + sliders[0].value*2 + ' ' + sliders[3].value*(100/255) + '% ' + sliders[6].value*(50/255) + '%)';
-        document.body.style.backgroundColor = 'hsl(' + sliders[0].value*2 + ' ' + sliders[3].value*(100/255) + '% 50%)';
+        document.body.style.backgroundColor = 'hsl(' + sliders[0].value * 2 + ' ' + sliders[3].value * (100 / 255) + '% 50%)';
     }, 50);
     for (let slider of sliders) {
         setTimeout(() => {
             animate(slider, Math.round(Math.random()));
-        }, Math.random()*3000);
+        }, Math.random() * 3000);
     }
     let angle = 0;
     let distance = 0;
     setInterval(() => {
         // angle += Math.random()*0.8-0.4;
-        angle += Math.random()*0.5;
-        distance = Math.max(-110, Math.min(distance+Math.random()*20-10, 110));
-        let x = Math.cos(angle)*distance;
-        let y = Math.sin(angle)*distance;
-        joystickPin.style.bottom = 114-y + 'px';
-        joystickPin.style.right = 114-x + 'px';
-        sliderX.style.bottom = 140-y + 'px';
-        sliderY.style.right = 140-x + 'px';
+        angle += Math.random() * 0.5;
+        distance = Math.max(-110, Math.min(distance + Math.random() * 20 - 10, 110));
+        let x = Math.cos(angle) * distance;
+        let y = Math.sin(angle) * distance;
+        joystickPin.style.bottom = 114 - y + 'px';
+        joystickPin.style.right = 114 - x + 'px';
+        sliderX.style.bottom = 140 - y + 'px';
+        sliderY.style.right = 140 - x + 'px';
     }, 20);
     let backwards = false;
     setInterval(() => {
@@ -886,6 +890,6 @@ async function animateAll() {
             displayFront();
         }
         if (index == 0) backwards = true;
-        if (index == history.length-1) backwards = false;
+        if (index == history.length - 1) backwards = false;
     }, 1);
 };
