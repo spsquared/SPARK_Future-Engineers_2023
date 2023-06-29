@@ -1,7 +1,4 @@
 from IO import io
-io.setup()
-from IO import drive
-from IO import camera
 from Util import server
 from AI import filter
 from threading import Thread
@@ -23,8 +20,6 @@ def main():
     try:
         io.setStatusBlink(2)
         server.open()
-        drive.start()
-        camera.start()
         def keys(data):
             global __forward, __backward, __left, __right
             key = data['key']
@@ -44,31 +39,31 @@ def main():
                 __right = 100
             elif key == 'D':
                 __right = 0
-            drive.throttle(__forward+__backward)
-            drive.steer(__left+__right)
+            io.throttle(__forward+__backward)
+            io.steer(__left+__right)
         def joystick(data):
             __forward = max(data['throttle'], 0)
             __backward = min(data['throttle'], 0)
             __left = min(data['steering'], 0)
             __right = max(data['steering'], 0)
-            drive.throttle(__forward+__backward)
-            drive.steer(__left+__right)
+            io.throttle(__forward+__backward)
+            io.steer(__left+__right)
         def capture(data):
-            camera.capture(server=server, drive=drive)
+            io.camera.capture(server=server)
         def captureStream(data):
             if data['state'] == True:
-                camera.startSaveStream(server=server, drive=drive)
+                io.camera.startSaveStream(server=server)
             else:
-                camera.stopSaveStream(server)
+                io.camera.stopSaveStream(server)
         def captureFilter(data):
             filter.setColors(data, server=server)
-            camera.capture(filter=filter, server=server, drive=drive)
+            io.camera.capture(filter=filter, server=server)
         def captureFilterStream(data):
             filter.setColors(data['colors'])
             if data['state'] == True:
-                camera.startSaveStream(filter=filter, server=server, drive=drive)
+                io.camera.startSaveStream(filter=filter, server=server)
             else:
-                camera.stopSaveStream(server)
+                io.camera.stopSaveStream(server)
         def stream(data):
             global streamThread, streaming
             if data['state'] == True:
@@ -79,7 +74,10 @@ def main():
                         try:
                             while streaming and running:
                                 start = time.time()
-                                encoded = base64.b64encode(cv2.imencode('.png', camera.read())[1]).decode()
+                                encoded = [
+                                    base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
+                                    base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+                                ]
                                 server.broadcast('capture', encoded)
                                 time.sleep(max(0.1-(time.time()-start), 0))
                         except Exception as err:
@@ -103,7 +101,10 @@ def main():
                         try:
                             while streaming2 and running:
                                 start = time.time()
-                                encoded = base64.b64encode(cv2.imencode('.png', filter.filter(camera.read(), False))[1]).decode()
+                                encoded = [
+                                    base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
+                                    base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+                                ]
                                 server.broadcast('capture', encoded)
                                 time.sleep(max(0.05-(time.time()-start), 0))
                         except Exception as err:
@@ -117,14 +118,20 @@ def main():
                     streamThread2.join()
                     server.broadcast('message', 'Ended filtered stream')
         def view(data):
-            encoded = base64.b64encode(cv2.imencode('.png', camera.read())[1]).decode()
+            encoded = [
+                base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
+                base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+            ]
             server.broadcast('capture', encoded)
         def viewFilter(data):
             filter.setColors(data)
-            encoded = base64.b64encode(cv2.imencode('.png', filter.filter(camera.read(), False))[1]).decode()
+            encoded = [
+                base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
+                base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+            ]
             server.broadcast('capture', encoded)
         def prediction(data):
-            filter.predict(camera.read(), server, False)
+            filter.predict(io.camera.read(), server, False)
             server.broadcast('message', 'Ran prediction on image')
         def colors(data):
             filter.setColors(data)
@@ -146,9 +153,7 @@ def main():
             global running
             running = False
             io.setStatusBlink(0)
-            camera.stop()
             server.close()
-            drive.stop()
             io.close()
             print('stopped by emergency stop button')
             exit(0)
@@ -162,9 +167,7 @@ def main():
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
         running = False
-        camera.stop()
         server.close()
-        drive.stop()
         io.close()
     except Exception as err:
         print(err)
