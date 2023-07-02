@@ -66,7 +66,11 @@ def undistort(img: numpy.ndarray):
     return img
 def getDistance(imgHeight: int):
     global focalLength, wallHeight
-    if height == 0: return float('inf')
+    if imgHeight == 0: return float('inf')
+    return wallHeight * focalLength / imgHeight
+def getAngle(imgHeight: int):
+    global focalLength, wallHeight
+    if imgHeight == 0: return float('inf')
     return wallHeight * focalLength / imgHeight
 
 def predict(leftIn: numpy.ndarray, rightIn: numpy.ndarray):
