@@ -6,7 +6,7 @@ import statistics
 import math
 import json
 
-# preprocessing filter module with cv prediction
+# converts images into data usable for SLAM and driving
 
 # colors
 rm = redMin = (0, 95, 75)
@@ -101,7 +101,8 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
-    # calculate the distance, then use law of cosines to get from "center" of car
+    # calculate the distance
+
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection

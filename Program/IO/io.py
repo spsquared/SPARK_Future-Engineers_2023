@@ -2,7 +2,7 @@ import Jetson.GPIO as GPIO
 from threading import Thread
 import time
 
-# general io module
+# unified IO wrapper that handles all IO for the program
 
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 

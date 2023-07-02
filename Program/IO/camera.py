@@ -7,7 +7,7 @@ import base64
 import time
 from Util import server
 
-# camera module for capturing input data
+# camera wrapper for taking input images
 
 camera0 = CSICamera(capture_device=0, width=272, height=154, capture_width=3264, capture_height=1848, capture_fps=28)
 camera1 = CSICamera(capture_device=1, width=272, height=154, capture_width=3264, capture_height=1848, capture_fps=28)
