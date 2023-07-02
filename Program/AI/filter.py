@@ -14,7 +14,9 @@ rM = redMax = (25, 255, 255)
 gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
+# other constants
 focalLength = 41.1573574682
+wallHeight = 10
 
 # create blob detector
 params = cv2.SimpleBlobDetector_Params()
@@ -51,7 +53,7 @@ def filter(imgIn: numpy.ndarray):
         blurredR = cv2.medianBlur(rMask, 5)
         blurredG = cv2.medianBlur(gMask, 5)
         gray_image = cv2.cvtColor(imgIn, cv2.COLOR_RGB2GRAY)
-        blurredImg = cv2.GaussianBlur(gray_image, (3,3),0)
+        blurredImg = cv2.GaussianBlur(gray_image, (3, 3), 0)
         # edge detection
         edgesImage = cv2.Canny(blurredImg, 50, 125, 3)
         # combine images
@@ -62,57 +64,59 @@ def filter(imgIn: numpy.ndarray):
 
 def undistort(img: numpy.ndarray):
     return img
-def getDistance(height: int):
-    global focalLength
+def getDistance(imgHeight: int):
+    global focalLength, wallHeight
     if height == 0: return float('inf')
-    return 10 * focalLength / height
-def combine
+    return wallHeight * focalLength / imgHeight
 
-def predict(leftImgIn: numpy.ndarray, rightImgIn: numpy.ndarray):
+def predict(leftIn: numpy.ndarray, rightIn: numpy.ndarray):
     try:
         # filter to colors and split
-        edgesLeftImg, gLeftImg, rLeftImg = cv2.split(filter(leftImgIn, True))
-        edgesRightImg, gRightImg, rRightImg = cv2.split(filter(rightImgIn, True))
+        edgesLeft, gLeft, rLeft = cv2.split(filter(leftIn, True))
+        edgesRight, gRight, rRight = cv2.split(filter(rightIn, True))
+
+        distances = getDistances(edgesLeft, edgesRight)
+
+        blobs = getBlobs(rLeft, gLeft, rRight, gRight)
 
         return "stop"
     except Exception as err:
         print(err)
         io.error()
 
-def getBlobs(imgIn: numpy.ndarray):
-    try:
-        # filter to colors and split
-        edgesImg, gImg, rImg = cv2.split(filter(imgIn, True))
+def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+    global focalLength, wallHeight
 
-        # crop for wall detection
-        wallStart = 79
-        wallEnd = 125
-        croppedEdgesImg = numpy.concatenate((edgesImg[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0)
+    # crop for wall detection, then flip
+    wallStart = 79
+    wallEnd = 125
+    croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0), 0, 1)
+    croppedRight = numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0), 0, 1)
 
-        # flip wall
-        croppedEdgesImg = numpy.swapaxes(croppedEdgesImg, 0, 1)
+    # get wall heights by finding the bottom edge of the wall
+    rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
+    rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
-        # get wall heights by finding the bottom edge of the wall
-        wallHeights = (croppedEdgesImg!=0).argmax(axis=1)
+    # calculate the distance, then use law of cosines to get from "center" of car
+    
 
-        # get wall 
+def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
+    # add borders to fix blob detection
+    blobStart = 79
+    blobEnd = 100
+    rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+    gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+    rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+    gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
-        # crop for blob detection
-        blobStart = 79
-        blobEnd = 100
-
-        # add borders to fix blob detection
-        rImg = cv2.copyMakeBorder(rImg[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gImg = cv2.copyMakeBorder(gImg[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-
-        # detect blobs
-        blobs.empty()
-        rBlobs = blobs.detect(255 - rImg)
-        blobs.empty()
-        gBlobs = blobs.detect(255 - gImg)
-    except Exception as err:
-        print(err)
-        io.error()
+    blobs.empty()
+    rLeftBlobs = blobs.detect(255 - rLeft)
+    blobs.empty()
+    gLeftBlobs = blobs.detect(255 - gLeft)
+    blobs.empty()
+    rLeftBlobs = blobs.detect(255 - rRight)
+    blobs.empty()
+    gLeftBlobs = blobs.detect(255 - gRight)
         
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
