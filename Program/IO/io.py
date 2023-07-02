@@ -63,6 +63,7 @@ def close():
         running = False
         drive.throttle(0)
         camera.stop()
+        imu.sto()
         if borked:
             borkedThread.join()
         blinkThread.join()

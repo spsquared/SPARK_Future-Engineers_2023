@@ -1,10 +1,6 @@
-from IO import io
 import numpy
 import cv2
-import base64
-import statistics
 import math
-import json
 
 # converts images into data usable for SLAM and driving
 
@@ -16,9 +12,10 @@ gM = greenMax = (110, 255, 255)
 
 # other constants
 focalLength = 41.1573574682
-imageWidth = 154
 fov = 175
-focalLength = imageWidth / 2 / math.sin(math.pi * fov * 3 / 8 / 180) * math.sin(math.pi * fov * 3 / 8 / 180)
+imageWidth = 272
+imageHeight = 154
+focalLength = imageHeight / 2 / math.sin(math.pi * fov * 3 / 8 / 180) * math.sin(math.pi * fov * 3 / 8 / 180)
 wallHeight = 10
 centerOffset = 10
 
@@ -66,29 +63,31 @@ def filter(imgIn: numpy.ndarray):
         print(err)
         io.error()
 
-def undistort(img: numpy.ndarray):
-    return img
-
-imgAngles = numpy.fromfunction(lambda i: i - 136, 272, dtype=float)
+# distance scanner
+imgAngles = numpy.fromfunction(lambda i: math.atan2(((imageWidth / 2) - i) / focalLength), imageWidth, dtype=float)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global focalLength, wallHeight
+    global focalLength, wallHeight, imgAngles
 
     # crop for wall detection, then flip
     wallStart = 79
     wallEnd = 125
-    croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0), 0, 1)
+    croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
+    croppedRight = numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
 
     # get wall heights by finding the bottom edge of the wall
     rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
-    # calculate the distance
-    def calcDist(imgHeight):
-        return (, wallHeight * focalLength / imgHeight)
-    
-    distancesLeft = 
+    def rawToCartesian(a, dir):
+        dist = wallHeight * focalLength / a[0]
+        return (dir * (3 + math.sin(60 - a[1]) * dist), (10 + math.cos(60 - a[1]) * dist))
+        # possibly precalculate the sin and cos values
 
+    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgAngles)), -1)
+    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgAngles)), 1)
+
+    return numpy.concatenate((leftCoordinates, rightCoordinates))
+    
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection
     blobStart = 79

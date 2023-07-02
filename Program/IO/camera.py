@@ -7,10 +7,13 @@ import base64
 import time
 from Util import server
 
-# camera wrapper for taking input images
+# wrapper for camera functions
 
-camera0 = CSICamera(capture_device=0, width=272, height=154, capture_width=3264, capture_height=1848, capture_fps=28)
-camera1 = CSICamera(capture_device=1, width=272, height=154, capture_width=3264, capture_height=1848, capture_fps=28)
+imageWidth = 272
+imageHeight = 154
+
+camera0 = CSICamera(capture_device=0, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
+camera1 = CSICamera(capture_device=1, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
 running = False
 currentImages = [[[[]]], [[[]]]]
 thread = None
@@ -24,8 +27,8 @@ def __capture():
         # update loop that constantly updates the most recent image which can be read at any time
         while running:
             start = time.time()
-            currentImages[0] = camera0.value
-            currentImages[1] = camera1.value
+            currentImages[0] = undistort(camera0.value)
+            currentImages[1] = undistort(camera1.value)
             time.sleep(max(0.02-(time.time()-start), 0))
     except Exception as err:
         print(err)
@@ -45,6 +48,9 @@ def stop():
 def read():
     global currentImages
     return currentImages
+
+def undistort(img: numpy.ndarray):
+    return img
 
 # single image save
 def capture(filter = None, server: server = None):
