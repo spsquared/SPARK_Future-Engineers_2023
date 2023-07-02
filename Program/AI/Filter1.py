@@ -14,6 +14,20 @@ rM = redMax = (25, 255, 255)
 gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
+focalLength = 41.1573574682
+
+# create blob detector
+params = cv2.SimpleBlobDetector_Params()
+params.filterByArea = True
+params.minArea = 65
+params.filterByCircularity = True
+params.minCircularity = 0.3
+params.filterByConvexity = True
+params.minConvexity = 0.7
+params.filterByInertia = True
+params.minInertiaRatio = 0
+blobs = cv2.SimpleBlobDetector_create(params)
+
 def filter(imgIn: numpy.ndarray):
     global redMax, redMin, greenMax, greenMin
     try:
@@ -75,7 +89,75 @@ def predict(leftImgIn: numpy.ndarray, rightImgIn: numpy.ndarray):
 
         # get wall heights by finding the bottom edge of the wall
         wallHeightsAll = (croppedEdgesImg!=0).argmax(axis=1)
+
+        return "stop"
     except Exception as err:
         print(err)
         io.error()
 
+def getImageData(imgIn: numpy.ndarray):
+    try:
+        # filter to colors and split
+        edgesImg, gImg, rImg = cv2.split(filter(imgIn, True))
+
+        # crop for wall detection
+        wallStart = 79
+        wallEnd = 125
+        croppedEdgesImg = numpy.concatenate((edgesImg[wallStart:wallEnd], numpy.full((2, 272), 1, dtype=int)), axis=0)
+
+        # flip wall
+        croppedEdgesImg = numpy.swapaxes(croppedEdgesImg, 0, 1)
+
+        # get wall heights by finding the bottom edge of the wall
+        wallHeights = (croppedEdgesImg!=0).argmax(axis=1)
+
+        # get wall 
+
+        # crop for blob detection
+        blobStart = 79
+        blobEnd = 100
+
+        # add borders to fix blob detection
+        rImg = cv2.copyMakeBorder(rImg[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gImg = cv2.copyMakeBorder(gImg[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+
+        # detect blobs
+        blobs.empty()
+        rBlobs = blobs.detect(255 - rImg)
+        blobs.empty()
+        gBlobs = blobs.detect(255 - gImg)
+    except Exception as err:
+        print(err)
+        io.error()
+        
+def setColors(data, server = None):
+    global redMax, redMin, greenMax, greenMin
+    redMax = (int(data[0]), int(data[3]), int(data[6]))
+    greenMax = (int(data[1]), int(data[4]), int(data[7]))
+    redMin = (int(data[9]), int(data[12]), int(data[15]))
+    greenMin = (int(data[10]), int(data[13]), int(data[16]))
+    print('-- New ----------')
+    print(redMax, redMin)
+    print(greenMax, greenMin)
+    if server != None:
+        server.broadcast('colors', getColors())
+def getColors():
+    global redMax, redMin, greenMax, greenMin
+    array = []
+    for i in range(9):
+        if i % 3 == 0:
+            array.append(redMax[math.ceil(i/3)])
+        elif i % 2 == 0:
+            array.append(greenMax[math.floor(i/3)+1])
+    for i in range(9):
+        if i % 3 == 0:
+            array.append(redMin[math.ceil(i/3)])
+        elif i % 2 == 0:
+            array.append(greenMin[math.floor(i/3)+1])
+    return array
+def setDefaultColors():
+    global rM, rm, gM, gm
+    print('-- New ----------')
+    print(rM, rm)
+    print(gM, gm)
+    return [rM[2], gM[2], rM[1], gM[1], rM[0], gM[0], rm[2], gm[2], rm[1], gm[1], rm[0], gm[0]]
