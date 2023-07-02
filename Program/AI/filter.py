@@ -68,7 +68,7 @@ def getDistance(imgHeight: int):
     global focalLength, wallHeight
     if imgHeight == 0: return float('inf')
     return wallHeight * focalLength / imgHeight
-def getAngle(imgHeight: int):
+def jfjfdlsdfplsdflksdfl smpikels seafjlesn ds lfdkj pixel simulator oof funoitn didk def eflkepoeifldsfk ejwfoiwjlfdksf nfewiuofkjbsdvc ksdkfeofpsdjf klsjdfsbdjfweufisdklfn dsnf kjewflkwefjsdoi dnsbfkj sdhf sdjkhf jsdkhf sjkdhf jsdhf jsdkhfjsdk fhjsdkfh sdjkfhsdjk hsdjkfh sdjkh jsdkh sdjk hjsd hjd hdj hdj hdj kdj kdj kdj kdj kdj kdjk dj kd(imgHeight: int):
     global focalLength, wallHeight
     if imgHeight == 0: return float('inf')
     return wallHeight * focalLength / imgHeight
