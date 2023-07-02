@@ -16,6 +16,9 @@ gM = greenMax = (110, 255, 255)
 
 # other constants
 focalLength = 41.1573574682
+imageWidth = 154
+horizontalCamerAngle = 175
+focalLength = imageWidth / 2 / math.sin(math.pi * horizontalCamerAngle * 3 / 8 / 180) * math.sin(math.pi * horizontalCamerAngle * 3 / 8 / 180)
 wallHeight = 10
 
 # create blob detector
