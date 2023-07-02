@@ -15,10 +15,19 @@ gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
 # other constants
+px = 1
+cm = 1
+m = 100
+° = 1
 focalLength = 41.1573574682
-wallHeight = 10
+imageWidth = 154 * px
+fov = 175 * °
+focalLength = imageWidth / 2 / math.sin(math.pi * fov * 3 / 8 / 180) * math.sin(math.pi * fov * 3 / 8 / 180) * cm
+wallHeight = 0.1 * m
+cameraDistance = 6.01 * cm
+centerOffset = 10 * cm
 
-# create blob detector
+# create blob detectors
 params = cv2.SimpleBlobDetector_Params()
 params.filterByArea = True
 params.minArea = 65
@@ -98,7 +107,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
     # calculate the distance, then use law of cosines to get from "center" of car
-    
+
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection
     blobStart = 79
