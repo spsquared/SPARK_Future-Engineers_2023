@@ -19,8 +19,9 @@ Below is a detailed step-by-step guide to recreate SPARK g2.
 * [Chassis Assembly](#chassis-assembly)
 * [Jetson NANO Setup](#jetson-nano-setup)
     * [Board Setup, SSHFS, Static IP](#board-setup-sshfs--static-ip)
-    * [Enable GPIO & PWM](#enable-gpio-and-pwm)
+    * [Enable GPIO & I2C](#enable-gpio-and-i2c)
     * [Remove GUI, Autologin, & Run-on-startup](#text-only-auto-login--run-on-startup)
+    * [Camera Color Fix](#camera-color-correction)
 
 ***
 
@@ -48,30 +49,36 @@ After setting up the board, follow step 2.1 in section "Basic Settings" to log i
 
 Make sure a static IP is set to the board to make SSH and file transfer easier. Go to your router settings and [assign a DHCP reservation (PCmag)](https://www.pcmag.com/how-to/how-to-set-up-a-static-ip-address) (or a straight static IP) to your Jetson NANO. Save this IP in your PuTTY settings and SSHFS mounting.
 
-Install `websockets` package with pip. <!-- add rest of stuff! -->
+<!-- Install `websockets` package with pip. add rest of stuff! -->
 
-### Enable GPIO and PWM
+### Enable GPIO and I2C
 
-Next, setting up the board for the application. First, enable GPIO and PWM. Create a new user group, and add your user to it (this is the user running the commands).
+Next, setting up the board for the application. First, enable GPIO and I2C. Create a new user group, and add your user to it (this is the user running the commands).
 
 ```
 sudo groupadd -f -r gpio
 sudo usermod -a -G gpio your_user_name
 ```
 
-Copy the `99-gpio.rules` file from the `/Program/` folder to `/etc/udev/rules.d/` on the Jetson NANO (use sshfs or ). Then enable the rule.
+Copy `99-gpio.rules` from `/dist/` in the project folder to `/etc/udev/rules.d/` on the Jetson NANO. Then enable the rule.
 
 ```
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-Now enable PWM. Run the options file for jetson-GPIO.
+<!-- Now enable PWM. Run the options file for jetson-GPIO.
 
 ```
 sudo /opt/nvidia/jetson-io/jetson-io.py
 ```
 
-Go down to "Configure 40-pin expansion header" and enter that submenu. Find `pwm0` and `pwm`, and enable them by selecting them and pressing "Enter". Now exit the tool. GPIO and PWM have been enabled.
+Go down to "Configure 40-pin expansion header" and enter that submenu. Find `pwm0` and `pwm`, and enable them by selecting them and pressing "Enter". Now exit the tool. GPIO and PWM have been enabled. -->
+
+You may need to enable permissions for I2C
+
+```
+sudo usermod -a -G i2c your_user_name
+```
 
 ### Text-Only, Auto-Login, & Run on Startup
 
@@ -87,7 +94,7 @@ Autologin must be done to avoid having to plug in a monitor and keyboard to star
 sudo systemctl edit getty@tty1
 ```
 
-A temporary editer will appear. Place the following text in it, replacing "your_user_name" with your user name.
+A temporary editor will appear. Place the following text in it, replacing "your_user_name" with your user name.
 
 ```
 [Service]
@@ -99,8 +106,6 @@ Save and close the editor with `:wqa`.
 
 To run the program on startup, first obtain the directory of the program folder uploaded earlier. Create `spark_startup.service` in `/etc/systemd/system` and place the following in the contents, replacing "/filepath/" with the absolute directory of the folder (begins with a "/").
 
-<!-- specify filepath? -->
-<!-- switch to bashrc? -->
 ```
 [Service]
 ExecStart=cd /filepath /usr/bin/python3 /filepath/startup.py
@@ -114,7 +119,7 @@ Save the file and add permissions to it.
 
 ```
 sudo chmod 644 /etc/systemd/system/spark_startup.service
-systemctl enable spark_startup.service
+systemctl enable /etc/systemd/system/spark_startup.service
 ```
 
 Reboot the Jetson NANO to test if these changes worked. No GUI should appear and you shuld be automatically logged in.
@@ -131,6 +136,23 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
 
 Reboot the Jetson NANO again
 
-### Camera fixes
+### Setup for Debugging Server
 
-You may encounter pink fringing on the cameras. If this happens, follow [this thread](https://forums.developer.nvidia.com/t/li-imx219-mipi-ff-nano-h136-pink-tint-problem/163533/10) to fix it.
+SPARK uses a debugging server for quick development and real-time monitoring. It runs on a separate Node.js process and is not needed. If you want access to the SPARK Control Panel you must install Node.js and install the dependencies.
+
+```
+sudo apt install nodejs
+```
+
+### Camera Color Correction
+
+You may encounter pink fringing on the cameras. If that happens, take the following steps to fix it:
+
+Copy `camera_overrides.isp` from `/dist/` in the project folder to `/var/nvidia/nvcam/settings/` on the Jetson Nano.
+
+Give the overrides permissions with the next two:
+
+```
+sudo chmod 664 /var/nvidia/nvcam/settings/camera_overrides.isp
+sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
+```

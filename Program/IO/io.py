@@ -1,15 +1,10 @@
 import Jetson.GPIO as GPIO
 from threading import Thread
-from adafruit_servokit import ServoKit
-import busio
-import board
 import time
 
 # general io module
 
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
-
-__pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
 
 running = True
 blinkThread = None
@@ -30,6 +25,9 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup([11, 13, 32, 33], GPIO.OUT)
 GPIO.setup(18, GPIO.IN)
 GPIO.output([11, 13], GPIO.LOW)
+
+from IO import drive
+from IO import camera
 
 # the status blink stuff
 statusBlink = 1
@@ -55,35 +53,6 @@ try:
 except:
     error()
 
-# drive output things
-currThr = 0
-currStr = 0
-throttleFwd = 0.10
-throttleRev = -0.15
-steeringL = 120
-steeringR = 60
-steeringTrim = 0
-def steer(str: int):
-    global __pwm, currStr, steeringL, steeringR, steeringTrim
-    currStr = max(-100, min(-str, 100))
-    __pwm.servo[1].angle = (currStr / 100) * (steeringL - steeringR) + steeringR + steeringTrim
-def throttle(thr: int):
-    global __pwm, currThr, throttleFwd, throttleRev
-    currThr = max(-100, min(thr, 100))
-    if (currThr < 0):__pwm.continuous_servo[0].throttle = (currThr / 100) * (-throttleRev) + 0.1
-    else: __pwm.continuous_servo[0].throttle = (currThr / 100) * throttleFwd + 0.1
-def trim(trim: int):
-    global steeringTrim, __pwm
-    steeringTrim = trim
-    steer(currStr)
-__pwm.continuous_servo[0].throttle = 0.1
-__pwm.servo[1].angle = 0
-
-# camera
-from IO import camera
-camera.start()
-
-# close and error
 def close():
     global blinkThread, borkedThread, running, borked, path, __pwm
     if running == True:
@@ -91,17 +60,17 @@ def close():
         fd.write('0')
         fd.close()
         running = False
-        __pwm.continuous_servo[0].throttle = 0.1
-        __pwm.servo[1].angle = 0
+        drive.throttle(0)
+        camera.stop()
         if borked:
             borkedThread.join()
         blinkThread.join()
-        camera.stop()
         GPIO.output([11, 13], GPIO.LOW)
         time.sleep(0.1)
         GPIO.cleanup()
         return True
     return False
+
 def error():
     global borked, borkedThread, running
     if borked == False and running == True:

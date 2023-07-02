@@ -1,5 +1,5 @@
 from IO import io
-from Util import server
+from Util import server_old as server
 from AI import filter
 from threading import Thread
 import cv2
