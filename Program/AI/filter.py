@@ -28,7 +28,7 @@ params.filterByConvexity = True
 params.minConvexity = 0.7
 params.filterByInertia = True
 params.minInertiaRatio = 0
-blobs = cv2.SimpleBlobDetector_create(params)
+blobDetector = cv2.SimpleBlobDetector_create(params)
 
 def filter(imgIn: numpy.ndarray):
     global redMax, redMin, greenMax, greenMin
@@ -66,7 +66,7 @@ def undistort(img: numpy.ndarray):
     return img
 def getDistance(imgHeight: int):
     global focalLength, wallHeight
-    if height == 0: return float('inf')
+    if imgHeight == 0: return float('inf')
     return wallHeight * focalLength / imgHeight
 
 def predict(leftIn: numpy.ndarray, rightIn: numpy.ndarray):
@@ -98,8 +98,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
     # calculate the distance, then use law of cosines to get from "center" of car
-
-
+    
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection
     blobStart = 79
