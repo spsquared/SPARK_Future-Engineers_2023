@@ -68,26 +68,8 @@ def filter(imgIn: numpy.ndarray):
 
 def undistort(img: numpy.ndarray):
     return img
-def getDistance(imgHeight: int):
-    global focalLength, wallHeight
-    if imgHeight == 0: return float('inf')
-    return wallHeight * focalLength / imgHeight
 
-def predict(leftIn: numpy.ndarray, rightIn: numpy.ndarray):
-    try:
-        # filter to colors and split
-        edgesLeft, gLeft, rLeft = cv2.split(filter(leftIn, True))
-        edgesRight, gRight, rRight = cv2.split(filter(rightIn, True))
-
-        distances = getDistances(edgesLeft, edgesRight)
-
-        blobs = getBlobs(rLeft, gLeft, rRight, gRight)
-
-        return "stop"
-    except Exception as err:
-        print(err)
-        io.error()
-
+imgAngles = numpy.fromfunction(lambda i: i - 136, 272, dtype=float)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight
 
@@ -102,7 +84,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
     # calculate the distance
-
+    def calcDist(imgHeight):
+        return (, wallHeight * focalLength / imgHeight)
+    
+    distancesLeft = 
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection
@@ -121,7 +106,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     rLeftBlobs = blobDetector.detect(255 - rRight)
     blobDetector.empty()
     gLeftBlobs = blobDetector.detect(255 - gRight)
-        
+
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
     redMax = (int(data[0]), int(data[3]), int(data[6]))
