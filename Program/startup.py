@@ -2,7 +2,7 @@ import Jetson.GPIO as GPIO
 import time
 import os
 
-path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
+path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 if __name__ == '__main__':
     GPIO.setwarnings(False)
@@ -12,6 +12,10 @@ if __name__ == '__main__':
     GPIO.output([11, 13], GPIO.LOW)
     time.sleep(0.5)
     GPIO.cleanup()
+
+    os.system('node ' + path + '/Util/server.js')
+
+    # start up the nodejs thing i guess
 
     # in competition, wait for button press
     fd = open(path + 'run_on_startup.txt', 'r')

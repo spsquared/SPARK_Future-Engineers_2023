@@ -453,46 +453,45 @@ window.onresize = () => {
     // imgRenderCanvas.height = 154;
 };
 function addCapture(img) {
-    // imgRenderCtx.clearRect(0, 0, 272, 154);
-    // const tempImg = new Image();
-    // tempImg.src = 'data:image/png;base64,'+img;
-    // tempImg.onload = () => {
-    //     imgRenderCtx.drawImage(tempImg, 0, 0);
-    //     // imgRenderCtx.fillStyle = '#FF0000'
-    //     // imgRenderCtx.fillRect(0, 0, 272, 154)
-    //     const imgData = imgRenderCtx.getImageData(0, 0, 272, 154);
-    //     console.log(imgData)
-    //     for (let i = 3; i < 167552; i += 4) { // 272 * 154 * 4
-    //         imgData.data[i] = 255;
-    //     }
-    //     imgRenderCtx.putImageData(imgData, 0, 0);
-    //     let procImg = imgRenderCanvas.toDataURL('image/png');
-    // };
-    history.unshift({
-        img: 'data:image/png;base64,' + img,
-        blobs: [[], [], [], []],
-        steer: [0, 'none', 0, 0],
-        wall: {
-            heights: []
-        },
-        turns: [false, 0, 0],
-        passed: 0
-    });
-    index = 0;
-    if (history.length > maxHistory) {
-        history.pop();
-    }
-    historySlider.max = history.length;
-    historySlider.value = history.length;
-    displayTimer = performance.now();
-    drawn = false;
-
-    let now = performance.now();
-    while (fpsTimes.length > 0 && fpsTimes[0] <= now - 1000) {
-        fpsTimes.shift();
-    }
-    fpsTimes.push(now);
-    FPS.innerHTML = 'FPS: ' + fpsTimes.length;
+    ctx.clearRect(0, 0, 272, 154);
+    const tempImg = new Image();
+    tempImg.src = 'data:image/png;base64,' + img[0];
+    tempImg.onload = () => {
+        ctx.drawImage(tempImg, 0, 0);
+        const tempImg2 = new Image();
+        tempImg2.src = 'data:image/png;base64,' + img[1];
+        tempImg2.onload = () => {
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(tempImg2, 0, 0);
+            ctx.globalAlpha = 1;
+            history.unshift({
+                // img: 'data:image/png;base64,' + img,
+                img: canvas.toDataURL('image/png'),
+                blobs: [[], [], [], []],
+                steer: [0, 'none', 0, 0],
+                wall: {
+                    heights: []
+                },
+                turns: [false, 0, 0],
+                passed: 0
+            });
+            index = 0;
+            if (history.length > maxHistory) {
+                history.pop();
+            }
+            historySlider.max = history.length;
+            historySlider.value = history.length;
+            displayTimer = performance.now();
+            drawn = false;
+        
+            let now = performance.now();
+            while (fpsTimes.length > 0 && fpsTimes[0] <= now - 1000) {
+                fpsTimes.shift();
+            }
+            fpsTimes.push(now);
+            FPS.innerHTML = 'FPS: ' + fpsTimes.length;
+        };
+    };
 };
 function addBlobs(data) {
     index = 0;
