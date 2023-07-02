@@ -46,6 +46,23 @@ def filter(imgIn: numpy.ndarray):
         print(err)
         io.error()
 
+def undistort(img: numpy.ndarray):
+    return img
+
+def getDistance(height: int):
+    global focalLength
+    if height == 0: return float('inf')
+    return 10 * focalLength / height
+
+def getImageDistances():
+    global focalLength
+    try:
+        wallStart = 79
+        wallEnd = 125
+        croppedEdgesImg = numpy.concatenate((edgesImage[wallStart:wallEnd], numpy.full((2,272),1,dtype=int)), axis=0)
+    except Exception as err:
+        print(err)
+        io.error()
 
 def predict(leftImgIn: numpy.ndarray, rightImgIn: numpy.ndarray):
     try:
@@ -78,4 +95,3 @@ def predict(leftImgIn: numpy.ndarray, rightImgIn: numpy.ndarray):
     except Exception as err:
         print(err)
         io.error()
-
