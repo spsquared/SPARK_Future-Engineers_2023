@@ -13,6 +13,7 @@ COLOR = 3
 RED = 0
 GREEN = 1
 
+# make numpy/cupy matrix so we can poke with GPU for sPEEEEEEEEEEED?
 storedLandmarks = [
     [0, 0, True], # OUter wall corners
     [300, 0, True],
@@ -40,7 +41,30 @@ possibleWallLandmarks = [
 ]
 
 possiblePillarLandmarks = [
-    # TODO
+    [100, 40], # section 1
+    [100, 60],
+    [150, 40],
+    [150, 60],
+    [200, 40],
+    [200, 60],
+    [40, 100], # section 2
+    [60, 100],
+    [40, 150],
+    [60, 150],
+    [40, 200],
+    [60, 200],
+    [100, 240], # section 3 
+    [100, 260],
+    [150, 240],
+    [150, 260],
+    [200, 240],
+    [200, 260],
+    [240, 100], # section 4
+    [260, 100],
+    [240, 150],
+    [260, 150],
+    [240, 200],
+    [260, 200],
 ]
 
 carX = -1
