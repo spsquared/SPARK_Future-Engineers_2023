@@ -117,14 +117,14 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
     gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
-    blobs.empty()
-    rLeftBlobs = blobs.detect(255 - rLeft)
-    blobs.empty()
-    gLeftBlobs = blobs.detect(255 - gLeft)
-    blobs.empty()
-    rLeftBlobs = blobs.detect(255 - rRight)
-    blobs.empty()
-    gLeftBlobs = blobs.detect(255 - gRight)
+    blobDetector.empty()
+    rLeftBlobs = blobDetector.detect(255 - rLeft)
+    blobDetector.empty()
+    gLeftBlobs = blobDetector.detect(255 - gLeft)
+    blobDetector.empty()
+    rLeftBlobs = blobDetector.detect(255 - rRight)
+    blobDetector.empty()
+    gLeftBlobs = blobDetector.detect(255 - gRight)
         
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
