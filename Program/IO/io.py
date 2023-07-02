@@ -28,6 +28,7 @@ GPIO.output([11, 13], GPIO.LOW)
 
 from IO import drive
 from IO import camera
+from IO import imu
 
 # the status blink stuff
 statusBlink = 1
