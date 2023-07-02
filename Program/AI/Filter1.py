@@ -111,8 +111,6 @@ def getImageData(imgIn: numpy.ndarray):
         # get wall heights by finding the bottom edge of the wall
         wallHeights = (croppedEdgesImg!=0).argmax(axis=1)
 
-        # get wall 
-
         # crop for blob detection
         blobStart = 79
         blobEnd = 100
@@ -126,6 +124,8 @@ def getImageData(imgIn: numpy.ndarray):
         rBlobs = blobs.detect(255 - rImg)
         blobs.empty()
         gBlobs = blobs.detect(255 - gImg)
+
+        return [wallHeights, rBlobs, gBlobs]
     except Exception as err:
         print(err)
         io.error()
