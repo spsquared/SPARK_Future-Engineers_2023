@@ -102,9 +102,9 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     blobDetector.empty()
     gLeftBlobs = blobDetector.detect(255 - gLeft)
     blobDetector.empty()
-    rLeftBlobs = blobDetector.detect(255 - rRight)
+    rRightBlobs = blobDetector.detect(255 - rRight)
     blobDetector.empty()
-    gLeftBlobs = blobDetector.detect(255 - gRight)
+    gRightBlobs = blobDetector.detect(255 - gRight)
 
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
