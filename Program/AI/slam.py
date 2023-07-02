@@ -1,10 +1,8 @@
 from IO import io
 import numpy
-import cv2
-import base64
-import statistics
 import math
-import json
+import scipy
+from scipy.optimize import least_squares
 
 # does EKF SLAM
 
@@ -58,7 +56,7 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
     drCarY = carY + math.sin(carAngle) * carSpeed
     drCarAngle = io.gyro.read()
 
-    # average position from landmarks
+    # get position from landmarks
 
     landmarks = []
 
@@ -70,8 +68,6 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
     for i in range(len(outerWalls)):
-        lmNum += 1
-
         # find nearest landmark
         nearestLandmark = storedLandmarks[0]
         for j in range(1, 4):
@@ -79,11 +75,60 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
                 nearestLandmark = storedLandmarks[j]
         
         landmarks.append(nearestLandmark)
+    
+    def positionEquations(guess):
+        x, y, r = guess
         
+        array = []
 
+        for i in range(len(landmarks)):
+            array.append(math.pow(x - landmarks[X], 2) + math.pow(y - landmarks[Y], 2) - math.pow(math.sqrt(math.pow(landmarks[X], 2) + math.pow(landmarks[Y], 2)) - r, 2))
         
-    lmCarX /= lmNum
-    lmCarY /= lmNum
-    lmCarAngle /= lmNum
+        return tuple(array)
+
+    # omg using package
+    # it uses the dead reckoning guess as initial guess
+    initialPositionGuess = (drCarX, drCarY, 0)
+
+    # use least squares
+    positionResult = least_squares(positionEquations, initialPositionGuess)
+
+    # get position of results
+    lmCarX = positionResult.x[0]
+    lmCarY = positionResult.x[1]
+
+    # get angle
+
+    def angleEquations(guess):
+        a = guess
+        
+        array = []
+
+        for i in range(len(landmarks)):
+            array.append(math.pow(math.atan2(lmCarX - landmarks[Y], lmCarY - landmarks[X]) - a, 2))
+        
+        return tuple(array)
+
+    # omg using package
+    # it uses the dead reckoning guess as initial guess
+    initialAngleGuess = drCarAngle
+
+    # use least squares
+    angleResult = least_squares(angleEquations, initialAngleGuess)
+
+    lmCarAngle = angleResult
+
+    # set car speed
+
+    carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - carX, 2) + math.pow((drCarY + lmCarY) / 2 - carY, 2))
+
+    # average!!!!1
+
+    carX = (drCarX + lmCarX) / 2
+    carY = (drCarY + lmCarY) / 2
+    carAngle = (drCarAngle + lmCarAngle) / 2
+
 
 def findStartingPosition(outerWalls, innerWalls, redBlobs, greenBlobs):
+    # oof
+    return "stop"
