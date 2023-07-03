@@ -10,6 +10,7 @@ X = 0
 Y = 1
 FOUND = 2
 COLOR = 3
+DISTANCE = 4
 RED = 0
 GREEN = 1
 
@@ -98,21 +99,22 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
             if (getDistance(storedLandmarks[j], outerWalls[i]) < getDistance(nearestLandmark, outerWalls[i])):
                 nearestLandmark = storedLandmarks[j]
         
+        nearestLandmark[DISTANCE] = getDistance([carX, carY], outerWalls[i])
         landmarks.append(nearestLandmark)
     
     def positionEquations(guess):
-        x, y, r = guess
+        x, y = guess
         
         array = []
 
         for i in range(len(landmarks)):
-            array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(math.sqrt(math.pow(landmarks[i][X], 2) + math.pow(landmarks[i][Y], 2)) - r, 2))
+            array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(landmarks[i][DISTANCE], 2))
         
         return tuple(array)
 
     # omg using package
     # it uses the dead reckoning guess as initial guess
-    initialPositionGuess = (drCarX, drCarY, 0)
+    initialPositionGuess = (drCarX, drCarY)
 
     # use least squares
     positionResult = least_squares(positionEquations, initialPositionGuess)
