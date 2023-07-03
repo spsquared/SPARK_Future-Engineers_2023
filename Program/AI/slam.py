@@ -106,7 +106,7 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         array = []
 
         for i in range(len(landmarks)):
-            array.append(math.pow(x - landmarks[X], 2) + math.pow(y - landmarks[Y], 2) - math.pow(math.sqrt(math.pow(landmarks[X], 2) + math.pow(landmarks[Y], 2)) - r, 2))
+            array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(math.sqrt(math.pow(landmarks[i][X], 2) + math.pow(landmarks[i][Y], 2)) - r, 2))
         
         return tuple(array)
 
@@ -129,7 +129,7 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         array = []
 
         for i in range(len(landmarks)):
-            array.append(math.pow(math.atan2(lmCarX - landmarks[Y], lmCarY - landmarks[X]) - a, 2))
+            array.append(math.pow(math.atan2(lmCarX - landmarks[i][Y], lmCarY - landmarks[i][X]) - a, 2))
         
         return tuple(array)
 
