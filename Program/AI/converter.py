@@ -11,11 +11,10 @@ gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
 # other constants
-focalLength = 41.1573574682
-fov = 175
+fov = 115
 imageWidth = 272
 imageHeight = 154
-focalLength = imageHeight / 2 / math.sin(math.pi * fov * 3 / 8 / 180) * math.sin(math.pi * fov * 3 / 8 / 180)
+focalLength = ((imageHeight / 2) * math.sin(math.pi * (90 - (fov / 2)) / 180)) / math.sin(math.pi * (fov / 2) / 180)
 wallHeight = 10
 centerOffset = 10
 
@@ -64,7 +63,8 @@ def filter(imgIn: numpy.ndarray):
         io.error()
 
 # distance scanner
-imgAngles = numpy.fromfunction(lambda i: math.atan2(((imageWidth / 2) - i) / focalLength), imageWidth, dtype=float)
+imgSinAngles = numpy.fromfunction(lambda i: math.sin(60 - math.atan2(((imageWidth / 2) - i) / focalLength)), imageWidth, dtype=float)
+imgCosAngles = numpy.fromfunction(lambda i: math.cos(60 - math.atan2(((imageWidth / 2) - i) / focalLength)), imageWidth, dtype=float)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, imgAngles
 
@@ -80,11 +80,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     def rawToCartesian(a, dir):
         dist = wallHeight * focalLength / a[0]
-        return (dir * (3 + math.sin(60 - a[1]) * dist), (10 + math.cos(60 - a[1]) * dist))
-        # possibly precalculate the sin and cos values
+        return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
 
-    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgAngles)), -1)
-    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgAngles)), 1)
+    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
+    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
 
     return numpy.concatenate((leftCoordinates, rightCoordinates))
     
@@ -102,9 +101,9 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     blobDetector.empty()
     gLeftBlobs = blobDetector.detect(255 - gLeft)
     blobDetector.empty()
-    rLeftBlobs = blobDetector.detect(255 - rRight)
+    rRightBlobs = blobDetector.detect(255 - rRight)
     blobDetector.empty()
-    gLeftBlobs = blobDetector.detect(255 - gRight)
+    gRightBlobs = blobDetector.detect(255 - gRight)
 
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
