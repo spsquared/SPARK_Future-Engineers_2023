@@ -137,7 +137,7 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 ## **Input Processing**
 
-All the code for image filtering and predictions can be found in `/Program/AI/filter.py`.
+All the code for image processing can be found in `/Program/AI/converter.py`.
 
 ### **Image Preprocessing**
 
@@ -147,9 +147,16 @@ All the code for image filtering and predictions can be found in `/Program/AI/fi
 
 *TBD*
 
-#### **subsection**
+## **SLAM OOF**
+
+All the code for slam can be found in `/Program/AI/slam.py`.
+$2^2$
 
 *TBD*
+
+## **Driving**
+
+All the code for driver can be found in `/Program/AI/driver.py`.
 
 ***
 
