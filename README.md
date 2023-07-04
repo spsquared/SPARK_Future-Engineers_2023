@@ -137,15 +137,7 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 ## **Input Processing**
 
-All the code for image processing can be found in `/Program/AI/converter.py`.
-
-### **Image Preprocessing**
-
-*TBD*
-
-### **Image Predictions**
-
-*TBD*
+lol
 
 ## **SLAM with Latex (gloves)**
 
