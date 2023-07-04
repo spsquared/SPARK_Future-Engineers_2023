@@ -97,11 +97,11 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
     blobDetector.empty()
-    rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
+    rLeftBlobs = blobDetector.detect(255 - rLeft)
     blobDetector.empty()
-    gLeftBlobs = processBlobs(blobDetector.detect(255 - gLeft))
+    gLeftBlobs = blobDetector.detect(255 - gLeft)
     blobDetector.empty()
-    rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
+    rRightBlobs = blobDetector.detect(255 - rRight)
     blobDetector.empty()
     gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
     
