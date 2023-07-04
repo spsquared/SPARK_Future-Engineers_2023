@@ -5,7 +5,7 @@ from threading import Thread
 from IO import io
 import base64
 import time
-from Util import server
+import numpy
 
 # wrapper for camera functions
 
@@ -53,20 +53,23 @@ def undistort(img: numpy.ndarray):
     return img
 
 # single image save
-def capture(filter = None, server: server = None):
+def capture(converter = None, server = None):
     global currentImages
     try:
         name = str(round(time.time()*1000))
-        if filter != None:
-            filteredImg = filter.filter(currentImages, False)
-            cv2.imwrite('filtered_out/' + name + '.png', filteredImg)
+        if converter != None:
+            filteredImgs = converter.filter(currentImages, False)
+            cv2.imwrite('filtered_out/' + name + '.png', filteredImgs[0].concatenate(filteredImgs[1]))
             if server != None:
                 server.broadcast('message', 'Captured (filtered) ' + name + '.png')
-                encoded = base64.b64encode(cv2.imencode('.png', filteredImg)[1]).decode()
+                encoded = [
+                    base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
+                    base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
+                ]
                 server.broadcast('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
-            cv2.imwrite('image_out/' + name + '.png', currentImages)
+            cv2.imwrite('image_out/' + name + '.png', currentImages[0].concatenate(currentImages[1]))
             if server != None:
                 server.broadcast('message', 'Captured ' + name + '.png')
                 encoded = [
@@ -84,12 +87,12 @@ def capture(filter = None, server: server = None):
 streamThread = None
 streaming = False
 totalCaptured = 0
-def startSaveStream(filter = None, server = None):
+def startSaveStream(converter = None, server = None):
     global streamThread, streaming
     if streaming == False:
         streaming = True
         name = str(round(time.time()*1000))
-        if filter != None:
+        if converter != None:
             os.mkdir('./filtered_out/' + name)
         else:
             os.mkdir('./image_out/' + name)
@@ -99,14 +102,17 @@ def startSaveStream(filter = None, server = None):
                 index = 0
                 while streaming:
                     start = time.time()
-                    if filter != None:
-                        filteredImg = filter.filter(currentImages, False)
-                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', filteredImg)
+                    if converter != None:
+                        filteredImgs = converter.filter(currentImages, False)
+                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', filteredImgs[0].concatenate(filteredImgs[1]))
                         if server != None:
-                            encoded = base64.b64encode(cv2.imencode('.png', filteredImg)[1]).decode()
+                            encoded = [
+                                base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
+                                base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
+                            ]
                             server.broadcast('capture', encoded)
                     else:
-                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', currentImages)
+                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', currentImages[0].concatenate(currentImages[1]))
                         if server != None:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', currentImages[0])[1]).decode(),
