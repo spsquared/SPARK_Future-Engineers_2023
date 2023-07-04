@@ -7,8 +7,6 @@ import base64
 import time
 import numpy
 
-io = None
-
 # wrapper for camera functions
 
 imageWidth = 272
@@ -58,7 +56,7 @@ def capture(converter = None, server = None):
         name = str(round(time.time()*1000))
         if converter != None:
             filteredImgs = converter.filter(currentImages, False)
-            cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate(filteredImgs[0], filteredImgs[1]))
+            cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if server != None:
                 server.broadcast('message', 'Captured (filtered) ' + name + '.png')
                 encoded = [
@@ -68,7 +66,7 @@ def capture(converter = None, server = None):
                 server.broadcast('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
-            cv2.imwrite('image_out/' + name + '.png', numpy.concatenate(currentImages[0], currentImages[1]))
+            cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
             if server != None:
                 server.broadcast('message', 'Captured ' + name + '.png')
                 encoded = [
@@ -103,7 +101,7 @@ def startSaveStream(converter = None, server = None):
                     start = time.time()
                     if converter != None:
                         filteredImgs = converter.filter(currentImages, False)
-                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate(filteredImgs[0], filteredImgs[1]))
+                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if server != None:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
@@ -111,7 +109,7 @@ def startSaveStream(converter = None, server = None):
                             ]
                             server.broadcast('capture', encoded)
                     else:
-                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate(currentImages[0], currentImages[1]))
+                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
                         if server != None:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', currentImages[0])[1]).decode(),
