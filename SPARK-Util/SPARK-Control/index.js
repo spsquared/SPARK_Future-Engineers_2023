@@ -21,6 +21,10 @@ const socket = io(ip + ':4040', {
     reconnection: false
 });
 
+socket.on('test', () => {
+    document.body.style.backgroundColor = 'blue'
+});
+
 const log = document.getElementById('eventLogBody');
 let connected = false;
 let toReconnect = false;
@@ -38,6 +42,9 @@ let ondisconnect = () => {
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
 socket.on('error', ondisconnect);
+socket.on('authenticate', () => {
+    socket.emit('authenticateResponse', auth_uuid);
+});
 function reconnect(force) {
     if (toReconnect || force) {
         toReconnect = false;
@@ -74,6 +81,7 @@ async function playSound() {
     });
 };
 function appendLog(text, color) {
+    return;
     const div = document.createElement('div');
     div.classList.add('logBlock');
     div.innerHTML = text;
@@ -89,8 +97,50 @@ socket.on('message', (data) => {
 });
 
 // manual driving
+const keyboard = {
+    forward: 0,
+    backward: 0,
+    left: 0,
+    right: 0
+};
 let trim = 0;
 let trim2 = 0.05;
+document.onkeydown = function (e) {
+    const key = e.key.toLowerCase();
+    send('key', { key: key });
+    switch (e.key.toLowerCase()) {
+        case 'w':
+            keyboard.foward = 100;
+            break;
+        case 's':
+            keyboard.backward = -100;
+            break;
+        case 'a':
+            keyboard.left = -100;
+            break;
+        case 'd':
+            keyboard.right = 100;
+            break;
+    }
+};
+document.onkeyup = function (e) {
+    const key = e.key.toUpperCase();
+    send('key', { key: key });
+    switch (e.key.toLowerCase()) {
+        case 'w':
+            keyboard.foward = 0;
+            break;
+        case 's':
+            keyboard.backward = -0;
+            break;
+        case 'a':
+            keyboard.left = -0;
+            break;
+        case 'd':
+            keyboard.right = 0;
+            break;
+    }
+};
 let pressedbuttons = [];
 function updateControllers() {
     let controllers = navigator.getGamepads();
@@ -136,8 +186,8 @@ function updateControllers() {
 };
 setInterval(function () {
     updateControllers();
-    if (keyboard.foward || keyboard.backward || keyboard.left || keyboard.right) {
-        send('drive', { throttle: keyboard.foward + keyboard.backward, steering: keyboard.left + keyboard.right });
+    if (keyboard.forward || keyboard.backward || keyboard.left || keyboard.right) {
+        send('drive', { throttle: keyboard.forward + keyboard.backward, steering: keyboard.left + keyboard.right });
     } else if (throttle != 0 || steering != 0) {
         send('drive', { throttle: throttle, steering: steering });
     }

@@ -1,6 +1,11 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
+const cors = require('cors');
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+}));
 
 const io = require('socket.io')(server);
 
@@ -14,6 +19,7 @@ io.on('connection', (socket) => {
             return;
         }
         socket = socket;
+        socket.emit('test')
     });
 });
 

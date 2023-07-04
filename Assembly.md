@@ -171,6 +171,8 @@ const ip = '192.168.1.151';
 const auth_uuid = '214e7634-b7c3-4044-b297-533da8cfbe7f';
 ```
 
+To open the SPARK Control Panel and other utilities, use `node SPARK-Util/static.js` or open the batch file `/SPARK-Util/static.bat`. In any web browser (only Chrome tested), navigate to `localhost:8081` to access the SPARK Control Panel.
+
 ### Camera Color Correction
 
 You may encounter pink fringing on the cameras. If that happens, take the following steps to fix it:
