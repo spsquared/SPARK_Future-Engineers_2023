@@ -1,10 +1,6 @@
 window.addEventListener('error', (e) => {
     appendLog(`An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
-const ip = '192.168.1.151';
-const socket = io(ip + ':4040', {
-    reconnection: false
-});
 
 const initcolors = [
     [
@@ -20,6 +16,10 @@ const initcolors = [
         90, 80, 70
     ],
 ];
+
+const socket = io(ip + ':4040', {
+    reconnection: false
+});
 
 const log = document.getElementById('eventLogBody');
 let connected = false;
