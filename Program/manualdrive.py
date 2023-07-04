@@ -1,6 +1,5 @@
 from IO import io
 from Util import server_old as server
-from AI import filter
 from threading import Thread
 import cv2
 import time
@@ -132,6 +131,9 @@ def main():
             print('stopped by emergency stop button')
             exit(0)
         server.addListener('stop', stop)
+        time.sleep(1)
+        print('take picture i guess')
+        io.camera.capture()
         while running:
             msg = input()
             if msg == 'reset':

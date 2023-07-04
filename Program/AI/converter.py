@@ -1,4 +1,5 @@
 import numpy
+from IO import io
 import cv2
 import math
 
@@ -31,8 +32,8 @@ params.minInertiaRatio = 0
 blobDetector = cv2.SimpleBlobDetector_create(params)
 
 def filter(imgIn: numpy.ndarray):
-    global redMax, redMin, greenMax, greenMin
     try:
+        global redMax, redMin, greenMax, greenMin
         # convert to HSV
         hsv = cv2.cvtColor(imgIn, cv2.COLOR_BGR2HSV)
         # red filter
@@ -59,8 +60,8 @@ def filter(imgIn: numpy.ndarray):
         # combine images
         return cv2.merge((edgesImage, blurredG, blurredR))
     except Exception as err:
-        print(err)
         io.error()
+        print(err)
 
 # distance scanner
 imgSinAngles = numpy.fromfunction(lambda i: math.sin(60 - math.atan2(((imageWidth / 2) - i) / focalLength)), imageWidth, dtype=float)
@@ -88,24 +89,28 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     return numpy.concatenate((leftCoordinates, rightCoordinates))
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
-    # add borders to fix blob detection
-    blobStart = 79
-    blobEnd = 100 # fix???
-    rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+    try:
+        # add borders to fix blob detection
+        blobStart = 79
+        blobEnd = 100 # fix???
+        rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
-    blobDetector.empty()
-    rLeftBlobs = blobDetector.detect(255 - rLeft)
-    blobDetector.empty()
-    gLeftBlobs = blobDetector.detect(255 - gLeft)
-    blobDetector.empty()
-    rRightBlobs = blobDetector.detect(255 - rRight)
-    blobDetector.empty()
-    gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
-    
-    return [numpy.concatenate(rLeftBlobs, rRightBlobs), numpy.concatenate(gLeftBlobs, gRightBlobs)]
+        blobDetector.empty()
+        rLeftBlobs = blobDetector.detect(255 - rLeft)
+        blobDetector.empty()
+        gLeftBlobs = blobDetector.detect(255 - gLeft)
+        blobDetector.empty()
+        rRightBlobs = blobDetector.detect(255 - rRight)
+        blobDetector.empty()
+        gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
+        
+        return [numpy.concatenate(rLeftBlobs, rRightBlobs), numpy.concatenate(gLeftBlobs, gRightBlobs)]
+    except Exception as err:
+        io.error()
+        print(err)
 
 def processBlobs(blobs):
     for i in range(len(blobs)):

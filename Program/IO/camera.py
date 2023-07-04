@@ -1,11 +1,13 @@
 from jetcam.csi_camera import CSICamera
+from IO import io
 import cv2
 import os
 from threading import Thread
-from IO import io
 import base64
 import time
 import numpy
+
+io = None
 
 # wrapper for camera functions
 
@@ -14,13 +16,12 @@ imageHeight = 154
 
 camera0 = CSICamera(capture_device=0, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
 camera1 = CSICamera(capture_device=1, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
-running = False
+running = True
 currentImages = [[[[]]], [[[]]]]
 thread = None
 
 camera0.running = True
 camera1.running = True
-running = True
 def __capture():
     try:
         global running, camera0, camera1, currentImages
@@ -33,8 +34,6 @@ def __capture():
     except Exception as err:
         print(err)
         io.error()
-thread = Thread(target = __capture)
-thread.start()
 
 def stop():
     global running, camera0, camera1, thread
@@ -59,7 +58,7 @@ def capture(converter = None, server = None):
         name = str(round(time.time()*1000))
         if converter != None:
             filteredImgs = converter.filter(currentImages, False)
-            cv2.imwrite('filtered_out/' + name + '.png', filteredImgs[0].concatenate(filteredImgs[1]))
+            cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate(filteredImgs[0], filteredImgs[1]))
             if server != None:
                 server.broadcast('message', 'Captured (filtered) ' + name + '.png')
                 encoded = [
@@ -69,7 +68,7 @@ def capture(converter = None, server = None):
                 server.broadcast('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
-            cv2.imwrite('image_out/' + name + '.png', currentImages[0].concatenate(currentImages[1]))
+            cv2.imwrite('image_out/' + name + '.png', numpy.concatenate(currentImages[0], currentImages[1]))
             if server != None:
                 server.broadcast('message', 'Captured ' + name + '.png')
                 encoded = [
@@ -104,7 +103,7 @@ def startSaveStream(converter = None, server = None):
                     start = time.time()
                     if converter != None:
                         filteredImgs = converter.filter(currentImages, False)
-                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', filteredImgs[0].concatenate(filteredImgs[1]))
+                        cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate(filteredImgs[0], filteredImgs[1]))
                         if server != None:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
@@ -112,7 +111,7 @@ def startSaveStream(converter = None, server = None):
                             ]
                             server.broadcast('capture', encoded)
                     else:
-                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', currentImages[0].concatenate(currentImages[1]))
+                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate(currentImages[0], currentImages[1]))
                         if server != None:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', currentImages[0])[1]).decode(),
@@ -142,3 +141,6 @@ def stopSaveStream(server = None):
         totalCaptured = 0
         return True
     return False
+
+thread = Thread(target = __capture)
+thread.start()

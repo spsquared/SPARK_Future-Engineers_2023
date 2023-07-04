@@ -75,84 +75,88 @@ carAngle = 0
 carSpeed = 0
 
 def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
-    # dead reckoning
+    try:
+        # dead reckoning
 
-    drCarX = carX + math.cos(carAngle) * carSpeed
-    drCarY = carY + math.sin(carAngle) * carSpeed
-    drCarAngle = io.gyro.read()
+        drCarX = carX + math.cos(carAngle) * carSpeed
+        drCarY = carY + math.sin(carAngle) * carSpeed
+        drCarAngle = io.gyro.read()
 
-    # get position from landmarks
+        # get position from landmarks
 
-    landmarks = []
+        landmarks = []
 
-    lmCarX = 0
-    lmCarY = 0
-    lmCarAngle = 0
+        lmCarX = 0
+        lmCarY = 0
+        lmCarAngle = 0
 
-    def getDistance(a, b):
-        return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+        def getDistance(a, b):
+            return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
-    for i in range(len(outerWalls)):
-        # find nearest landmark
-        nearestLandmark = storedLandmarks[0]
-        for j in range(1, 4):
-            if (getDistance(storedLandmarks[j], outerWalls[i]) < getDistance(nearestLandmark, outerWalls[i])):
-                nearestLandmark = storedLandmarks[j]
+        for i in range(len(outerWalls)):
+            # find nearest landmark
+            nearestLandmark = storedLandmarks[0]
+            for j in range(1, 4):
+                if (getDistance(storedLandmarks[j], outerWalls[i]) < getDistance(nearestLandmark, outerWalls[i])):
+                    nearestLandmark = storedLandmarks[j]
+            
+            nearestLandmark[DISTANCE] = getDistance([carX, carY], outerWalls[i])
+            landmarks.append(nearestLandmark)
         
-        nearestLandmark[DISTANCE] = getDistance([carX, carY], outerWalls[i])
-        landmarks.append(nearestLandmark)
-    
-    def positionEquations(guess):
-        x, y = guess
-        
-        array = []
+        def positionEquations(guess):
+            x, y = guess
+            
+            array = []
 
-        for i in range(len(landmarks)):
-            array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(landmarks[i][DISTANCE], 2))
-        
-        return tuple(array)
+            for i in range(len(landmarks)):
+                array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(landmarks[i][DISTANCE], 2))
+            
+            return tuple(array)
 
-    # omg using package
-    # it uses the dead reckoning guess as initial guess
-    initialPositionGuess = (drCarX, drCarY)
+        # omg using package
+        # it uses the dead reckoning guess as initial guess
+        initialPositionGuess = (drCarX, drCarY)
 
-    # use least squares
-    positionResult = least_squares(positionEquations, initialPositionGuess)
+        # use least squares
+        positionResult = least_squares(positionEquations, initialPositionGuess)
 
-    # get position of results
-    lmCarX = positionResult.x[0]
-    lmCarY = positionResult.x[1]
+        # get position of results
+        lmCarX = positionResult.x[0]
+        lmCarY = positionResult.x[1]
 
-    # get angle
+        # get angle
 
-    def angleEquations(guess):
-        a = guess
-        
-        array = []
+        def angleEquations(guess):
+            a = guess
+            
+            array = []
 
-        for i in range(len(landmarks)):
-            array.append(math.pow(math.atan2(lmCarX - landmarks[i][Y], lmCarY - landmarks[i][X]) - a, 2))
-        
-        return tuple(array)
+            for i in range(len(landmarks)):
+                array.append(math.pow(math.atan2(lmCarX - landmarks[i][Y], lmCarY - landmarks[i][X]) - a, 2))
+            
+            return tuple(array)
 
-    # omg using package
-    # it uses the dead reckoning guess as initial guess
-    initialAngleGuess = drCarAngle
+        # omg using package
+        # it uses the dead reckoning guess as initial guess
+        initialAngleGuess = drCarAngle
 
-    # use least squares
-    angleResult = least_squares(angleEquations, initialAngleGuess)
+        # use least squares
+        angleResult = least_squares(angleEquations, initialAngleGuess)
 
-    lmCarAngle = angleResult
+        lmCarAngle = angleResult
 
-    # set car speed
+        # set car speed
 
-    carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - carX, 2) + math.pow((drCarY + lmCarY) / 2 - carY, 2))
+        carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - carX, 2) + math.pow((drCarY + lmCarY) / 2 - carY, 2))
 
-    # average!!!!1
+        # average!!!!1
 
-    carX = (drCarX + lmCarX) / 2
-    carY = (drCarY + lmCarY) / 2
-    carAngle = (drCarAngle + lmCarAngle) / 2
+        carX = (drCarX + lmCarX) / 2
+        carY = (drCarY + lmCarY) / 2
+        carAngle = (drCarAngle + lmCarAngle) / 2
+    except Exception as err:
+        io.error()
+        print(err)
 
 
 def findStartingPosition(outerWalls, innerWalls, redBlobs, greenBlobs):

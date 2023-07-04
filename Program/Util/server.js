@@ -3,8 +3,7 @@ const app = express();
 const server = require('http').Server(app);
 const cors = require('cors');
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+    origin: '*'
 }));
 
 const io = require('socket.io')(server);
