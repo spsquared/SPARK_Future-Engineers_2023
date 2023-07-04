@@ -137,53 +137,23 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 ## **Input Processing**
 
-lol
+All the code for image processing can be found in `/Program/AI/converter.py`.
 
-## **SLAM with Latex (gloves)**
+### **Image Preprocessing**
+
+*TBD*
+
+### **Image Predictions**
+
+*TBD*
+
+# ****
+
+
+
+## **SLAM with LaTeX (gloves)**
 
 All the code for slam can be found in `/Program/AI/slam.py`.
-$2^2$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
 
 *TBD*
 
