@@ -147,7 +147,7 @@ All the code for image processing can be found in `/Program/AI/converter.py`.
 
 *TBD*
 
-## **SLAM OOF**
+## **SLAM with Latex (gloves)**
 
 All the code for slam can be found in `/Program/AI/slam.py`.
 $2^2$
