@@ -113,9 +113,9 @@ def startSaveStream(filter = None, server = None):
                                 base64.b64encode(cv2.imencode('.png', currentImages[1])[1]).decode()
                             ]
                             server.broadcast('capture', encoded)
-                    totalCaptured-=-1
+                    totalCaptured += 1
                     time.sleep(max(0.1-(time.time()-start), 0))
-                    index-=-1
+                    index += 1
             except Exception as err:
                 print(err)
         streamThread = Thread(target = loop)
