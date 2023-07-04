@@ -214,8 +214,24 @@ document.getElementById('captureFilterStreamButton').onclick = function (e) {
 // filter adjuster
 let sliders = [];
 const filterAdjust = document.getElementById('filterAdjust');
+const filterAdjustSliders = document.getElementById('filterAdjustSliders');
+const filterAdjustIndicators = document.getElementById('filterAdjustIndicators');
 // this is arguably worse than the hard coded tables
 {
+    let indicators = {
+        red: {
+            Max: [],
+            Min: []
+        },
+        green: {
+            Max: [],
+            Min: []
+        },
+        blue: {
+            Max: [],
+            Min: []
+        },
+    };
     let i = 0;
     let minmax = 'Max';
     let l1 = () => {
@@ -229,14 +245,22 @@ const filterAdjust = document.getElementById('filterAdjust');
                 slider.type = 'range';
                 slider.classList.add('slider');
                 slider.classList.add('slider' + hsv);
+                slider.id = color + hsv + minmax;
                 slider.min = 0;
                 slider.max = max;
                 slider.step = step;
-                slider.oninput = updateSlider(i++);
+                let j = i;
+                slider.oninput = () => updateSlider(j);
                 sliders.push(slider);
-                filterAdjust.appendChild(slider);
+                const label = document.createElement('span');
+                label.innerHTML = hsv + '&nbsp;' + minmax;
                 const indicator = document.createElement('span');
-                indicator.id = color + hsv + minmax + 'indicator';
+                indicator.id = color + hsv + minmax + 'Indicator';
+                indicator.style.marginRight = '4px';
+                filterAdjustSliders.appendChild(label);
+                filterAdjustSliders.appendChild(slider);
+                indicators[color][minmax].push(indicator);
+                i++;
             };
             l3();
             color = 'green';
@@ -255,9 +279,22 @@ const filterAdjust = document.getElementById('filterAdjust');
     l1();
     minmax = 'Min';
     l1();
+    for (let a in indicators) {
+        for (let b in indicators[a]) {
+            const block = document.createElement('div');
+            block.style.width = '100px';
+            const label = document.createElement('span');
+            label.innerHTML = '&nbsp;&nbsp;' + b + ':&nbsp;';
+            block.appendChild(label);
+            for (let c in indicators[a][b]) {
+                block.appendChild(indicators[a][b][c]);
+            }
+            filterAdjustIndicators.appendChild(block);
+        }
+    }
 }
 function updateSlider(i) {
-    document.getElementById(sliders[i].id + 'indicator').innerText = sliders[i].value;
+    document.getElementById(sliders[i].id + 'Indicator').innerText = sliders[i].value;
     if (sliders[i].id.includes('H')) {
         sliders[i].style.setProperty('--hue', sliders[i].value * 2);
         sliders[i + 3].style.setProperty('--hue', sliders[i].value * 2);
