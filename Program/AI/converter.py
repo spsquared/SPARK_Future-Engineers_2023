@@ -78,6 +78,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
+    def rawToCartesian(a, dir):
+        dist = wallHeight * focalLength / a[0]
+        return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
+
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
 
@@ -103,17 +107,13 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     
     rLeftBlobsCoordinates = []
     for i in range(len(rLeftBlobs)):
-        rLeftBlobsCoordinates.append(rawToCartesian(rLeftBlobs))
+        rLeftBlobsCoordinates.append((rLeftBlobs))
 
 def processBlobs(blobs):
     for i in range(len(blobs)):
         blobs[i] = blobs[i].pt[0]
     
     return blobs
-
-def rawToCartesian(a, dir):
-    dist = wallHeight * focalLength / a[0]
-    return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
 
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
