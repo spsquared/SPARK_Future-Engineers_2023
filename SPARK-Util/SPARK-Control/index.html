@@ -28,6 +28,7 @@
     <title>SPARK Control Panel</title>
     <link rel="icon" href="./favicon.png" type="image/png">
     <link rel="stylesheet" href="./style.css">
+    <script src="./socket.io.min.js"></script>
     <script src="./index.js" defer></script>
 </head>
 <body>
@@ -49,8 +50,9 @@
         <button id="predictionButton" class="largeButton">VIEW PREDICTION</button>
     </div>
     <div id="filterAdjust">
-        <div style="font-size: 32px; font-weight: bold;">Adjust Filter</div>
-        <div style="font-size: 8px; font-weight: lighter; color: grey;">"Min" and "Max" do not refer to actual minimums and maximums - they refer to the bounds that the color values must be within to be considered.</div>
+        
+    </div>
+    <div id="filterAdjusta">
         <table>
             <tbody>
                 <tr>
@@ -284,11 +286,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div id="joystick">
-        <div id="joystickPin"></div>
-        <div id="sliderX"></div>
-        <div id="sliderY"></div>
     </div>
     <canvas id="logocanvas"></canvas>
     <script src="./../logoIntro.js"></script>

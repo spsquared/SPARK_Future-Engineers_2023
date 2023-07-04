@@ -20,34 +20,9 @@ def main():
     try:
         io.setStatusBlink(2)
         server.open()
-        def keys(data):
-            global __forward, __backward, __left, __right
-            key = data['key']
-            if key == 'w':
-                __forward = 100
-            elif key == 'W':
-                __forward = 0
-            elif key == 's':
-                __backward = -100
-            elif key == 'S':
-                __backward = 0
-            elif key == 'a':
-                __left = -100
-            elif key == 'A':
-                __left = 0
-            elif key == 'd':
-                __right = 100
-            elif key == 'D':
-                __right = 0
-            io.throttle(__forward+__backward)
-            io.steer(__left+__right)
-        def joystick(data):
-            __forward = max(data['throttle'], 0)
-            __backward = min(data['throttle'], 0)
-            __left = min(data['steering'], 0)
-            __right = max(data['steering'], 0)
-            io.throttle(__forward+__backward)
-            io.steer(__left+__right)
+        def drive(data):
+            io.drive.throttle(data['throttle'])
+            io.drive.steer(data['steering'])
         def capture(data):
             io.camera.capture(server=server)
         def captureStream(data):
@@ -135,8 +110,7 @@ def main():
             server.broadcast('message', 'Ran prediction on image')
         def colors(data):
             filter.setColors(data)
-        server.addListener('key', keys)
-        server.addListener('joystick', joystick)
+        server.addListener('drive', drive)
         server.addListener('capture', capture)
         server.addListener('captureStream', captureStream)
         server.addListener('colors', colors)

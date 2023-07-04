@@ -2,56 +2,35 @@ window.addEventListener('error', (e) => {
     appendLog(`An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
 const ip = '192.168.1.151';
-
-socket = new WebSocket('ws://' + ip + ':4040');
+const socket = io(ip + ':4040', {
+    reconnection: false
+});
 
 const log = document.getElementById('eventLogBody');
 const callbacks = [];
 let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
-function addListener(event, cb) {
-    callbacks[event] = cb;
-};
-function send(event, data) {
-    if (connected) {
-        socket.send(JSON.stringify({
-            event: event,
-            data: data
-        }));
-    }
-};
-socket.onmessage = function (e) {
-    if (e.data != 'ping') {
-        let json = JSON.parse(e.data);
-        for (let i in callbacks) {
-            if (i == json.event) {
-                callbacks[i](json.data);
-            }
-        }
-    }
-};
-socket.onopen = function () {
+socket.on('connect', () => {
     connected = true;
     appendLog('Connected!', 'lime');
-};
-socket.onclose = function () {
+});
+let ondisconnect = () => {
     connected = false;
     if (autoReconnect) toReconnect = true;
     appendLog('Connection closed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
     setTimeout(reconnect, 10000);
 };
+socket.on('disconnect', ondisconnect);
+socket.on('timeout', ondisconnect);
+socket.on('error', ondisconnect);
 function reconnect(force) {
     if (toReconnect || force) {
         toReconnect = false;
         autoReconnect = true;
         document.querySelectorAll('.connectNow').forEach(button => button.remove());
         appendLog('Attempting to reconnect...');
-        let newsocket = new WebSocket('ws://' + ip + ':4040');
-        newsocket.onmessage = socket.onmessage;
-        newsocket.onopen = socket.onopen;
-        newsocket.onclose = socket.onclose;
-        socket = newsocket;
+        socket.connect();
     }
 };
 
@@ -90,104 +69,52 @@ function appendLog(text, color) {
     log.appendChild(div);
     if (scroll) log.scrollTop = log.scrollHeight;
 };
-addListener('message', function (data) {
+socket.on('message', (data) => {
     playSound();
     appendLog(data);
 });
 
-// keys
+// manual driving
+let keyboard = {
+    foward: 0, // oops
+    backward: 0,
+    left: 0,
+    right: 0
+};
 document.onkeydown = function (e) {
-    const key = e.key.toLowerCase();
-    send('key', { key: key });
+    switch (e.key.toLowerCase()) {
+        case 'w':
+            keyboard.foward = 100;
+            break;
+        case 's':
+            keyboard.backward = -100;
+            break;
+        case 'a':
+            keyboard.left = -100;
+            break;
+        case 'd':
+            keyboard.right = 100;
+            break;
+    }
 };
 document.onkeyup = function (e) {
-    const key = e.key.toUpperCase();
-    send('key', { key: key });
+    switch (e.key.toLowerCase()) {
+        case 'w':
+            keyboard.foward = 0;
+            break;
+        case 's':
+            keyboard.backward = -0;
+            break;
+        case 'a':
+            keyboard.left = -0;
+            break;
+        case 'd':
+            keyboard.right = 0;
+            break;
+    }
 };
-
-// joystick
-const joystick = document.getElementById('joystick');
-const joystickPin = document.getElementById('joystickPin');
-const sliderX = document.getElementById('sliderX');
-const sliderY = document.getElementById('sliderY');
-
-let grabbing = false;
-let grabbingtouch = false;
 let throttle = 0;
 let steering = 0;
-joystick.onmousedown = function (e) {
-    grabbing = true;
-};
-joystick.addEventListener('touchstart', function (e) {
-    grabbingtouch = true;
-}, { passive: true });
-document.onmouseup = function (e) {
-    if (grabbing) {
-        grabbing = false;
-        joystickPin.style.right = '114px';
-        joystickPin.style.bottom = '114px';
-        sliderX.style.bottom = '140px';
-        sliderY.style.right = '140px';
-        throttle = 0;
-        steering = 0;
-        send('joystick', { throttle: 0, steering: 0 });
-    }
-};
-document.addEventListener('touchend', function (e) {
-    if (grabbingtouch) {
-        grabbingtouch = false;
-        joystickPin.style.right = '110px';
-        joystickPin.style.bottom = '110px';
-        sliderX.style.bottom = '140px';
-        sliderY.style.right = '140px';
-        throttle = 0;
-        steering = 0;
-        send('joystick', { throttle: 0, steering: 0 });
-    }
-}, { passive: true });
-document.addEventListener('touchcancel', function (e) {
-    if (grabbingtouch) {
-        grabbingtouch = false;
-        joystickPin.style.right = '114px';
-        joystickPin.style.bottom = '114px';
-        sliderX.style.bottom = '140px';
-        sliderY.style.right = '140px';
-        throttle = 0;
-        steering = 0;
-        send('joystick', { throttle: 0, steering: 0 });
-    }
-}, { passive: true });
-document.onmousemove = function (e) {
-    if (grabbing) {
-        let x = Math.max(-110, Math.min(e.clientX - window.innerWidth + 150, 110));
-        let y = Math.max(-110, Math.min(e.clientY - window.innerHeight + 150, 110));
-        throttle = Math.round(-y * 90 / 99);
-        steering = Math.round(x * 90 / 99);
-        joystickPin.style.bottom = 114 - y + 'px';
-        joystickPin.style.right = 114 - x + 'px';
-        sliderX.style.bottom = 140 - y + 'px';
-        sliderY.style.right = 140 - x + 'px';
-    }
-};
-document.addEventListener('touchmove', function (e) {
-    if (grabbingtouch) {
-        for (let i in e.touches) {
-            if (joystick.contains(e.touches[i].target)) {
-                let x = Math.max(-110, Math.min(e.touches[i].clientX - window.innerWidth + 150, 110));
-                let y = Math.max(-110, Math.min(e.touches[i].clientY - window.innerHeight + 150, 110));
-                throttle = Math.round(-y * 90 / 99);
-                steering = Math.round(x * 90 / 99);
-                joystickPin.style.bottom = 114 - y + 'px';
-                joystickPin.style.right = 114 - x + 'px';
-                sliderX.style.bottom = 140 - y + 'px';
-                sliderY.style.right = 140 - x + 'px';
-                break;
-            }
-        }
-    }
-}, { passive: true });
-
-// controllers
 let trim = 0;
 let trim2 = 0.05;
 let pressedbuttons = [];
@@ -234,24 +161,24 @@ function updateControllers() {
     }
 };
 setInterval(function () {
-    updateControllers()
 }, 25);
-
-// send
 setInterval(function () {
-    if (throttle != 0 || steering != 0) {
-        send('joystick', { throttle: throttle, steering: steering });
+    updateControllers();
+    if (keyboard.foward || keyboard.backward || keyboard.left || keyboard.right) {
+        send('drive', { throttle: keyboard.foward + keyboard.backward, steering: keyboard.left + keyboard.right });
+    } else if (throttle != 0 || steering != 0) {
+        send('drive', { throttle: throttle, steering: steering });
     }
 }, 50);
 
 // capture
 document.getElementById('captureButton').onclick = function (e) {
-    send('capture', {});
+    socket.emit('capture');
 };
 let streaming = false;
 document.getElementById('captureStreamButton').onclick = function (e) {
     streaming = !streaming;
-    send('captureStream', { state: streaming });
+    socket.emit('captureStream', streaming);
     if (streaming) {
         document.getElementById('captureStreamButton').innerText = 'STOP CAPTURE STREAM';
         document.getElementById('captureStreamButton').style.backgroundColor = 'lightcoral';
@@ -265,7 +192,7 @@ document.getElementById('captureFilterButton').onclick = function (e) {
     for (let i in sliders) {
         arr.push(sliders[i].value);
     }
-    send('captureFilter', arr);
+    socket.emit('captureFilter', arr);
 };
 let filterstreaming = false;
 document.getElementById('captureFilterStreamButton').onclick = function (e) {
@@ -274,7 +201,7 @@ document.getElementById('captureFilterStreamButton').onclick = function (e) {
         arr.push(sliders[i].value);
     }
     filterstreaming = !filterstreaming;
-    send('captureFilterStream', { colors: arr, state: filterstreaming });
+    socket.emit('captureFilterStream', { colors: arr, state: filterstreaming });
     if (filterstreaming) {
         document.getElementById('captureFilterStreamButton').innerText = 'STOP FILTERED CAPTURE STREAM';
         document.getElementById('captureFilterStreamButton').style.backgroundColor = 'lightcoral';
@@ -284,27 +211,51 @@ document.getElementById('captureFilterStreamButton').onclick = function (e) {
     }
 };
 
-// filtered capture (ignore the terrible coding practices this was intended to be a temporary thing)
-let sliders = [
-    document.getElementById('redHMax'),
-    document.getElementById('greenHMax'),
-    document.getElementById('blueHMax'),
-    document.getElementById('redSMax'),
-    document.getElementById('greenSMax'),
-    document.getElementById('blueSMax'),
-    document.getElementById('redVMax'),
-    document.getElementById('greenVMax'),
-    document.getElementById('blueVMax'),
-    document.getElementById('redHMin'),
-    document.getElementById('greenHMin'),
-    document.getElementById('blueHMin'),
-    document.getElementById('redSMin'),
-    document.getElementById('greenSMin'),
-    document.getElementById('blueSMin'),
-    document.getElementById('redVMin'),
-    document.getElementById('greenVMin'),
-    document.getElementById('blueVMin')
-];
+// filter adjuster
+let sliders = [];
+const filterAdjust = document.getElementById('filterAdjust');
+// this is arguably worse than the hard coded tables
+{
+    let i = 0;
+    let minmax = 'Max';
+    let l1 = () => {
+        let hsv = 'H';
+        let max = 180;
+        let step = 2;
+        let l2 = () => {
+            let color = 'red';
+            let l3 = () => {
+                const slider = document.createElement('input');
+                slider.type = 'range';
+                slider.classList.add('slider');
+                slider.classList.add('slider' + hsv);
+                slider.min = 0;
+                slider.max = max;
+                slider.step = step;
+                slider.oninput = updateSlider(i++);
+                sliders.push(slider);
+                filterAdjust.appendChild(slider);
+                const indicator = document.createElement('span');
+                indicator.id = color + hsv + minmax + 'indicator';
+            };
+            l3();
+            color = 'green';
+            l3();
+            color = 'blue';
+            l3();
+        };
+        l2();
+        hsv = 'S';
+        max = 255;
+        step = 5;
+        l2();
+        hsv = 'V';
+        l2();
+    };
+    l1();
+    minmax = 'Min';
+    l1();
+}
 function updateSlider(i) {
     document.getElementById(sliders[i].id + 'indicator').innerText = sliders[i].value;
     if (sliders[i].id.includes('H')) {
@@ -324,7 +275,7 @@ function setColors(colors) {
         updateSlider(parseInt(i));
     }
 };
-addListener('colors', setColors);
+socket.on('colors', setColors);
 
 // non capture streams and iamges
 document.getElementById('viewButton').onclick = function (e) {
@@ -690,9 +641,9 @@ function importSession() {
         reader.readAsText(files[0]);
     };
 };
-addListener('capture', addCapture);
-addListener('blobs', addBlobs);
-addListener('values', addData);
+socket.on('capture', addCapture);
+socket.on('blobs', addBlobs);
+socket.on('values', addData);
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     FPS.innerHTML = 'FPS: ' + fpsTimes.length;
