@@ -154,48 +154,6 @@ All the code for image processing can be found in `/Program/AI/converter.py`.
 ## **SLAM with LaTeX (gloves)**
 
 All the code for slam can be found in `/Program/AI/slam.py`.
-$2^2$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
 
 *TBD*
 
