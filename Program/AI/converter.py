@@ -90,7 +90,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     # add borders to fix blob detection
     blobStart = 79
-    blobEnd = 100
+    blobEnd = 100 # fix???
     rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
     gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
     rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
@@ -105,9 +105,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     blobDetector.empty()
     gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
     
-    rLeftBlobsCoordinates = []
-    for i in range(len(rLeftBlobs)):
-        rLeftBlobsCoordinates.append((rLeftBlobs))
+    return [numpy.concatenate(rLeftBlobs, rRightBlobs), numpy.concatenate(gLeftBlobs, gRightBlobs)]
 
 def processBlobs(blobs):
     for i in range(len(blobs)):
