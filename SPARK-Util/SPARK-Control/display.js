@@ -65,7 +65,7 @@ function importSession() {
 socket.on('data', () => { 'idk'});
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
-    FPS.innerHTML = 'FPS: ' + fpsTimes.length;
+    // FPS.innerHTML = 'FPS: ' + fpsTimes.length;
 }, 1000);
 document.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowLeft') {

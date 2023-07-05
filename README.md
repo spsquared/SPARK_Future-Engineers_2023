@@ -239,18 +239,14 @@ You can update the defaults in `/SPARK-Control/index.js` as well in `initcolors`
 Example:
 
 ```
-let initcolors = [
+const initcolors = [
     [
-        25, 255, 255,
-        0, 95, 75
+        [ 25, 255, 255 ],
+        [ 0, 95, 75 ]
     ],
     [
-        110, 255, 255,
-        30, 30, 40
-    ],
-    [
-        140, 255, 255,
-        90, 80, 70
+        [ 110, 255, 255 ],
+        [ 30, 30, 40 ]
     ],
 ];
 ```

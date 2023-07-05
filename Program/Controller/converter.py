@@ -120,10 +120,10 @@ def processBlobs(blobs):
 
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
-    redMax = (int(data[0]), int(data[3]), int(data[6]))
-    greenMax = (int(data[1]), int(data[4]), int(data[7]))
-    redMin = (int(data[9]), int(data[12]), int(data[15]))
-    greenMin = (int(data[10]), int(data[13]), int(data[16]))
+    redMax = (int(data[0]), int(data[2]), int(data[4]))
+    greenMax = (int(data[1]), int(data[3]), int(data[5]))
+    redMin = (int(data[6]), int(data[8]), int(data[10]))
+    greenMin = (int(data[7]), int(data[9]), int(data[11]))
     print('-- New ----------')
     print(redMax, redMin)
     print(greenMax, greenMin)
@@ -132,16 +132,16 @@ def setColors(data, server = None):
 def getColors():
     global redMax, redMin, greenMax, greenMin
     array = []
-    for i in range(9):
-        if i % 3 == 0:
-            array.append(redMax[math.ceil(i/3)])
-        elif i % 2 == 0:
-            array.append(greenMax[math.floor(i/3)+1])
-    for i in range(9):
-        if i % 3 == 0:
-            array.append(redMin[math.ceil(i/3)])
-        elif i % 2 == 0:
-            array.append(greenMin[math.floor(i/3)+1])
+    for i in range(6):
+        if i % 2 == 0:
+            array.append(redMax[math.ceil(i / 3)])
+        else:
+            array.append(greenMax[math.floor(i / 3) + 1])
+    for i in range(6):
+        if i % 2 == 0:
+            array.append(redMin[math.ceil(i / 3)])
+        else:
+            array.append(greenMin[math.floor(i / 3) + 1])
     return array
 def setDefaultColors():
     global rM, rm, gM, gm

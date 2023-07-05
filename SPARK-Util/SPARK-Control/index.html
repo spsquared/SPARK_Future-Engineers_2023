@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPARK Control Panel</title>
-    <link rel="icon" href="./favicon.png" type="image/png">
+    <link rel="icon" href="./assets/favicon.png" type="image/png">
     <link rel="stylesheet" href="./style.css">
     <script src="./config.js"></script>
     <script src="./socket.io.min.js"></script>
@@ -13,9 +13,19 @@
     <script src="./display.js" defer></script>
 </head>
 <body>
-    <div id="filterAdjust">
-        <div id="filterAdjustSliders"></div>
-        <div id="filterAdjustIndicators"></div>
+    <div id="leftPane">
+        <!-- logo, log, images -->
+    </div>
+    <div id="rightPane">
+        <canvas id="map"></canvas>
+        <input type="checkbox" id="dropdownTabCheckbox"> <!-- dumb css thing -->
+        <div id="dropdown">
+            <div id="filterAdjust">
+                <div id="filterAdjustSliders"></div>
+                <div id="filterAdjustIndicators"></div>
+            </div>
+            <label id="dropdownTab" for="dropdownTabCheckbox"></label>
+        </div>
     </div>
     <canvas id="logocanvas"></canvas>
     <script src="./../logoIntro.js"></script>

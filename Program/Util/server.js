@@ -3,10 +3,16 @@ const app = express();
 const server = require('http').Server(app);
 const cors = require('cors');
 app.use(cors({
-    origin: '*'
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
 }));
 
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+    }
+});
 
 const authIds = require('./auth.json');
 

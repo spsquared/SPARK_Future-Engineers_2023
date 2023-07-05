@@ -4,16 +4,12 @@ window.addEventListener('error', (e) => {
 
 const initcolors = [
     [
-        25, 255, 255,
-        0, 95, 75
+        [ 25, 255, 255 ],
+        [ 0, 95, 75 ]
     ],
     [
-        110, 255, 255,
-        30, 30, 40
-    ],
-    [
-        140, 255, 255,
-        90, 80, 70
+        [ 110, 255, 255 ],
+        [ 30, 30, 40 ]
     ],
 ];
 
@@ -25,7 +21,6 @@ socket.on('test', () => {
     document.body.style.backgroundColor = 'blue'
 });
 
-const log = document.getElementById('eventLogBody');
 let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
@@ -80,8 +75,8 @@ async function playSound() {
         pendingsounds.push(ping);
     });
 };
+const log = document.getElementById('logBody');
 function appendLog(text, color) {
-    return;
     const div = document.createElement('div');
     div.classList.add('logBlock');
     div.innerHTML = text;
@@ -97,47 +92,44 @@ socket.on('message', (data) => {
 });
 
 // manual driving
-const keyboard = {
+const controls = {
     forward: 0,
     backward: 0,
     left: 0,
-    right: 0
+    right: 0,
+    throttle: 0,
+    steering: 0,
+    trim: 0.05
 };
-let trim = 0;
-let trim2 = 0.05;
 document.onkeydown = function (e) {
-    const key = e.key.toLowerCase();
-    send('key', { key: key });
     switch (e.key.toLowerCase()) {
         case 'w':
-            keyboard.foward = 100;
+            controls.forward = 100;
             break;
         case 's':
-            keyboard.backward = -100;
+            controls.backward = -100;
             break;
         case 'a':
-            keyboard.left = -100;
+            controls.left = -100;
             break;
         case 'd':
-            keyboard.right = 100;
+            controls.right = 100;
             break;
     }
 };
 document.onkeyup = function (e) {
-    const key = e.key.toUpperCase();
-    send('key', { key: key });
     switch (e.key.toLowerCase()) {
         case 'w':
-            keyboard.foward = 0;
+            controls.forward = 0;
             break;
         case 's':
-            keyboard.backward = -0;
+            controls.backward = -0;
             break;
         case 'a':
-            keyboard.left = -0;
+            controls.left = -0;
             break;
         case 'd':
-            keyboard.right = 0;
+            controls.right = 0;
             break;
     }
 };
@@ -148,7 +140,7 @@ function updateControllers() {
         if (controllers[i] instanceof Gamepad) {
             let controller = controllers[i];
             throttle = Math.round(controller.axes[1] * -100);
-            steering = Math.round((controller.axes[2] - trim2) * 100) - trim;
+            steering = Math.round((controller.axes[2] - controls.trim) * 100);
             if (controller.buttons[8].pressed && pressedbuttons.indexOf(8) == -1) {
                 if (controller.buttons[7].pressed) document.getElementById('captureFilterButton').click();
                 else document.getElementById('captureButton').click();
@@ -186,10 +178,10 @@ function updateControllers() {
 };
 setInterval(function () {
     updateControllers();
-    if (keyboard.forward || keyboard.backward || keyboard.left || keyboard.right) {
-        send('drive', { throttle: keyboard.forward + keyboard.backward, steering: keyboard.left + keyboard.right });
-    } else if (throttle != 0 || steering != 0) {
-        send('drive', { throttle: throttle, steering: steering });
+    if (controls.forward || controls.backward || controls.left || controls.right) {
+        send('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
+    } else if (controls.throttle != 0 || controls.steering != 0) {
+        send('drive', { throttle: controls.throttle, steering: controls.steering });
     }
 }, 50);
 
@@ -209,17 +201,13 @@ const filterAdjustIndicators = document.getElementById('filterAdjustIndicators')
             Max: [],
             Min: []
         },
-        blue: {
-            Max: [],
-            Min: []
-        },
     };
     let i = 0;
     let minmax = 'Max';
     let l1 = () => {
         let hsv = 'H';
         let max = 180;
-        let step = 2;
+        let step = 1;
         let l2 = () => {
             let color = 'red';
             let l3 = () => {
@@ -246,8 +234,6 @@ const filterAdjustIndicators = document.getElementById('filterAdjustIndicators')
             };
             l3();
             color = 'green';
-            l3();
-            color = 'blue';
             l3();
         };
         l2();
@@ -279,11 +265,11 @@ function updateSlider(i) {
     document.getElementById(sliders[i].id + 'Indicator').innerText = sliders[i].value;
     if (sliders[i].id.includes('H')) {
         sliders[i].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 3].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 6].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 2].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 4].style.setProperty('--hue', sliders[i].value * 2);
     } else if (sliders[i].id.includes('S')) {
         sliders[i].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
-        sliders[i + 3].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
+        sliders[i + 2].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
     } else if (sliders[i].id.includes('V')) {
         sliders[i].style.setProperty('--value', sliders[i].value * (50 / 255) + '%');
     }
@@ -294,30 +280,18 @@ function setColors(colors) {
         updateSlider(parseInt(i));
     }
 };
-socket.on('colors', setColors);
-
-// bad coding practices
-sliders[0].value = initcolors[0][0];
-sliders[1].value = initcolors[1][0];
-sliders[2].value = initcolors[2][0];
-sliders[3].value = initcolors[0][1];
-sliders[4].value = initcolors[1][1];
-sliders[5].value = initcolors[2][1];
-sliders[6].value = initcolors[0][2];
-sliders[7].value = initcolors[1][2];
-sliders[8].value = initcolors[2][2];
-sliders[9].value = initcolors[0][3];
-sliders[10].value = initcolors[1][3];
-sliders[11].value = initcolors[2][3];
-sliders[12].value = initcolors[0][4];
-sliders[13].value = initcolors[1][4];
-sliders[14].value = initcolors[2][4];
-sliders[15].value = initcolors[0][5];
-sliders[16].value = initcolors[1][5];
-sliders[17].value = initcolors[2][5];
-for (let i in sliders) {
-    updateSlider(parseInt(i));
+{
+    let k = 0;
+    for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 6; j++) {
+            sliders[k++].value = initcolors[j % 2][i][j % 3];
+        }
+    }
+    for (let i in sliders) {
+        updateSlider(parseInt(i));
+    }
 }
+socket.on('colors', setColors);
 
 // stop
 document.getElementById('emergencyStop').onclick = () => {

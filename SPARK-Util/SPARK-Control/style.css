@@ -22,32 +22,90 @@ img {
     border-style: inset;
 }
 
-#filterAdjust {
+#leftPane {
     position: absolute;
     top: 0px;
-    right: 300px;
+    left: 0px;
+    width: calc(100vw - min(80vw, 100vh));
+    height: 100vh;
+    background-color: lightgrey;
+}
+#rightPane {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: min(80vw, 100vh);
+    height: 100vh;
+    background-color: #444;
+}
+#dropdown {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 100%;
+    background-color: lightgray;
+    transition: 200ms ease transform;
+    transform: translateY(-100%);
+    --tabImage: url(./assets/arrow-down.svg)
+}
+#dropdownTab {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    background-color: lightgray;
+    border: 4px solid black;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80% 80%;
+    background-image: var(--tabImage);
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+#dropdownTabCheckbox {
+    opacity: 0;
+    cursor: pointer;
+}
+#dropdownTabCheckbox:checked ~ #dropdown {
+    transform: translateY(0);
+    --tabImage: url(./assets/arrow-up.svg);
+}
+
+
+#map {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: min(80vw, 100vh);
+    height: min(80vw, 100vh);
+    background-color: black;
+}
+
+#filterAdjust {
+    width: calc(100% - 40px);
     padding: 16px;
     padding-bottom: 0px;
     border: 4px solid black;
 }
 #filterAdjustSliders {
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(6, auto);
+    grid-template-columns: auto 1fr auto 1fr;
     grid-template-rows: repeat(6, 24px);
 }
 #filterAdjustIndicators {
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(2, auto);
     grid-template-rows: repeat(2, 24px);
+    grid-auto-flow: column;
 }
 .slider {
     appearance: none;
-    width: 196px;
     height: 10px;
     background-color: lightgray;
     border: 2px solid black;
-    margin-left: 4px;
-    margin-right: 4px;
+    margin-right: 8px;
 }
 .slider::-webkit-slider-thumb {
     appearance: none;
