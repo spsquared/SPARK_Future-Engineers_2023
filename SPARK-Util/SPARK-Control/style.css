@@ -6,6 +6,7 @@ div {
 }
 img {
     -webkit-user-drag: none;
+    image-rendering: pixelated;
 }
 
 .largeButton {
@@ -23,11 +24,14 @@ img {
 }
 
 #leftPane {
+    display: grid;
+    grid-template-columns: 1fr;
     position: absolute;
     top: 0px;
     left: 0px;
     width: calc(100vw - min(80vw, 100vh));
     height: 100vh;
+    container-type: size;
     background-color: lightgrey;
 }
 #rightPane {
@@ -38,6 +42,23 @@ img {
     height: 100vh;
     background-color: #444;
 }
+
+#logo {
+    display: inline-block;
+    width: min(100px, calc(20vw - 16px));
+    margin: 8px;
+}
+#banner {
+    display: inline-block;
+    height: 100px;
+    margin-bottom: 8px;
+}
+@container (max-width: 508px) {
+    #banner {
+        display: none;
+    }
+}
+
 #dropdown {
     position: absolute;
     top: 0px;
@@ -71,7 +92,6 @@ img {
     transform: translateY(0);
     --tabImage: url(./assets/arrow-up.svg);
 }
-
 
 #map {
     position: absolute;

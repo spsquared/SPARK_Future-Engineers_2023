@@ -9,11 +9,13 @@ import numpy
 
 # wrapper for camera functions
 
+imageWidthRaw = 544
+imageHeightRaw = 308
 imageWidth = 272
 imageHeight = 154
 
-camera0 = CSICamera(capture_device=0, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
-camera1 = CSICamera(capture_device=1, width=imageWidth, height=imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
+camera0 = CSICamera(capture_device=0, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
+camera1 = CSICamera(capture_device=1, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
 running = True
 currentImages = [[[[]]], [[[]]]]
 thread = None
@@ -26,8 +28,8 @@ def __capture():
         # update loop that constantly updates the most recent image which can be read at any time
         while running:
             start = time.time()
-            currentImages[0] = undistort(camera0.value)
-            currentImages[1] = undistort(camera1.value)
+            currentImages[0] = downscale(undistort(camera0.value))
+            currentImages[1] = downscale(undistort(camera1.value))
             time.sleep(max(0.02-(time.time()-start), 0))
     except Exception as err:
         print(err)
@@ -48,6 +50,8 @@ def read():
 
 def undistort(img: numpy.ndarray):
     return img
+def downscale(img: numpy.ndarray):
+    return cv2.resize(img, (imageWidth, imageHeight), interpolation=cv2.INTER_NEAREST)
 
 # single image save
 def capture(converter = None, server = None):
