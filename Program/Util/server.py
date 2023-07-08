@@ -24,5 +24,3 @@ def emit(ev: str, data):
 @__socket.event
 def disconnect():
     print('disconnected')
-
-open()
