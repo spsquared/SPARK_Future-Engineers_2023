@@ -87,7 +87,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # get wall heights by finding the bottom edge of the wall
     rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
-
+    
     def rawToCartesian(a, dir):
         #need   focal length  fix
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
