@@ -1,6 +1,13 @@
 <div align=center>
 
 ![banner](./img/banner.png)
+![banner](./img/blue_banner.png)
+![banner](./img/redBanner.png)
+![banner](./img/YellowBanner.png)
+![banner](./img/GREENbANNER.png)
+![banner](./img/orange-banner.png)
+![banner](./img/cERULEANbANNER.png)
+![banner](./img/Purple%20Banner.png)
 
 </div>
 
