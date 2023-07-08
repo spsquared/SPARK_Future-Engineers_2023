@@ -1,6 +1,7 @@
 from IO import io
 from Util import server
 from Controller import driver
+from Controller import converter
 from threading import Thread
 import cv2
 import time
@@ -18,27 +19,27 @@ streaming2 = False
 def main():
     global running
     try:
-        io.setStatusBlink(2)
         server.open()
+        io.setStatusBlink(2)
         def drive(data):
             io.drive.throttle(data['throttle'])
             io.drive.steer(data['steering'])
         def capture(data):
-            io.camera.capture(server=server)
+            io.camera.capture(True)
         def captureStream(data):
             if data['state'] == True:
-                io.camera.startSaveStream(server=server)
+                io.camera.startSaveStream(True)
             else:
-                io.camera.stopSaveStream(server)
+                io.camera.stopSaveStream(True)
         def captureFilter(data):
-            filter.setColors(data, server=server)
-            io.camera.capture(filter=filter, server=server)
+            converter.setColors(data, True)
+            io.camera.capture(True, True)
         def captureFilterStream(data):
-            filter.setColors(data['colors'])
+            converter.setColors(data['colors'])
             if data['state'] == True:
-                io.camera.startSaveStream(filter=filter, server=server)
+                io.camera.startSaveStream(True, True)
             else:
-                io.camera.stopSaveStream(server)
+                io.camera.stopSaveStream(True)
         def stream(data):
             global streamThread, streaming
             if data['state'] == True:
@@ -126,26 +127,25 @@ def main():
         def stop(data):
             global running
             running = False
-            io.setStatusBlink(0)
-            server.close()
-            io.close()
             print('stopped by emergency stop button')
-            exit(0)
         server.on('stop', stop)
         while running:
             msg = input()
             if msg == 'reset':
                 server.emit('colors', filter.setDefaultColors())
+            elif msg == 'stop':
+                break
             elif msg != '':
                 server.emit('message', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
-        running = False
-        server.close()
-        io.close()
     except Exception as err:
+        print('---------------------- AN ERROR OCCURED ----------------------')
         print(err)
         io.error()
+    running = False
+    server.close()
+    io.close()
 
 if __name__ == '__main__':
     main()

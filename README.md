@@ -126,7 +126,14 @@ We used Jetson Nano's operating system, which is Ubuntu 18.04. It has been chang
 
 ## **Programming Language**
 
-All our code is in python (except the SPARK Control Panel and SPARK Randomizer, those are HTML/JS/CSS applications used for development). We use the following packages: ***add list***.
+All our code is in python (except the SPARK Control Panel and SPARK Randomizer, those are HTML/JS/CSS applications used for development).
+
+Dependencies:
+* Jetson-GPIO
+* numpy
+* cv2
+* adafruit-servokit
+* python-socketio
 
 The **entire** `Program` directory must be uploaded in order for the program to run. Make sure the directory in `path` in `/Program/IO/io.py` is set correctly (you can use any existing directory with a `lock.txt`, but the uploaded folder is recommended)
 

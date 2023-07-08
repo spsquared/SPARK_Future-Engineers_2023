@@ -66,6 +66,8 @@ function connect() {
 };
 window.addEventListener('load', connect);
 
+socket.on('pong', () => console.log('PING REPLY'));
+
 // messages
 const pendingsounds = [];
 let first = true;

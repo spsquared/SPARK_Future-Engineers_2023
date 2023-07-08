@@ -2,13 +2,22 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const server2 = require('http').Server(app);
+const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const { Server: SocketIO } = require('socket.io');
+const limiter = rateLimit({
+    windowMs: 250,
+    max: 25,
+    handler: function (req, res, options) {
+        console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
+    }
+});
 
 app.use(cors({
     origin: '*',
     methods: ['GET']
 }));
+app.use(limiter);
 app.get('/', (req, res) => res.send('OK'));
 
 const hostio = new SocketIO(server);
@@ -30,6 +39,7 @@ hostio.on('connection', (socket) => {
         socket.onevent = (packet) => {};
         return;
     }
+    console.log('Connection from server');
     hostConnectionCount++;
     socket.on('disconnect', () => hostConnectionCount--);
     socket.on('timeout', () => hostConnectionCount--);
@@ -39,10 +49,10 @@ hostio.on('connection', (socket) => {
         hostio.emit('multipleHosts');
     }
     socket.onAny((event, ...args) => { // python socketio only allows 1 argument but sure
-        io.emit(event, ...args);
         if (event === 'data') {
             // store in recentData
         }
+        io.emit(event, ...args);
     });
 });
 io.on('connection', (socket) => {
@@ -55,6 +65,7 @@ io.on('connection', (socket) => {
             socket.onevent = (packet) => {};
             return;
         }
+        console.log('Connection from client');
         socket.on('error', (err) => console.log(err));
         const onevent = socket.onevent;
         socket.onevent = (packet) => {

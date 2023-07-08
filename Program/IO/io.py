@@ -47,7 +47,7 @@ def close():
         if borked:
             borkedThread.join()
         blinkThread.join()
-        GPIO.output([11, 13], GPIO.LOW)
+        GPIO.output([__ledGreen, __ledRed], GPIO.LOW)
         time.sleep(0.1)
         GPIO.cleanup()
         return True
