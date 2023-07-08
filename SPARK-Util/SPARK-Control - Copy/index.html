@@ -28,6 +28,7 @@
     <title>SPARK Control Panel</title>
     <link rel="icon" href="./favicon.png" type="image/png">
     <link rel="stylesheet" href="./style.css">
+    <script src="./socket.io.min.js"></script>
     <script src="./index.js" defer></script>
 </head>
 <body>
@@ -49,150 +50,8 @@
         <button id="predictionButton" class="largeButton">VIEW PREDICTION</button>
     </div>
     <div id="filterAdjust">
-        <div style="font-size: 32px; font-weight: bold;">Adjust Filter</div>
-        <div style="font-size: 8px; font-weight: lighter; color: grey;">"Min" and "Max" do not refer to actual minimums and maximums - they refer to the bounds that the color values must be within to be considered.</div>
-        <table>
-            <tbody>
-                <tr>
-                    <td></td>
-                    <td>Red HSV</td>
-                    <td></td>
-                    <td>Green HSV</td>
-                    <td></td>
-                    <td>Blue HSV</td>
-                </tr>
-                <tr>
-                    <td>H max</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="redHMax" oninput="updateSlider(0);">
-                    </td>
-                    <td>H max</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="greenHMax" oninput="updateSlider(1);">
-                    </td>
-                    <td>H max</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="blueHMax" oninput="updateSlider(2);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>S max</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="redSMax" oninput="updateSlider(3);">
-                    </td>
-                    <td>S max</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="greenSMax" oninput="updateSlider(4);">
-                    </td>
-                    <td>S max</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="blueSMax" oninput="updateSlider(5);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>V max</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="redVMax" oninput="updateSlider(6);">
-                    </td>
-                    <td>V max</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="greenVMax" oninput="updateSlider(7);">
-                    </td>
-                    <td>V max</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="blueVMax" oninput="updateSlider(8);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>H min</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="redHMin" oninput="updateSlider(9);">
-                    </td>
-                    <td>H min</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="greenHMin" oninput="updateSlider(10);">
-                    </td>
-                    <td>H min</td>
-                    <td>
-                        <input type="range" class="slider sliderH" min="0" max="180" step="2" id="blueHMin" oninput="updateSlider(11);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>S min</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="redSMin" oninput="updateSlider(12);">
-                    </td>
-                    <td>S min</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="greenSMin" oninput="updateSlider(13);">
-                    </td>
-                    <td>S min</td>
-                    <td>
-                        <input type="range" class="slider sliderS" min="0" max="255" step="5" id="blueSMin" oninput="updateSlider(14);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>V min</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="redVMin" oninput="updateSlider(15);">
-                    </td>
-                    <td>V min</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="greenVMin" oninput="updateSlider(16);">
-                    </td>
-                    <td>V min</td>
-                    <td>
-                        <input type="range" class="slider sliderV" min="0" max="255" step="5" id="blueVMin" oninput="updateSlider(17);">
-                    </td>
-                </tr>
-                <tr>
-                    <td>Max:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="redHMaxindicator">0</span>
-                        <span id="redSMaxindicator">0</span>
-                        <span id="redVMaxindicator">0</span>
-                    </td>
-                    <td>Max:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="greenHMaxindicator">0</span>
-                        <span id="greenSMaxindicator">0</span>
-                        <span id="greenVMaxindicator">0</span>
-                    </td>
-                    <td>Max:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="blueHMaxindicator">0</span>
-                        <span id="blueSMaxindicator">0</span>
-                        <span id="blueVMaxindicator">0</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Min:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="redHMinindicator">0</span>
-                        <span id="redSMinindicator">0</span>
-                        <span id="redVMinindicator">0</span>
-                    </td>
-                    <td>Min:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="greenHMinindicator">0</span>
-                        <span id="greenSMinindicator">0</span>
-                        <span id="greenVMinindicator">0</span>
-                    </td>
-                    <td>Min:</td>
-                    <td>
-                        <span>HSV: </span>
-                        <span id="blueHMinindicator">0</span>
-                        <span id="blueSMinindicator">0</span>
-                        <span id="blueVMinindicator">0</span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="filterAdjustSliders"></div>
+        <div id="filterAdjustIndicators"></div>
     </div>
     <div id="captureDisplay">
         <button id="displayBack" onclick="displayBack();">&#60</button>
@@ -284,11 +143,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div id="joystick">
-        <div id="joystickPin"></div>
-        <div id="sliderX"></div>
-        <div id="sliderY"></div>
     </div>
     <canvas id="logocanvas"></canvas>
     <script src="./../logoIntro.js"></script>

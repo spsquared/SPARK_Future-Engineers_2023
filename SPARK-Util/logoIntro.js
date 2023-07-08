@@ -81,6 +81,7 @@ logotext.onload = () => {
                     fadeX = 0;
                     fadeY = -0.1;
                     fadeXSpeed = -0.01;
+                    cameraShake = 0;
                 } else {
                     clearInterval(logodraw);
                     logocanvas.remove();

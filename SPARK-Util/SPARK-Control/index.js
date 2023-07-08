@@ -1,13 +1,23 @@
 window.addEventListener('error', (e) => {
     appendLog(`An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
-const ip = '192.168.1.151';
+
+const initcolors = [
+    [
+        [ 25, 255, 255 ],
+        [ 0, 95, 75 ]
+    ],
+    [
+        [ 110, 255, 255 ],
+        [ 30, 30, 40 ]
+    ],
+];
+
 const socket = io(ip + ':4040', {
+    autoConnect: false,
     reconnection: false
 });
 
-const log = document.getElementById('eventLogBody');
-const callbacks = [];
 let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
@@ -24,15 +34,37 @@ let ondisconnect = () => {
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
 socket.on('error', ondisconnect);
+socket.on('authenticate', () => {
+    socket.emit('authenticateResponse', auth_uuid);
+});
 function reconnect(force) {
     if (toReconnect || force) {
         toReconnect = false;
         autoReconnect = true;
         document.querySelectorAll('.connectNow').forEach(button => button.remove());
         appendLog('Attempting to reconnect...');
-        socket.connect();
+        connect();
     }
 };
+function connect() {
+    const req = new XMLHttpRequest();
+    req.open('GET', `http://${ip}:4040`);
+    req.onload = (res) => {
+        if (req.status != 200) {
+            req.onerror();
+            return;
+        }
+        if (!socket.connected) socket.connect();
+    };
+    req.onerror = (err) => {
+        connected = false;
+        if (autoReconnect) toReconnect = true;
+        appendLog('Connection failed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
+        setTimeout(reconnect, 10000);
+    };
+    req.send();
+};
+window.addEventListener('load', connect);
 
 // messages
 const pendingsounds = [];
@@ -59,6 +91,7 @@ async function playSound() {
         pendingsounds.push(ping);
     });
 };
+const log = document.getElementById('log');
 function appendLog(text, color) {
     const div = document.createElement('div');
     div.classList.add('logBlock');
@@ -75,48 +108,47 @@ socket.on('message', (data) => {
 });
 
 // manual driving
-let keyboard = {
-    foward: 0, // oops
+const controls = {
+    forward: 0,
     backward: 0,
     left: 0,
-    right: 0
+    right: 0,
+    throttle: 0,
+    steering: 0,
+    trim: 0.05
 };
 document.onkeydown = function (e) {
     switch (e.key.toLowerCase()) {
         case 'w':
-            keyboard.foward = 100;
+            controls.forward = 100;
             break;
         case 's':
-            keyboard.backward = -100;
+            controls.backward = -100;
             break;
         case 'a':
-            keyboard.left = -100;
+            controls.left = -100;
             break;
         case 'd':
-            keyboard.right = 100;
+            controls.right = 100;
             break;
     }
 };
 document.onkeyup = function (e) {
     switch (e.key.toLowerCase()) {
         case 'w':
-            keyboard.foward = 0;
+            controls.forward = 0;
             break;
         case 's':
-            keyboard.backward = -0;
+            controls.backward = -0;
             break;
         case 'a':
-            keyboard.left = -0;
+            controls.left = -0;
             break;
         case 'd':
-            keyboard.right = 0;
+            controls.right = 0;
             break;
     }
 };
-let throttle = 0;
-let steering = 0;
-let trim = 0;
-let trim2 = 0.05;
 let pressedbuttons = [];
 function updateControllers() {
     let controllers = navigator.getGamepads();
@@ -124,7 +156,7 @@ function updateControllers() {
         if (controllers[i] instanceof Gamepad) {
             let controller = controllers[i];
             throttle = Math.round(controller.axes[1] * -100);
-            steering = Math.round((controller.axes[2] - trim2) * 100) - trim;
+            steering = Math.round((controller.axes[2] - controls.trim) * 100);
             if (controller.buttons[8].pressed && pressedbuttons.indexOf(8) == -1) {
                 if (controller.buttons[7].pressed) document.getElementById('captureFilterButton').click();
                 else document.getElementById('captureButton').click();
@@ -161,67 +193,37 @@ function updateControllers() {
     }
 };
 setInterval(function () {
-}, 25);
-setInterval(function () {
     updateControllers();
-    if (keyboard.foward || keyboard.backward || keyboard.left || keyboard.right) {
-        send('drive', { throttle: keyboard.foward + keyboard.backward, steering: keyboard.left + keyboard.right });
-    } else if (throttle != 0 || steering != 0) {
-        send('drive', { throttle: throttle, steering: steering });
+    if (controls.forward || controls.backward || controls.left || controls.right) {
+        send('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
+    } else if (controls.throttle != 0 || controls.steering != 0) {
+        send('drive', { throttle: controls.throttle, steering: controls.steering });
     }
 }, 50);
-
-// capture
-document.getElementById('captureButton').onclick = function (e) {
-    socket.emit('capture');
-};
-let streaming = false;
-document.getElementById('captureStreamButton').onclick = function (e) {
-    streaming = !streaming;
-    socket.emit('captureStream', streaming);
-    if (streaming) {
-        document.getElementById('captureStreamButton').innerText = 'STOP CAPTURE STREAM';
-        document.getElementById('captureStreamButton').style.backgroundColor = 'lightcoral';
-    } else {
-        document.getElementById('captureStreamButton').innerText = 'START CAPTURE STREAM';
-        document.getElementById('captureStreamButton').style.backgroundColor = 'lightgreen';
-    }
-};
-document.getElementById('captureFilterButton').onclick = function (e) {
-    let arr = [];
-    for (let i in sliders) {
-        arr.push(sliders[i].value);
-    }
-    socket.emit('captureFilter', arr);
-};
-let filterstreaming = false;
-document.getElementById('captureFilterStreamButton').onclick = function (e) {
-    let arr = [];
-    for (let i in sliders) {
-        arr.push(sliders[i].value);
-    }
-    filterstreaming = !filterstreaming;
-    socket.emit('captureFilterStream', { colors: arr, state: filterstreaming });
-    if (filterstreaming) {
-        document.getElementById('captureFilterStreamButton').innerText = 'STOP FILTERED CAPTURE STREAM';
-        document.getElementById('captureFilterStreamButton').style.backgroundColor = 'lightcoral';
-    } else {
-        document.getElementById('captureFilterStreamButton').innerText = 'START FILTERED CAPTURE STREAM';
-        document.getElementById('captureFilterStreamButton').style.backgroundColor = 'lightgreen';
-    }
-};
 
 // filter adjuster
 let sliders = [];
 const filterAdjust = document.getElementById('filterAdjust');
+const filterAdjustSliders = document.getElementById('filterAdjustSliders');
+const filterAdjustIndicators = document.getElementById('filterAdjustIndicators');
 // this is arguably worse than the hard coded tables
 {
+    let indicators = {
+        red: {
+            Max: [],
+            Min: []
+        },
+        green: {
+            Max: [],
+            Min: []
+        },
+    };
     let i = 0;
     let minmax = 'Max';
     let l1 = () => {
         let hsv = 'H';
         let max = 180;
-        let step = 2;
+        let step = 1;
         let l2 = () => {
             let color = 'red';
             let l3 = () => {
@@ -229,19 +231,25 @@ const filterAdjust = document.getElementById('filterAdjust');
                 slider.type = 'range';
                 slider.classList.add('slider');
                 slider.classList.add('slider' + hsv);
+                slider.id = color + hsv + minmax;
                 slider.min = 0;
                 slider.max = max;
                 slider.step = step;
-                slider.oninput = updateSlider(i++);
+                let j = i;
+                slider.oninput = () => updateSlider(j);
                 sliders.push(slider);
-                filterAdjust.appendChild(slider);
+                const label = document.createElement('span');
+                label.innerHTML = hsv + '&nbsp;' + minmax;
                 const indicator = document.createElement('span');
-                indicator.id = color + hsv + minmax + 'indicator';
+                indicator.id = color + hsv + minmax + 'Indicator';
+                indicator.style.marginRight = '4px';
+                filterAdjustSliders.appendChild(label);
+                filterAdjustSliders.appendChild(slider);
+                indicators[color][minmax].push(indicator);
+                i++;
             };
             l3();
             color = 'green';
-            l3();
-            color = 'blue';
             l3();
         };
         l2();
@@ -255,16 +263,29 @@ const filterAdjust = document.getElementById('filterAdjust');
     l1();
     minmax = 'Min';
     l1();
+    for (let a in indicators) {
+        for (let b in indicators[a]) {
+            const block = document.createElement('div');
+            block.style.width = '100px';
+            const label = document.createElement('span');
+            label.innerHTML = '&nbsp;&nbsp;' + b + ':&nbsp;';
+            block.appendChild(label);
+            for (let c in indicators[a][b]) {
+                block.appendChild(indicators[a][b][c]);
+            }
+            filterAdjustIndicators.appendChild(block);
+        }
+    }
 }
 function updateSlider(i) {
-    document.getElementById(sliders[i].id + 'indicator').innerText = sliders[i].value;
+    document.getElementById(sliders[i].id + 'Indicator').innerText = sliders[i].value;
     if (sliders[i].id.includes('H')) {
         sliders[i].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 3].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 6].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 2].style.setProperty('--hue', sliders[i].value * 2);
+        sliders[i + 4].style.setProperty('--hue', sliders[i].value * 2);
     } else if (sliders[i].id.includes('S')) {
         sliders[i].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
-        sliders[i + 3].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
+        sliders[i + 2].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
     } else if (sliders[i].id.includes('V')) {
         sliders[i].style.setProperty('--value', sliders[i].value * (50 / 255) + '%');
     }
@@ -275,428 +296,27 @@ function setColors(colors) {
         updateSlider(parseInt(i));
     }
 };
-socket.on('colors', setColors);
-
-// non capture streams and iamges
-document.getElementById('viewButton').onclick = function (e) {
-    send('view', {});
-};
-document.getElementById('viewFilterButton').onclick = function (e) {
-    let arr = [];
-    for (let i in sliders) {
-        arr.push(sliders[i].value);
-    }
-    send('viewFilter', arr)
-};
-let streaming2 = false;
-let filterstreaming2 = false;
-document.getElementById('streamButton').onclick = function (e) {
-    streaming2 = !streaming2;
-    send('stream', { state: streaming2 });
-    if (streaming2) {
-        document.getElementById('streamButton').innerText = 'STOP STREAM';
-        document.getElementById('streamButton').style.backgroundColor = 'lightcoral';
-    } else {
-        document.getElementById('streamButton').innerText = 'START STREAM';
-        document.getElementById('streamButton').style.backgroundColor = 'lightgreen';
-    }
-};
-document.getElementById('filterStreamButton').onclick = function (e) {
-    filterstreaming2 = !filterstreaming2;
-    let arr = [];
-    for (let i in sliders) {
-        arr.push(sliders[i].value);
-    }
-    send('filterstream', { colors: arr, state: filterstreaming2 });
-    if (filterstreaming2) {
-        document.getElementById('filterStreamButton').innerText = 'STOP FILTERED STREAM';
-        document.getElementById('filterStreamButton').style.backgroundColor = 'lightcoral';
-    } else {
-        document.getElementById('filterStreamButton').innerText = 'START FILTEREDSTREAM';
-        document.getElementById('filterStreamButton').style.backgroundColor = 'lightgreen';
-    }
-};
-
-// prediction view
-document.getElementById('predictionButton').onclick = function (e) {
-    send('prediction', {});
-};
-
-// bad coding practices
-let initcolors = [
-    [
-        25, 255, 255,
-        0, 95, 75
-    ],
-    [
-        110, 255, 255,
-        30, 30, 40
-    ],
-    [
-        140, 255, 255,
-        90, 80, 70
-    ],
-];
-sliders[0].value = initcolors[0][0];
-sliders[1].value = initcolors[1][0];
-sliders[2].value = initcolors[2][0];
-sliders[3].value = initcolors[0][1];
-sliders[4].value = initcolors[1][1];
-sliders[5].value = initcolors[2][1];
-sliders[6].value = initcolors[0][2];
-sliders[7].value = initcolors[1][2];
-sliders[8].value = initcolors[2][2];
-sliders[9].value = initcolors[0][3];
-sliders[10].value = initcolors[1][3];
-sliders[11].value = initcolors[2][3];
-sliders[12].value = initcolors[0][4];
-sliders[13].value = initcolors[1][4];
-sliders[14].value = initcolors[2][4];
-sliders[15].value = initcolors[0][5];
-sliders[16].value = initcolors[1][5];
-sliders[17].value = initcolors[2][5];
-for (let i in sliders) {
-    updateSlider(parseInt(i));
-}
-
-// capture display
-let maxHistory = 1000;
-let data = 0;
-const history = [];
-let index = 0;
-let lefting = false;
-let righting = false;
-let fasting = false;
-let slowing = false;
-const fpsTimes = [];
-const displayImg = document.getElementById('displayImg');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext("2d");
-const canvas2 = document.getElementById('canvas2');
-const ctx2 = canvas2.getContext("2d");
-const historySlider = document.getElementById('historySlider');
-const FPS = document.getElementById('fps');
-const strPredict = document.getElementById('strPredict');
-const wallStrPredict = document.getElementById('wallStrPredict');
-const pillarStrPredict = document.getElementById('pillarStrPredict');
-const strReason = document.getElementById('strReason');
-const wallHeightLeft = document.getElementById('wallHeightLeft');
-const wallHeightCenter = document.getElementById('wallHeightCenter');
-const wallHeightRight = document.getElementById('wallHeightRight');
-const turnsMade = document.getElementById('turnsMade');
-const turnCooldown = document.getElementById('turnCooldown');
-const justTurned = document.getElementById('justTurned');
-const passedPillar = document.getElementById('passedPillar');
-canvas.width = 272;
-canvas.height = 154;
-canvas2.width = 272;
-canvas2.height = 154;
-let displayTimer = 0;
-let drawn = false;
-let displayDelay = 5;
-window.onresize = () => {
-    canvas.width = 272;
-    canvas.height = 154;
-    canvas2.width = 272;
-    canvas2.height = 154;
-    displayChange();
-    // imgRenderCanvas.width = 272;
-    // imgRenderCanvas.height = 154;
-};
-function addCapture(img) {
-    ctx.clearRect(0, 0, 272, 154);
-    const tempImg = new Image();
-    tempImg.src = 'data:image/png;base64,' + img[0];
-    tempImg.onload = () => {
-        ctx.drawImage(tempImg, 0, 0);
-        const tempImg2 = new Image();
-        tempImg2.src = 'data:image/png;base64,' + img[1];
-        tempImg2.onload = () => {
-            ctx.globalAlpha = 0.5;
-            ctx.drawImage(tempImg2, 0, 0);
-            ctx.globalAlpha = 1;
-            history.unshift({
-                // img: 'data:image/png;base64,' + img,
-                img: canvas.toDataURL('image/png'),
-                blobs: [[], [], [], []],
-                steer: [0, 'none', 0, 0],
-                wall: {
-                    heights: []
-                },
-                turns: [false, 0, 0],
-                passed: 0
-            });
-            index = 0;
-            if (history.length > maxHistory) {
-                history.pop();
-            }
-            historySlider.max = history.length;
-            historySlider.value = history.length;
-            displayTimer = performance.now();
-            drawn = false;
-        
-            let now = performance.now();
-            while (fpsTimes.length > 0 && fpsTimes[0] <= now - 1000) {
-                fpsTimes.shift();
-            }
-            fpsTimes.push(now);
-            FPS.innerHTML = 'FPS: ' + fpsTimes.length;
-        };
-    };
-};
-function addBlobs(data) {
-    index = 0;
-    history[index].blobs = data;
-    if (history.length > maxHistory) {
-        history.pop();
-    }
-    displayTimer = performance.now();
-    drawn = false;
-};
-function drawBlobs() {
-    let data = history[index].blobs;
-    ctx.clearRect(0, 0, 272, 154);
-    for (let i of data[1]) {
-        drawLightBlob(i, 0);
-    }
-    for (let i of data[3]) {
-        drawLightBlob(i, 1);
-    }
-    drawBlob(data[0], 0);
-    drawBlob(data[2], 1);
-};
-function drawBlob(blob, blobColor) {
-    if (!blob) {
-        return;
-    }
-    ctx.beginPath();
-    if (blobColor === 0) {
-        ctx.strokeStyle = "#f00";
-        ctx.fillStyle = "#F005";
-    }
-    else {
-        ctx.strokeStyle = "#0f0"
-        ctx.fillStyle = "#0F05";
-    }
-    ctx.arc(blob[0], blob[1], blob[2] * 2, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-};
-function drawLightBlob(blob, blobColor) {
-    if (!blob) {
-        return;
-    }
-    ctx.beginPath();
-    if (blobColor === 0) {
-        ctx.strokeStyle = "#f00";
-        ctx.fillStyle = "#F005";
-    }
-    else {
-        ctx.strokeStyle = "#0f0"
-        ctx.fillStyle = "#0F05";
-    }
-    ctx.arc(blob[0], blob[1], blob[2] * 2, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-};
-function addData(data) {
-    index = 0;
-    // steering data
-    history[index].steer = data[0];
-    // wall data
-    for (var i = 0; i < 8; i += 1) {
-        history[index].wall.heights[i] = JSON.parse(data[1][i]);
-    }
-    // history[index].wall[0] = parseFloat(data[1]);
-    // history[index].wall[1] = parseFloat(data[2]);
-    // history[index].wall[2] = parseFloat(data[3]);
-    // history[index].wall[3] = JSON.parse(data[4]);
-    // history[index].wall[4] = JSON.parse(data[5]);
-    // history[index].wall[5] = JSON.parse(data[6]);
-    // history[index].wall[6] = JSON.parse(data[7]);
-    // history[index].wall[7] = JSON.parse(data[8]);
-    // history[index].wall[8] = JSON.parse(data[9]);
-    // turn data
-    // if (data[10][0] == 'True') data[10][0] = true;
-    // else if (data[10][0] == 'False') data[10][0] = false;
-    // data[10][1] = parseInt(data[10][1]);
-    // data[10][2] = parseInt(data[10][2]);
-    // history[index].turns = data[10];
-    // // pass data
-    // history[index].passed = parseInt(data[11]);
-    if (history.length > maxHistory) {
-        history.pop();
-    }
-    displayTimer = performance.now();
-    drawn = false;
-};
-function showPredictions() {
-    let data = history[index].steer;
-    strPredict.innerText = 'Final Steering: ' + Math.round(data[0]);
-    strReason.innerText = data[1];
-    wallStrPredict.innerText = 'Wall Steering: ' + Math.round(data[2]);
-    pillarStrPredict.innerText = 'Pillar Steering: ' + Math.round(data[3]);
-};
-function showWallData() {
-    let data = history[index].wall.heights;
-    if (data.length === 0) {
-        return;
-    }
-    canvas2.width = 272;
-    canvas2.height = 154;
-    ctx2.clearRect(0, 0, 272, 154);
-    ctx2.fillStyle = '#FFF9';
-    for (let i = 0; i < 8; i++) {
-        for (var j = 0; j < 34; j++) {
-            try {
-                ctx2.fillRect(i * 34 + j, 78, 1, data[i][j]);
-            }
-            catch (err) {
-                appendLog("'data'", '#c4c4c4');
-            }
+{
+    let k = 0;
+    for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 6; j++) {
+            sliders[k++].value = initcolors[j % 2][i][j % 3];
         }
     }
-    // wallHeightLeft.innerText = 'L: ' + data[0];
-    // wallHeightCenter.innerText = 'C: ' + data[1];
-    // wallHeightRight.innerText = 'R: ' + data[2];
-};
-function showTurnPassData() {
-    let data = history[index].turns;
-    justTurned.innerText = data[0];
-    turnCooldown.innerText = data[1];
-    turnsMade.innerText = data[2];
-    passedPillar.innerText = history[index].passed;
-};
-function displayBack() {
-    index = Math.min(index + 1, history.length - 1);
-    historySlider.max = history.length;
-    historySlider.value = history.length - index;
-    displayTimer = performance.now();
-    drawn = false;
-};
-function displayFront() {
-    index = Math.max(index - 1, 0);
-    historySlider.max = history.length;
-    historySlider.value = history.length - index;
-    displayTimer = performance.now();
-    drawn = false;
-};
-function displayChange() {
-    historySlider.max = history.length;
-    index = history.length - parseInt(historySlider.value);
-    if (history[index]) {
-        displayImg.src = history[index].img;
-        drawBlobs();
-        showWallData();
-        showPredictions();
-        showTurnPassData();
+    for (let i in sliders) {
+        updateSlider(parseInt(i));
     }
-};
-function downloadFrame() {
-    const downloadCanvas = document.createElement('canvas');
-    downloadCanvas.width = 272;
-    downloadCanvas.height = 154;
-    const downloadctx = downloadCanvas.getContext('2d');
-    downloadctx.drawImage(displayImg, 0, 0);
-    downloadctx.drawImage(canvas, 0, 0);
-    downloadctx.drawImage(canvas2, 0, 0);
-    // set data
-    let data = downloadCanvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = data;
-    let current = new Date();
-    a.download = `SPARK-img_${current.getHours()}-${current.getMinutes()}_${current.getMonth()}-${current.getDay()}-${current.getFullYear()}.png`;
-    a.click();
-};
-function downloadSession() {
-    // data...
-    const data = 'data:text/json;charset=UTF-8,' + encodeURIComponent(JSON.stringify(history));
-    const a = document.createElement('a');
-    a.href = data;
-    let current = new Date();
-    a.download = `SPARK-data_${current.getHours()}-${current.getMinutes()}_${current.getMonth()}-${current.getDay()}-${current.getFullYear()}.json`;
-    a.click();
-};
-function importSession() {
-    // create file input
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.click();
-    input.oninput = () => {
-        // read files
-        let files = input.files;
-        if (files.length == 0) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            // set history
-            let raw = JSON.parse(e.target.result);
-            history.splice(0, history.length);
-            for (let i in raw) {
-                history.push(raw[i]);
-            }
-            historySlider.max = 0;
-            displayChange();
-        };
-        reader.readAsText(files[0]);
-    };
-};
-socket.on('capture', addCapture);
-socket.on('blobs', addBlobs);
-socket.on('values', addData);
-setInterval(() => {
-    while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
-    FPS.innerHTML = 'FPS: ' + fpsTimes.length;
-}, 1000);
-setInterval(() => {
-    if (performance.now() - displayTimer >= displayDelay && !drawn) {
-        drawn = true;
-        displayChange();
-    }
-}, 1);
-document.addEventListener('keydown', (e) => {
-    if (e.key == 'ArrowLeft') {
-        lefting = true;
-    } else if (e.key == 'ArrowRight') {
-        righting = true;
-    } else if (e.key == 'Control') {
-        fasting = true;
-    } else if (e.key == 'Shift') {
-        slowing = true;
-    } else if (e.key.toLowerCase() == 's' && e.ctrlKey) {
-        downloadSession();
-        e.preventDefault();
-    } else if (e.key.toLowerCase() == 'o' && e.ctrlKey) {
-        importSession();
-        e.preventDefault();
-    }
-});
-document.addEventListener('keyup', (e) => {
-    if (e.key == 'ArrowLeft') {
-        lefting = false;
-    } else if (e.key == 'ArrowRight') {
-        righting = false;
-    } else if (e.key == 'Control') {
-        fasting = false;
-    } else if (e.key == 'Shift') {
-        slowing = false;
-    }
-});
-let timer = 0;
-setInterval(() => {
-    timer++;
-    if ((slowing && timer > 10) || (!slowing && timer > 2) || fasting) {
-        timer = 0;
-        if (lefting) displayBack();
-        if (righting) displayFront();
-    }
-}, 10);
-document.getElementById('displayBlock').onfullscreenchange = displayChange;
+}
+socket.on('colors', setColors);
 
 // stop
 document.getElementById('emergencyStop').onclick = () => {
     send('stop', {});
 };
+document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
+});
+
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {
     socket.close();
@@ -779,9 +399,6 @@ document.getElementById('disconnect').onclick = async () => {
         document.getElementById('disconnect').click();
     };
 };
-document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
-});
 
 // errors
 window.onerror = function (err) {

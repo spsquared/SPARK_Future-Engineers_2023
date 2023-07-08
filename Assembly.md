@@ -136,13 +136,42 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
 
 Reboot the Jetson NANO again
 
-### Setup for Debugging Server
+### Setup for SPARK Control Panel
 
-SPARK uses a debugging server for quick development and real-time monitoring. It runs on a separate Node.js process and is not needed. If you want access to the SPARK Control Panel you must install Node.js and install the dependencies.
+SPARK uses a debugging server (SPARK Control Panel) for quick development and real-time monitoring. It runs on a separate Node.js process and is not needed. If you want access to the SPARK Control Panel you must install Node.js and dependencies.
 
 ```
 sudo apt install nodejs
 ```
+
+Navigate to `/Util/` and install dependencies.
+
+```
+npm install
+```
+
+For the authentication system to work properly (not actual authentication, just a UUID exchange to prevent people from sending bogus signals) `auth.json` must be created in `/Util/`.
+
+```
+vim auth.json
+```
+
+The contents should be a single UUID:
+
+```
+"214e7634-b7c3-4044-b297-533da8cfbe7f"
+```
+
+This UUID should also be present on client devices, along with the IP of the car (set earlier). On the client devices, create `/SPARK-Util/SPARK-Control/config.js`.
+
+Example:
+
+```
+const ip = '192.168.1.151';
+const auth_uuid = '214e7634-b7c3-4044-b297-533da8cfbe7f';
+```
+
+To open the SPARK Control Panel and other utilities, use `node SPARK-Util/static.js` or open the batch file `/SPARK-Util/static.bat`. In any web browser (only Chrome tested), navigate to `localhost:8081` to access the SPARK Control Panel.
 
 ### Camera Color Correction
 

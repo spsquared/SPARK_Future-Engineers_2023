@@ -1,4 +1,5 @@
 import numpy
+from IO import io
 import cv2
 import math
 
@@ -18,6 +19,8 @@ imageHeight = 154
 focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
 wallHeight = 10
 centerOffset = 10
+cameraOffsetX = 3
+cameraOffsetY = 10
 
 # create blob detectors
 params = cv2.SimpleBlobDetector_Params()
@@ -32,8 +35,8 @@ params.minInertiaRatio = 0
 blobDetector = cv2.SimpleBlobDetector_create(params)
 
 def filter(imgIn: numpy.ndarray):
-    global redMax, redMin, greenMax, greenMin
     try:
+        global redMax, redMin, greenMax, greenMin
         # convert to HSV
         hsv = cv2.cvtColor(imgIn, cv2.COLOR_BGR2HSV)
         # red filter
@@ -60,12 +63,17 @@ def filter(imgIn: numpy.ndarray):
         # combine images
         return cv2.merge((edgesImage, blurredG, blurredR))
     except Exception as err:
-        print(err)
         io.error()
+        print(err)
 
 # distance scanner
-imgSinAngles = numpy.fromfunction(lambda i: math.sin(60 - math.atan2(((imageWidth / 2) - i) / focalLength)), imageWidth, dtype=float)
-imgCosAngles = numpy.fromfunction(lambda i: math.cos(60 - math.atan2(((imageWidth / 2) - i) / focalLength)), imageWidth, dtype=float)
+imgSinAngles = []
+imgCosAngles = []
+for i in range(imageWidth):
+    imgSinAngles.append(math.sin(60 - math.atan2((imageWidth / 2) - i, focalLength)))
+    imgCosAngles.append(math.cos(60 - math.atan2((imageWidth / 2) - i, focalLength)))
+imgSinAngles = numpy.array(imgSinAngles)
+imgCosAngles = numpy.array(imgCosAngles)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, imgAngles
 
@@ -81,8 +89,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     def rawToCartesian(a, dir):
         #need   focal length  fix
-        dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
-        return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
+        # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
+        # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
+        dist = wallHeight * focalLength / a[0]
+        return (dir * (cameraOffsetX + a[1] * dist), (cameraOffsetY + a[2] * dist), dist)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
@@ -90,24 +100,26 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     return numpy.concatenate((leftCoordinates, rightCoordinates))
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
-    # add borders to fix blob detection
-    blobStart = 79
-    blobEnd = 100 # fix???
-    rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-    gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+    try:
+        # add borders to fix blob detection
+        blobStart = 79
+        blobEnd = 100 # fix???
+        rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
-    blobDetector.empty()
-    rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
-    blobDetector.empty()
-    gLeftBlobs = processBlobs(blobDetector.detect(255 - gLeft))
-    blobDetector.empty()
-    rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
-    blobDetector.empty()
-    gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
-    
-    return [numpy.concatenate(rLeftBlobs, rRightBlobs), numpy.concatenate(gLeftBlobs, gRightBlobs)]
+        blobDetector.empty()
+        rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
+        blobDetector.empty()
+        gLeftBlobs = processBlobs(blobDetector.detect(255 - gLeft))
+        blobDetector.empty()
+        rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
+        blobDetector.empty()
+        gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
+    except Exception as err:
+        io.error()
+        print(err)
 
 def processBlobs(blobs):
     for i in range(len(blobs)):
@@ -115,32 +127,33 @@ def processBlobs(blobs):
     
     return blobs
 
-def getLandmarks
+def getLandmarks(idk):
+    return False
 
-def setColors(data, server = None):
+def setColors(data, sendServer: bool = False):
     global redMax, redMin, greenMax, greenMin
-    redMax = (int(data[0]), int(data[3]), int(data[6]))
-    greenMax = (int(data[1]), int(data[4]), int(data[7]))
-    redMin = (int(data[9]), int(data[12]), int(data[15]))
-    greenMin = (int(data[10]), int(data[13]), int(data[16]))
+    redMax = (int(data[0]), int(data[2]), int(data[4]))
+    greenMax = (int(data[1]), int(data[3]), int(data[5]))
+    redMin = (int(data[6]), int(data[8]), int(data[10]))
+    greenMin = (int(data[7]), int(data[9]), int(data[11]))
     print('-- New ----------')
     print(redMax, redMin)
     print(greenMax, greenMin)
     if server != None:
-        server.broadcast('colors', getColors())
+        server.send('colors', getColors())
 def getColors():
     global redMax, redMin, greenMax, greenMin
     array = []
-    for i in range(9):
-        if i % 3 == 0:
-            array.append(redMax[math.ceil(i/3)])
-        elif i % 2 == 0:
-            array.append(greenMax[math.floor(i/3)+1])
-    for i in range(9):
-        if i % 3 == 0:
-            array.append(redMin[math.ceil(i/3)])
-        elif i % 2 == 0:
-            array.append(greenMin[math.floor(i/3)+1])
+    for i in range(6):
+        if i % 2 == 0:
+            array.append(redMax[math.ceil(i / 3)])
+        else:
+            array.append(greenMax[math.floor(i / 3) + 1])
+    for i in range(6):
+        if i % 2 == 0:
+            array.append(redMin[math.ceil(i / 3)])
+        else:
+            array.append(greenMin[math.floor(i / 3) + 1])
     return array
 def setDefaultColors():
     global rM, rm, gM, gm

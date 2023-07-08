@@ -1,6 +1,5 @@
 from IO import io
-from Util import server_old as server
-from AI import filter
+from Util import server
 from threading import Thread
 import cv2
 import time
@@ -53,18 +52,18 @@ def main():
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
                                 ]
-                                server.broadcast('capture', encoded)
+                                server.emit('capture', encoded)
                                 time.sleep(max(0.1-(time.time()-start), 0))
                         except Exception as err:
                             print(err)
                     streamThread = Thread(target = loop)
                     streamThread.start()
-                    server.broadcast('message', 'Began stream')
+                    server.emit('message', 'Began stream')
             else:
                 if streaming == True:
                     streaming = False
                     streamThread.join()
-                    server.broadcast('message', 'Ended stream')
+                    server.emit('message', 'Ended stream')
         def filterstream(data):
             global streamThread2, streaming2
             filter.setColors(data['colors'])
@@ -80,47 +79,47 @@ def main():
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
                                 ]
-                                server.broadcast('capture', encoded)
+                                server.emit('capture', encoded)
                                 time.sleep(max(0.05-(time.time()-start), 0))
                         except Exception as err:
                             print(err)
                     streamThread2 = Thread(target = loop)
                     streamThread2.start()
-                    server.broadcast('message', 'Began filtered stream')
+                    server.emit('message', 'Began filtered stream')
             else:
                 if streaming2 == True:
                     streaming2 = False
                     streamThread2.join()
-                    server.broadcast('message', 'Ended filtered stream')
+                    server.emit('message', 'Ended filtered stream')
         def view(data):
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
             ]
-            server.broadcast('capture', encoded)
+            server.emit('capture', encoded)
         def viewFilter(data):
             filter.setColors(data)
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
             ]
-            server.broadcast('capture', encoded)
+            server.emit('capture', encoded)
         def prediction(data):
             filter.predict(io.camera.read(), server, False)
-            server.broadcast('message', 'Ran prediction on image')
+            server.emit('message', 'Ran prediction on image')
         def colors(data):
             filter.setColors(data)
-        server.addListener('drive', drive)
-        server.addListener('capture', capture)
-        server.addListener('captureStream', captureStream)
-        server.addListener('colors', colors)
-        server.addListener('captureFilter', captureFilter)
-        server.addListener('captureFilterStream', captureFilterStream)
-        server.addListener('view', view)
-        server.addListener('viewFilter', viewFilter)
-        server.addListener('stream', stream)
-        server.addListener('filterstream', filterstream)
-        server.addListener('prediction', prediction)
+        server.on('drive', drive)
+        server.on('capture', capture)
+        server.on('captureStream', captureStream)
+        server.on('colors', colors)
+        server.on('captureFilter', captureFilter)
+        server.on('captureFilterStream', captureFilterStream)
+        server.on('view', view)
+        server.on('viewFilter', viewFilter)
+        server.on('stream', stream)
+        server.on('filterstream', filterstream)
+        server.on('prediction', prediction)
         global running
         running = True
         def stop(data):
@@ -131,13 +130,16 @@ def main():
             io.close()
             print('stopped by emergency stop button')
             exit(0)
-        server.addListener('stop', stop)
+        server.on('stop', stop)
+        time.sleep(1)
+        print('take picture i guess')
+        io.camera.capture()
         while running:
             msg = input()
             if msg == 'reset':
-                server.broadcast('colors', filter.setDefaultColors())
+                server.emit('colors', filter.setDefaultColors())
             elif msg != '':
-                server.broadcast('message', msg)
+                server.emit('message', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
         running = False
