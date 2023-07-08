@@ -6,6 +6,8 @@ from threading import Thread
 import base64
 import time
 import numpy
+from Controller import converter
+from Util import server
 
 # wrapper for camera functions
 
@@ -54,7 +56,8 @@ def downscale(img: numpy.ndarray):
     return cv2.resize(img, (imageWidth, imageHeight), interpolation=cv2.INTER_NEAREST)
 
 # single image save
-def capture(converter = None, server = None):
+streamQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
+def capture(converter: converter = None, server: server = None):
     global currentImages
     try:
         name = str(round(time.time()*1000))
@@ -62,22 +65,22 @@ def capture(converter = None, server = None):
             filteredImgs = converter.filter(currentImages, False)
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if server != None:
-                server.broadcast('message', 'Captured (filtered) ' + name + '.png')
+                server.send('message', 'Captured (filtered) ' + name + '.png')
                 encoded = [
                     base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                     base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
                 ]
-                server.broadcast('capture', encoded)
+                server.send('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
             cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
             if server != None:
-                server.broadcast('message', 'Captured ' + name + '.png')
+                server.send('message', 'Captured ' + name + '.png')
                 encoded = [
-                    base64.b64encode(cv2.imencode('.png', currentImages[0])[1]).decode(),
-                    base64.b64encode(cv2.imencode('.png', currentImages[1])[1]).decode()
+                    base64.b64encode(cv2.imencode('.jpg', currentImages[0], streamQuality)[1]).decode(),
+                    base64.b64encode(cv2.imencode('.jpg', currentImages[1], streamQuality)[1]).decode()
                 ]
-                server.broadcast('capture', encoded)
+                server.send('capture', encoded)
             print('Captured ' + name + '.png')
         return currentImages
     except Exception as err:
@@ -88,7 +91,7 @@ def capture(converter = None, server = None):
 streamThread = None
 streaming = False
 totalCaptured = 0
-def startSaveStream(converter = None, server = None):
+def startSaveStream(converter: converter = None, server: server = None):
     global streamThread, streaming
     if streaming == False:
         streaming = True
@@ -111,15 +114,15 @@ def startSaveStream(converter = None, server = None):
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
                             ]
-                            server.broadcast('capture', encoded)
+                            server.send('capture', encoded)
                     else:
                         cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
                         if server != None:
                             encoded = [
-                                base64.b64encode(cv2.imencode('.png', currentImages[0])[1]).decode(),
-                                base64.b64encode(cv2.imencode('.png', currentImages[1])[1]).decode()
+                                base64.b64encode(cv2.imencode('.jpg', currentImages[0], streamQuality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', currentImages[1], streamQuality)[1]).decode()
                             ]
-                            server.broadcast('capture', encoded)
+                            server.send('capture', encoded)
                     totalCaptured += 1
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
@@ -128,17 +131,17 @@ def startSaveStream(converter = None, server = None):
         streamThread = Thread(target = loop)
         streamThread.start()
         if server != None:
-            server.broadcast('message', 'Began save stream')
+            server.send('message', 'Began save stream')
         print('Began save stream')
         return True
     return False
-def stopSaveStream(server = None):
+def stopSaveStream(server: server = None):
     global streamThread, streaming, totalCaptured
     if streaming == True:
         streaming = False
         streamThread.join()
         if server != None:
-            server.broadcast('message', 'Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
+            server.send('message', 'Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
         print('Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
         totalCaptured = 0
         return True

@@ -62,7 +62,6 @@ function importSession() {
         reader.readAsText(files[0]);
     };
 };
-socket.on('data', () => { 'idk'});
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     // FPS.innerHTML = 'FPS: ' + fpsTimes.length;
@@ -96,3 +95,5 @@ document.addEventListener('keyup', (e) => {
     }
 });
 document.getElementById('displayBlock').onfullscreenchange = displayChange;
+socket.on('capture', () => { 'add single frame idk'});
+socket.on('data', () => { 'add data idk'});

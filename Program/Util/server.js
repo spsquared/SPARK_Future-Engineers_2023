@@ -7,6 +7,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
 }));
 
+app.get('/', (req, res) => res.send('OK'));
+
 const io = require('socket.io')(server, {
     cors: {
         origin: '*',
@@ -23,8 +25,7 @@ io.on('connection', (socket) => {
             socket.disconnect();
             return;
         }
-        socket = socket;
-        socket.emit('test')
+        socket.emit('test');
     });
 });
 

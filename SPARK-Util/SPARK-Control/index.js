@@ -17,10 +17,6 @@ const socket = io(ip + ':4040', {
     reconnection: false
 });
 
-socket.on('test', () => {
-    document.body.style.backgroundColor = 'blue'
-});
-
 let connected = false;
 let toReconnect = false;
 let autoReconnect = true;

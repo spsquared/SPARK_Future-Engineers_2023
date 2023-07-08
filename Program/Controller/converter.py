@@ -18,6 +18,8 @@ imageHeight = 154
 focalLength = ((imageHeight / 2) * math.cotangent(math.pi * (90 - (fov / 2)) / 180))
 wallHeight = 10
 centerOffset = 10
+cameraOffsetX = 3
+cameraOffsetY = 10
 
 # create blob detectors
 params = cv2.SimpleBlobDetector_Params()
@@ -81,7 +83,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     def rawToCartesian(a, dir):
         dist = wallHeight * focalLength / a[0]
-        return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
+        return (dir * (cameraOffsetX + a[1] * dist), (cameraOffsetY + a[2] * dist), dist)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
@@ -128,7 +130,7 @@ def setColors(data, server = None):
     print(redMax, redMin)
     print(greenMax, greenMin)
     if server != None:
-        server.broadcast('colors', getColors())
+        server.send('colors', getColors())
 def getColors():
     global redMax, redMin, greenMax, greenMin
     array = []
