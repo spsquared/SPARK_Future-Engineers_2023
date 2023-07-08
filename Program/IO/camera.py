@@ -1,3 +1,5 @@
+from Controller import converter
+from Util import server
 from jetcam.csi_camera import CSICamera
 from IO import io
 import cv2
@@ -6,8 +8,6 @@ from threading import Thread
 import base64
 import time
 import numpy
-from Controller import converter
-from Util import server
 
 # wrapper for camera functions
 

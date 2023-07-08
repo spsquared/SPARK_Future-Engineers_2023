@@ -1,5 +1,6 @@
-import numpy
 from IO import io
+from Util import server
+import numpy
 import cv2
 import math
 
@@ -139,8 +140,8 @@ def setColors(data, sendServer: bool = False):
     print('-- New ----------')
     print(redMax, redMin)
     print(greenMax, greenMin)
-    if server != None:
-        server.send('colors', getColors())
+    if sendServer:
+        server.emit('colors', getColors())
 def getColors():
     global redMax, redMin, greenMax, greenMin
     array = []
