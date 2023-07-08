@@ -11,10 +11,11 @@ gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
 # other constants
-fov = 115
+horizontalFov = 155
+verticalFov = 115
 imageWidth = 272
 imageHeight = 154
-focalLength = ((imageHeight / 2) * math.cotangent(math.pi * (90 - (fov / 2)) / 180))
+focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
 wallHeight = 10
 centerOffset = 10
 
@@ -79,7 +80,8 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
 
     def rawToCartesian(a, dir):
-        dist = wallHeight * focalLength / a[0]
+        #need   focal length  fix
+        dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
@@ -97,11 +99,11 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
     blobDetector.empty()
-    rLeftBlobs = blobDetector.detect(255 - rLeft)
+    rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
     blobDetector.empty()
-    gLeftBlobs = blobDetector.detect(255 - gLeft)
+    gLeftBlobs = processBlobs(blobDetector.detect(255 - gLeft))
     blobDetector.empty()
-    rRightBlobs = blobDetector.detect(255 - rRight)
+    rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
     blobDetector.empty()
     gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
     
@@ -112,6 +114,8 @@ def processBlobs(blobs):
         blobs[i] = blobs[i].pt[0]
     
     return blobs
+
+def getLandmarks
 
 def setColors(data, server = None):
     global redMax, redMin, greenMax, greenMin
