@@ -24,7 +24,7 @@ img {
 }
 
 #leftPane {
-    display: grid;
+    display: flex;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
     position: absolute;
@@ -32,7 +32,7 @@ img {
     left: 0px;
     width: calc(calc(100vw - min(80vw, 100vh)) - 4px);
     height: 100vh;
-    /* flex-direction: column; */
+    flex-direction: column;
     container-type: size;
     border-right: 4px solid grey;
 }
