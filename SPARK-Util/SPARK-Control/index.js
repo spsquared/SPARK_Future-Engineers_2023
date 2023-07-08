@@ -22,8 +22,11 @@ let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
-    connected = true;
-    appendLog('Connected!', 'lime');
+    socket.emit('ping');
+    socket.once('pong', () => {
+        connected = true;
+        appendLog('Connected!', 'lime');
+    });
 });
 let ondisconnect = () => {
     connected = false;

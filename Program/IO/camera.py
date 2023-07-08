@@ -57,7 +57,7 @@ def downscale(img: numpy.ndarray):
 
 # single image save
 streamQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
-def capture(filter: bool = False, sendServer: bool = True):
+def capture(filter: bool, sendServer: bool):
     global currentImages
     try:
         name = str(round(time.time()*1000))
@@ -92,7 +92,7 @@ streamThread = None
 streaming = False
 totalCaptured = 0
 streamServing = False
-def startSaveStream(filter: bool = False, sendServer: bool = True):
+def startSaveStream(filter: bool, sendServer: bool):
     global streamThread, streaming, streamServing
     if not streaming:
         streamServing = sendServer
