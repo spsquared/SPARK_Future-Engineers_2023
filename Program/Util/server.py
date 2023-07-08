@@ -19,12 +19,12 @@ def emit(ev: str, data):
     __socket.emit(ev, data)
 
 @__socket.on('disconnect')
-def __disconnect():
+def __disconnect(e):
     print('disconnected')
 @__socket.on('connect')
-def __connect():
+def __connect(e):
     print('connected')
 
 @__socket.on('ping')
-def __ping():
+def __ping(e):
     __socket.emit('pong')
