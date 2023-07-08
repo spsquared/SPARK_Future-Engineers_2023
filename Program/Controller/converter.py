@@ -69,8 +69,8 @@ def filter(imgIn: numpy.ndarray):
 imgSinAngles = []
 imgCosAngles = []
 for i in range(imageWidth):
-    imgSinAngles[i] = math.sin(60 - math.atan2(((imageWidth / 2) - i) / focalLength))
-    imgCosAngles[i] = math.cos(60 - math.atan2(((imageWidth / 2) - i) / focalLength))
+    imgSinAngles.append(math.sin(60 - math.atan2((imageWidth / 2) - i, focalLength)))
+    imgCosAngles.append(math.cos(60 - math.atan2((imageWidth / 2) - i, focalLength)))
 imgSinAngles = numpy.array(imgSinAngles)
 imgCosAngles = numpy.array(imgCosAngles)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
