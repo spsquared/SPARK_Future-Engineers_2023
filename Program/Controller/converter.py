@@ -87,7 +87,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # get wall heights by finding the bottom edge of the wall
     rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
-    
+
     def rawToCartesian(a, dir):
         #need   focal length  fix
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
@@ -137,7 +137,7 @@ def setColors(data, sendServer: bool = False):
     greenMax = (int(data[1]), int(data[3]), int(data[5]))
     redMin = (int(data[6]), int(data[8]), int(data[10]))
     greenMin = (int(data[7]), int(data[9]), int(data[11]))
-    print('-- New ----------')
+    print('-- New ​----------')
     print(redMax, redMin)
     print(greenMax, greenMin)
     if sendServer:
