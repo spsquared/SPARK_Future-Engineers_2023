@@ -6,8 +6,8 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const { Server: SocketIO } = require('socket.io');
 const limiter = rateLimit({
-    windowMs: 250,
-    max: 25,
+    windowMs: 100,
+    max: 5,
     handler: function (req, res, options) {
         console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }

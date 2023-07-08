@@ -36,7 +36,7 @@ from IO import imu
 
 def close():
     global blinkThread, borkedThread, running, borked, path, __pwm
-    if running == True:
+    if running:
         fd = open(path + '../lock.txt', 'w+')
         fd.write('0')
         fd.close()
@@ -74,7 +74,7 @@ def __blink():
 
 def error():
     global borked, borkedThread, running
-    if borked == False and running == True:
+    if borked == False and running:
         borked = True
         def borkblink():
             while running:

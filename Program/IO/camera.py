@@ -39,7 +39,7 @@ def __capture():
 
 def stop():
     global running, camera0, camera1, thread
-    if running == True:
+    if running:
         running = False
         thread.join()
         camera0.running = False
@@ -65,22 +65,22 @@ def capture(filter: bool, sendServer: bool):
             filteredImgs = converter.filter(currentImages, False)
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
-                server.send('message', 'Captured (filtered) ' + name + '.png')
+                server.emit('message', 'Captured (filtered) ' + name + '.png')
                 encoded = [
                     base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                     base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
                 ]
-                server.send('capture', encoded)
+                server.emit('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
             cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
             if sendServer:
-                server.send('message', 'Captured ' + name + '.png')
+                server.emit('message', 'Captured ' + name + '.png')
                 encoded = [
                     base64.b64encode(cv2.imencode('.jpg', currentImages[0], streamQuality)[1]).decode(),
                     base64.b64encode(cv2.imencode('.jpg', currentImages[1], streamQuality)[1]).decode()
                 ]
-                server.send('capture', encoded)
+                server.emit('capture', encoded)
             print('Captured ' + name + '.png')
         return currentImages
     except Exception as err:
@@ -92,10 +92,12 @@ streamThread = None
 streaming = False
 totalCaptured = 0
 streamServing = False
+streamSaving = False
 def startSaveStream(filter: bool, sendServer: bool):
-    global streamThread, streaming, streamServing
+    global streamThread, streaming, streamServing, streamSaving
     if not streaming:
         streamServing = sendServer
+        streamSaving = True
         streaming = True
         name = str(round(time.time()*1000))
         if filter:
@@ -116,7 +118,7 @@ def startSaveStream(filter: bool, sendServer: bool):
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
                             ]
-                            server.send('capture', encoded)
+                            server.emit('capture', encoded)
                     else:
                         cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate((currentImages[0], currentImages[1]), axis=1))
                         if sendServer:
@@ -124,7 +126,7 @@ def startSaveStream(filter: bool, sendServer: bool):
                                 base64.b64encode(cv2.imencode('.jpg', currentImages[0], streamQuality)[1]).decode(),
                                 base64.b64encode(cv2.imencode('.jpg', currentImages[1], streamQuality)[1]).decode()
                             ]
-                            server.send('capture', encoded)
+                            server.emit('capture', encoded)
                     totalCaptured += 1
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
@@ -133,19 +135,67 @@ def startSaveStream(filter: bool, sendServer: bool):
         streamThread = Thread(target = loop)
         streamThread.start()
         if sendServer:
-            server.send('message', 'Began save stream')
+            server.emit('message', 'Began save stream')
         print('Began save stream')
         return True
     return False
 def stopSaveStream():
     global streamThread, streaming, totalCaptured, streamServing
-    if streaming == True:
+    if streaming and streamSaving:
         streaming = False
         streamThread.join()
         if streamServing:
-            server.send('message', 'Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
+            server.emit('message', 'Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
         print('Ended save stream:<br>&emsp;Saved ' + str(totalCaptured) + ' images')
         totalCaptured = 0
+        return True
+    return False
+def startStream(filter: bool, sendServer: bool):
+    global streamThread, streaming, streamServing, streamSaving
+    if not streaming:
+        streamServing = sendServer
+        streamSaving = False
+        streaming = True
+        def loop():
+            global currentImages, streaming
+            try:
+                index = 0
+                while streaming:
+                    start = time.time()
+                    if filter:
+                        filteredImgs = converter.filter(currentImages, False)
+                        if sendServer:
+                            encoded = [
+                                base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
+                                base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode()
+                            ]
+                            server.emit('capture', encoded)
+                    else:
+                        if sendServer:
+                            encoded = [
+                                base64.b64encode(cv2.imencode('.jpg', currentImages[0], streamQuality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', currentImages[1], streamQuality)[1]).decode()
+                            ]
+                            server.emit('capture', encoded)
+                    time.sleep(max(0.1-(time.time()-start), 0))
+                    index += 1
+            except Exception as err:
+                print(err)
+        streamThread = Thread(target = loop)
+        streamThread.start()
+        if sendServer:
+            server.emit('message', 'Began stream')
+        print('Began stream')
+        return True
+    return False
+def stopSaveStream():
+    global streamThread, streaming, streamServing
+    if streaming and not streamSaving:
+        streaming = False
+        streamThread.join()
+        if streamServing:
+            server.emit('message', 'Ended stream')
+        print('Ended stream')
         return True
     return False
 
