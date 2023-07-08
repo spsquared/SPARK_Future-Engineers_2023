@@ -26,13 +26,14 @@ img {
 #leftPane {
     display: grid;
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
     position: absolute;
     top: 0px;
     left: 0px;
-    width: calc(100vw - min(80vw, 100vh));
+    width: calc(calc(100vw - min(80vw, 100vh)) - 4px);
     height: 100vh;
     container-type: size;
-    background-color: lightgrey;
+    border-right: 4px solid grey;
 }
 #rightPane {
     position: absolute;
@@ -45,18 +46,74 @@ img {
 
 #logo {
     display: inline-block;
-    width: min(100px, calc(20vw - 16px));
+    width: min(81px, calc(20vw - 16px));
     margin: 8px;
 }
 #banner {
     display: inline-block;
-    height: 100px;
+    height: 81px;
     margin-bottom: 8px;
 }
 @container (max-width: 508px) {
     #banner {
         display: none;
     }
+}
+
+#log {
+    display: grid;
+    min-height: 20vh;
+    border-top: 4px solid black;
+    border-bottom: 4px solid black;
+    background-color: white;
+    font-size: 20px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.logBlock {
+    background-color: lightgrey;
+    padding: 4px 16px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+.connectNow {
+    width: 20%;
+    height: 24px;
+    margin-left: 16px;
+    font: 12px sans-serif;
+    font-weight: bolder;
+    border: 4px outset crimson;
+    background-color: red;
+    cursor: pointer;
+}
+
+#display {
+    display: grid;
+    container-type: size;
+}
+#display0, #display1 {
+    position: relative;
+    background-color: black;
+    aspect-ratio: 136 / 77;
+}
+#display0Img, #display1Img {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 136 / 77;
+    border: none;
+}
+#display0Overlay, #display1Overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+@container (max-width: 25vw) {
+    /* vertical layout */
 }
 
 #dropdown {

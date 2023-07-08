@@ -6,9 +6,10 @@ import typing
 
 __socket = socketio.AsyncClient()
 
-async def __start():
-    await __socket.connect('http://localhost:4041')
-asyncio.run(__start())
+def open():
+    asyncio.get_event_loop().run_until_complete(__socket.connect('http://localhost:4041')) # because we can't have Python 3.7 or higher
+def close():
+    asyncio.get_event_loop().run_until_complete(__socket.disconnect())
 
 def on(ev: str, cb: typing.Callable[[typing.Any], None]):
     @__socket.on(ev)
@@ -19,3 +20,9 @@ async def __emit(ev, data):
     await __socket.emit(ev, data)
 def emit(ev: str, data):
     asyncio.create_task(__emit(ev, data))
+
+@__socket.event
+def disconnect():
+    print('disconnected')
+
+open()

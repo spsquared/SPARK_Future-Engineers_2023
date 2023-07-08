@@ -14,6 +14,7 @@ const initcolors = [
 ];
 
 const socket = io(ip + ':4040', {
+    autoConnect: false,
     reconnection: false
 });
 
@@ -42,9 +43,28 @@ function reconnect(force) {
         autoReconnect = true;
         document.querySelectorAll('.connectNow').forEach(button => button.remove());
         appendLog('Attempting to reconnect...');
-        socket.connect();
+        connect();
     }
 };
+function connect() {
+    const req = new XMLHttpRequest();
+    req.open('GET', `http://${ip}:4040`);
+    req.onload = (res) => {
+        if (req.status != 200) {
+            req.onerror();
+            return;
+        }
+        if (!socket.connected) socket.connect();
+    };
+    req.onerror = (err) => {
+        connected = false;
+        if (autoReconnect) toReconnect = true;
+        appendLog('Connection failed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
+        setTimeout(reconnect, 10000);
+    };
+    req.send();
+};
+window.addEventListener('load', connect);
 
 // messages
 const pendingsounds = [];
@@ -71,7 +91,7 @@ async function playSound() {
         pendingsounds.push(ping);
     });
 };
-const log = document.getElementById('logBody');
+const log = document.getElementById('log');
 function appendLog(text, color) {
     const div = document.createElement('div');
     div.classList.add('logBlock');

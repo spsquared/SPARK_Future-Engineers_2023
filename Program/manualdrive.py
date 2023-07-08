@@ -1,5 +1,5 @@
 from IO import io
-from Util import server_old as server
+from Util import server
 from threading import Thread
 import cv2
 import time
@@ -109,17 +109,17 @@ def main():
             server.send('message', 'Ran prediction on image')
         def colors(data):
             filter.setColors(data)
-        server.addListener('drive', drive)
-        server.addListener('capture', capture)
-        server.addListener('captureStream', captureStream)
-        server.addListener('colors', colors)
-        server.addListener('captureFilter', captureFilter)
-        server.addListener('captureFilterStream', captureFilterStream)
-        server.addListener('view', view)
-        server.addListener('viewFilter', viewFilter)
-        server.addListener('stream', stream)
-        server.addListener('filterstream', filterstream)
-        server.addListener('prediction', prediction)
+        server.on('drive', drive)
+        server.on('capture', capture)
+        server.on('captureStream', captureStream)
+        server.on('colors', colors)
+        server.on('captureFilter', captureFilter)
+        server.on('captureFilterStream', captureFilterStream)
+        server.on('view', view)
+        server.on('viewFilter', viewFilter)
+        server.on('stream', stream)
+        server.on('filterstream', filterstream)
+        server.on('prediction', prediction)
         global running
         running = True
         def stop(data):
@@ -130,7 +130,7 @@ def main():
             io.close()
             print('stopped by emergency stop button')
             exit(0)
-        server.addListener('stop', stop)
+        server.on('stop', stop)
         time.sleep(1)
         print('take picture i guess')
         io.camera.capture()

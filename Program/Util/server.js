@@ -2,8 +2,13 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const server2 = require('http').Server(app);
+const cors = require('cors');
 const { Server: SocketIO } = require('socket.io');
 
+app.use(cors({
+    origin: '*',
+    methods: ['GET']
+}));
 app.get('/', (req, res) => res.send('OK'));
 
 const hostio = new SocketIO(server);
@@ -18,6 +23,13 @@ const authIds = require('./auth.json');
 const recentData = {};
 let hostConnectionCount = 0;
 hostio.on('connection', (socket) => {
+    const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'unknown';
+    if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) {
+        console.log(`Kicked ${ip} from server connection`);
+        socket.disconnect();
+        socket.onevent = (packet) => {};
+        return;
+    }
     hostConnectionCount++;
     socket.on('disconnect', () => hostConnectionCount--);
     socket.on('timeout', () => hostConnectionCount--);
@@ -34,10 +46,13 @@ hostio.on('connection', (socket) => {
     });
 });
 io.on('connection', (socket) => {
+    const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'unknown';
     socket.emit('authenticate');
     socket.once('authenticateResponse', (id) => {
         if (!authIds.includes(id)) {
+            console.log(`Kicked ${ip} from client connection`);
             socket.disconnect();
+            socket.onevent = (packet) => {};
             return;
         }
         socket.on('error', (err) => console.log(err));

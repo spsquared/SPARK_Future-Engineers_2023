@@ -120,7 +120,7 @@ def processBlobs(blobs):
     
     return blobs
 
-def setColors(data, server = None):
+def setColors(data, sendServer: bool = False):
     global redMax, redMin, greenMax, greenMin
     redMax = (int(data[0]), int(data[2]), int(data[4]))
     greenMax = (int(data[1]), int(data[3]), int(data[5]))
