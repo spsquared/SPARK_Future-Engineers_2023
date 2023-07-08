@@ -15,7 +15,7 @@ gM = greenMax = (110, 255, 255)
 fov = 115
 imageWidth = 272
 imageHeight = 154
-focalLength = ((imageHeight / 2) * math.cotangent(math.pi * (90 - (fov / 2)) / 180))
+focalLength = (imageHeight / 2) * (1 / math.tan(math.pi * (90 - (fov / 2)) / 180))
 wallHeight = 10
 centerOffset = 10
 cameraOffsetX = 3

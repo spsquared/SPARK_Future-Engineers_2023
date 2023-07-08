@@ -95,5 +95,5 @@ document.addEventListener('keyup', (e) => {
     }
 });
 document.getElementById('displayBlock').onfullscreenchange = displayChange;
-socket.on('capture', () => { 'add single frame idk'});
-socket.on('data', () => { 'add data idk'});
+socket.on('capture', (images) => console.log(images));
+socket.on('data', () => 'idk');

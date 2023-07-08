@@ -52,18 +52,18 @@ def main():
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
                                 ]
-                                server.send('capture', encoded)
+                                server.emit('capture', encoded)
                                 time.sleep(max(0.1-(time.time()-start), 0))
                         except Exception as err:
                             print(err)
                     streamThread = Thread(target = loop)
                     streamThread.start()
-                    server.send('message', 'Began stream')
+                    server.emit('message', 'Began stream')
             else:
                 if streaming == True:
                     streaming = False
                     streamThread.join()
-                    server.send('message', 'Ended stream')
+                    server.emit('message', 'Ended stream')
         def filterstream(data):
             global streamThread2, streaming2
             filter.setColors(data['colors'])
@@ -79,34 +79,34 @@ def main():
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                                     base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
                                 ]
-                                server.send('capture', encoded)
+                                server.emit('capture', encoded)
                                 time.sleep(max(0.05-(time.time()-start), 0))
                         except Exception as err:
                             print(err)
                     streamThread2 = Thread(target = loop)
                     streamThread2.start()
-                    server.send('message', 'Began filtered stream')
+                    server.emit('message', 'Began filtered stream')
             else:
                 if streaming2 == True:
                     streaming2 = False
                     streamThread2.join()
-                    server.send('message', 'Ended filtered stream')
+                    server.emit('message', 'Ended filtered stream')
         def view(data):
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
             ]
-            server.send('capture', encoded)
+            server.emit('capture', encoded)
         def viewFilter(data):
             filter.setColors(data)
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
             ]
-            server.send('capture', encoded)
+            server.emit('capture', encoded)
         def prediction(data):
             filter.predict(io.camera.read(), server, False)
-            server.send('message', 'Ran prediction on image')
+            server.emit('message', 'Ran prediction on image')
         def colors(data):
             filter.setColors(data)
         server.on('drive', drive)
@@ -137,9 +137,9 @@ def main():
         while running:
             msg = input()
             if msg == 'reset':
-                server.send('colors', filter.setDefaultColors())
+                server.emit('colors', filter.setDefaultColors())
             elif msg != '':
-                server.send('message', msg)
+                server.emit('message', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
         running = False
