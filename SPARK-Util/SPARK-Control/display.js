@@ -94,6 +94,9 @@ document.addEventListener('keyup', (e) => {
         historyControls.slowmode = false;
     }
 });
-document.getElementById('displayBlock').onfullscreenchange = displayChange;
 socket.on('capture', (images) => console.log(images)); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');
+
+for (let i = 0; i < 20; i++) {
+    appendLog('a')
+}

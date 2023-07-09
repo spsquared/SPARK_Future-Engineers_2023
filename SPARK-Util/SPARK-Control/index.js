@@ -319,16 +319,16 @@ function setColors(colors) {
 socket.on('colors', setColors);
 
 // stop
-document.getElementById('emergencyStop').onclick = () => {
-    send('stop', {});
-};
+// document.getElementById('emergencyStop').onclick = () => {
+//     send('stop', {});
+// };
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
 });
 
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {
-    socket.close();
+    socket.disconnect();
     toReconnect = false;
     autoReconnect = false;
     if (rickrolled) return;

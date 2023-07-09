@@ -18,7 +18,9 @@
             <img id="logo" src="./assets/logo.png">
             <img id="banner" src="./assets/banner.png">
         </div>
-        <div id="log">
+        <div id="logButtonsCollapsible">
+            <div id="buttons"></div>
+            <div id="log"></div>
         </div>
         <div id="display">
             <div id="display0">
@@ -30,7 +32,7 @@
                 <canvas id="display1Overlay"></canvas>
             </div>
         </div>
-        <div style="display: relative;">
+        <div id="historyControlsWrapper">
             <div id="historyControls">
                 <div id="historyControlsBody">
                     <button id="historyPrevious">&#60</button>
@@ -53,5 +55,6 @@
     </div>
     <canvas id="logocanvas"></canvas>
     <script src="./../logoIntro.js"></script>
+    <button id="disconnect"></button>
 </body>
 </html>

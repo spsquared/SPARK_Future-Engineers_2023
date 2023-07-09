@@ -73,11 +73,23 @@ img {
     }
 }
 
-#log {
+#logButtonsCollapsible {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     border-top: 4px solid black;
+    color:
+}
+
+#buttons {
+    border-right: 4px solid black;
+    overflow-y: auto;
+}
+
+#log {
+    height: 100%;
     background-color: white;
     font-size: 20px;
-    flex-grow: 1;
     overflow-y: scroll;
     overflow-x: hidden;
 }
@@ -139,6 +151,9 @@ img {
     }
 }
 
+#historyControlsWrapper {
+    position: relative;
+}
 #historyControls {
     position: absolute;
     bottom: 0px;
@@ -154,7 +169,7 @@ img {
     left: 0px;
     width: 100%;
     padding-top: 16px;
-    transition: 200ms linear transform;
+    transition: 100ms linear transform;
     transform: translateY(100%);
 }
 #historyPrevious, #historyNext {
@@ -163,7 +178,7 @@ img {
     font-size: 5vh;
     font-family: Impact, 'Arial Narrow Bold', sans-serif;
     color: black;
-    background-color: lightgray;
+    background-color: #AAA;
     border: 0.5vh solid white;
     margin: 1.5vh;
     cursor: pointer;
@@ -177,6 +192,7 @@ img {
     width: none;
     height: 4vh;
     margin-top: 3vh;
+    background-color: #AAA;
     border: 0.5vh solid white;
 }
 #historySlider::-webkit-slider-thumb {
@@ -275,4 +291,8 @@ img {
 }
 .sliderV::-webkit-slider-thumb {
     background-color: hsl(var(--hue), var(--saturation), var(--value));
+}
+
+#disconnect {
+    display: none;
 }
