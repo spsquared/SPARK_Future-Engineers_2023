@@ -86,6 +86,7 @@ img {
     padding: 4px 16px;
     margin-top: 6px;
     margin-bottom: 2px;
+    line-break: anywhere;
 }
 .connectNow {
     float: right;
@@ -136,6 +137,56 @@ img {
     #display0, #display1 {
         width: 100%;
     }
+}
+
+#historyControls {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: var(--sidebar-width);
+    min-height: 6vh;
+}
+#historyControlsBody {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    padding-top: 16px;
+    transition: 200ms linear transform;
+    transform: translateY(100%);
+}
+#historyPrevious, #historyNext {
+    width: 6vh;
+    height: 8vh;
+    font-size: 5vh;
+    font-family: Impact, 'Arial Narrow Bold', sans-serif;
+    color: black;
+    background-color: lightgray;
+    border: 0.5vh solid white;
+    margin: 1.5vh;
+    cursor: pointer;
+}
+#historyPrevious:disabled, #historyNext:disabled {
+    color: gray;
+    cursor: not-allowed;
+}
+#historySlider {
+    min-width: none;
+    width: none;
+    height: 4vh;
+    margin-top: 3vh;
+    border: 0.5vh solid white;
+}
+#historySlider::-webkit-slider-thumb {
+    width: 4vh;
+    height: 8vh;
+    background-color: lightgray;
+    border: 0.5vh solid grey;
+}
+#historyControls:hover #historyControlsBody {
+    transform: translateY(0);
 }
 
 #dropdown {
