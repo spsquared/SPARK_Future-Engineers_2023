@@ -1,5 +1,6 @@
 body {
     overflow: hidden;
+    --min-sidebar-width: 40vw;
 }
 div {
     font-family: sans-serif;
@@ -25,22 +26,22 @@ img {
 
 #leftPane {
     display: flex;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
     position: absolute;
     top: 0px;
     left: 0px;
-    width: calc(calc(100vw - min(80vw, 100vh)) - 4px);
+    width: var(--sidebar-width);
     height: 100vh;
     flex-direction: column;
+    align-items: stretch;
     container-type: size;
     border-right: 4px solid grey;
+    --sidebar-width: calc(100vw - min(calc(100vw - var(--min-sidebar-width)), 100vh) - 4px);
 }
 #rightPane {
     position: absolute;
     top: 0px;
     right: 0px;
-    width: min(80vw, 100vh);
+    width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     height: 100vh;
     background-color: #444;
 }
@@ -48,19 +49,20 @@ img {
 #header {
     white-space: nowrap;
     overflow-x: hidden;
+    min-height: min(97px, var(--min-sidebar-width));
 }
 #logo {
     display: inline-block;
-    width: min(81px, calc(20vw - 16px));
+    width: min(81px, calc(var(--min-sidebar-width) - 20px));
     margin: 8px;
+    margin-bottom: 0px;
 }
 #banner {
     display: inline-block;
     height: 81px;
-    margin-bottom: 8px;
     transition: 100ms linear opacity;
 }
-@container (max-width: 416px) {
+@container (max-width: 420px) {
     #banner {
         opacity: 0;
     }
@@ -72,12 +74,10 @@ img {
 }
 
 #log {
-    display: grid;
-    min-height: 20vh;
     border-top: 4px solid black;
-    border-bottom: 4px solid black;
     background-color: white;
     font-size: 20px;
+    flex-grow: 1;
     overflow-y: scroll;
     overflow-x: hidden;
 }
@@ -88,7 +88,7 @@ img {
     margin-bottom: 2px;
 }
 .connectNow {
-    width: 20%;
+    float: right;
     height: 24px;
     margin-left: 16px;
     font: 12px sans-serif;
@@ -99,14 +99,16 @@ img {
 }
 
 #display {
-    width: 100%;
     display: flex;
-    flex-grow: 1;
+    width: var(--sidebar-width);
+    min-height: calc((var(--sidebar-width) * 77) / 272); /* because aspect-ratio wasn't enough */
     flex-direction: row;
     container-type: size;
+    aspect-ratio: 272 / 77;
 }
 #display0, #display1 {
     position: relative;
+    width: 50%;
     background-color: black;
     aspect-ratio: 136 / 77;
 }
@@ -116,7 +118,6 @@ img {
     left: 0px;
     width: 100%;
     height: 100%;
-    aspect-ratio: 136 / 77;
     border: none;
 }
 #display0Overlay, #display1Overlay {
@@ -126,9 +127,14 @@ img {
     width: 100%;
     height: 100%;
 }
-@container (max-width: 30vw) {
+@container (max-width: 70vh) {
     #display {
         flex-direction: column;
+        min-height: calc((var(--sidebar-width) * 154) / 136);
+        aspect-ratio: 136 / 154;
+    }
+    #display0, #display1 {
+        width: 100%;
     }
 }
 
@@ -170,8 +176,8 @@ img {
     position: absolute;
     bottom: 0px;
     right: 0px;
-    width: min(80vw, 100vh);
-    height: min(80vw, 100vh);
+    width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
+    height: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     background-color: black;
 }
 
