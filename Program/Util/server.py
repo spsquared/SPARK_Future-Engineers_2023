@@ -26,5 +26,5 @@ def __connect():
     print('----- SERVER CONNECTED')
 
 @__socket.on('ping')
-def __ping(e):
-    __socket.emit('pong')
+def __ping(n):
+    __socket.emit('pong', n)

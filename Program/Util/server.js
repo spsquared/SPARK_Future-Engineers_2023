@@ -52,6 +52,7 @@ hostio.on('connection', (socket) => {
         if (event === 'data') {
             // store in recentData
         }
+        console.log(event, args)
         io.emit(event, ...args);
     });
 });

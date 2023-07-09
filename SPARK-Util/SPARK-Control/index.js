@@ -22,11 +22,15 @@ let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
-    socket.emit('ping');
-    socket.once('pong', () => {
-        connected = true;
-        appendLog('Connected!', 'lime');
+    let num = Math.random();
+    socket.on('pong', function confirm(n) {
+        if (n == num) {
+            connected = true;
+            appendLog('Connected!', 'lime');
+            socket.off('pong', confirm);
+        }
     });
+    socket.emit('ping', num);
 });
 let ondisconnect = () => {
     connected = false;
@@ -69,7 +73,7 @@ function connect() {
 };
 window.addEventListener('load', connect);
 
-socket.on('pong', () => console.log('PING REPLY'));
+socket.on('pong', playSound);
 
 // messages
 const pendingsounds = [];

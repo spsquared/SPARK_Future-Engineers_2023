@@ -4,19 +4,15 @@ from Controller import driver
 from Controller import converter
 from threading import Thread
 import cv2
-import time
 import base64
 
-__forward = 0
-__backward = 0
-__left = 0
-__right = 0
 running = True
 def main():
     global running
     try:
         server.open()
         io.setStatusBlink(2)
+        quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         def drive(data):
             io.drive.throttle(data['throttle'])
             io.drive.steer(data['steering'])
@@ -48,15 +44,17 @@ def main():
                 io.camera.startStream(True)
         def view(data):
             encoded = [
-                base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
-                base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
+                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
+                0
             ]
             server.emit('capture', encoded)
         def viewFilter(data):
             filter.setColors(data)
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
-                base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode()
+                base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode(),
+                1
             ]
             server.emit('capture', encoded)
         def prediction(data):
