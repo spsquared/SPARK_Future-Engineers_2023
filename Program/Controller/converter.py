@@ -132,12 +132,40 @@ def processBlobs(blobs):
     return blobs
 
 def getLandmarks(distances, rBlobs, gBlobs):
+    outerWallLandmarks = []
+    innerWallLandmarks = []
+    rBlobLandmarks = []
+    gBlobLandmarks = []
     # x, y, distance, angle
     # all relative to car center
-    if carDirection == COUNTER_CLOCKWISE:
-    else:
-    numpy.apply_along_axis(getWallLandmarks, 1, distances, -1)
-    return False
+
+    # get outer and inner walls
+    last = None
+    angleAverage = None
+    for point in list(distances):
+        if last != None:
+            slope = (point[2] - last[2]) / (point[3] - last[3])
+            angle = math.atan2(slope, 1)
+            if angleAverage == None:
+                angleAverage = angle
+            else:
+                if point[2] - last[2] > 20:
+                    innerWallLandmarks.append(last)
+                    angleAverage = None
+                else:
+                    angleDifference = math.abs(angle - angleAverage)
+                    if angleDifference < -45 * carDirection:
+                        outerWallLandmarks.append(last)
+                    angleAverage = angle / 2 + angleAverage / 2
+        last = point
+    
+    # get distance info for blobs
+    for blob in rBlobs:
+        rBlobLandmarks.append(distances[blob[0]])
+    for blob in gBlobs:
+        gBlobLandmarks.append(distances[blob[0]])
+
+    return [outerWallLandmarks, innerWallLandmarks, rBlobLandmarks, gBlobLandmarks]
 
 def setColors(data, sendServer: bool):
     global redMax, redMin, greenMax, greenMin
