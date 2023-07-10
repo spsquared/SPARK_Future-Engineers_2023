@@ -75,13 +75,51 @@ img {
 
 #logButtonsCollapsible {
     flex-grow: 1;
-    min-height: 0px;
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    min-height: 0px;
     border-top: 4px solid black;
 }
 
+#buttonsContainer {
+    position: relative;
+    height: 100%;
+    border-right: 4px solid black;
+    overflow: visible;
+}
+#slideout {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    --tabImage: url(./assets/arrow-right.svg);
+}
+#slideoutTab {
+    display: none;
+    position: absolute;
+    top: -4px;
+    right: -32px;
+    width: 24px;
+    height: 100%;
+    background-color: lightgray;
+    border: 4px solid black;
+    border-bottom: none;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80% 80%;
+    background-image: var(--tabImage);
+    cursor: pointer;
+}
+#slideoutTabCheckbox {
+    opacity: 0;
+}
 #buttons {
+    min-height: calc(100% - 16px);
+    max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
+    padding: 8px 8px;
+    margin-right: -4px;
     border-right: 4px solid black;
     overflow-y: auto;
 }
@@ -114,7 +152,8 @@ img {
 #display {
     display: flex;
     width: var(--sidebar-width);
-    min-height: calc((var(--sidebar-width) * 77) / 272); /* because aspect-ratio wasn't enough */
+    /* because aspect-ratio wasn't enough */
+    min-height: calc((var(--sidebar-width) * 77) / 272);
     flex-direction: row;
     container-type: size;
     aspect-ratio: 272 / 77;
@@ -141,6 +180,42 @@ img {
     height: 100%;
 }
 @container (max-width: 70vh) {
+    #logButtonsCollapsible {
+        grid-template-columns: 28px 1fr;
+    }
+
+    #buttonsContainer {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        border-right: none;
+        z-index: 1;
+    }
+    #slideout {
+        top: -4px;
+        border: 4px solid black;
+        border-left: none;
+        border-bottom: none;
+        width: unset;
+        transform: translateX(-100%);
+        transition: 200ms ease transform;
+    }
+    #slideoutTab {
+        display: block;
+    }
+    #slideoutTabCheckbox:checked~#slideout {
+        transform: translateX(0);
+        --tabImage: url(./assets/arrow-left.svg);
+    }
+    #buttons {
+        background-color: lightgray;
+    }
+
+    #log {
+        grid-column: 2 / 3;
+    }
+
     #display {
         flex-direction: column;
         min-height: calc((var(--sidebar-width) * 154) / 136);
@@ -232,9 +307,8 @@ img {
 }
 #dropdownTabCheckbox {
     opacity: 0;
-    cursor: pointer;
 }
-#dropdownTabCheckbox:checked ~ #dropdown {
+#dropdownTabCheckbox:checked~#dropdown {
     transform: translateY(0);
     --tabImage: url(./assets/arrow-up.svg);
 }
