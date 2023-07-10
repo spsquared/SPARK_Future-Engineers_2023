@@ -89,7 +89,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
     
     def rawToCartesian(a, dir):
-        #need   focal length  fix
+        # focal length fix for non-cylindrical projection
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         dist = wallHeight * focalLength / a[0]
@@ -100,8 +100,13 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
 
-    // sort by angle @sampleprovider(SP)
-    return numpy.sort(numpy.concatenate((leftCoordinates, rightCoordinates)), kind='mergesort')
+    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
+
+    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    ref = coordinates.ravel().view(dtype)
+    ref.sort(order=['theta', 'dist', 'x', 'y'])
+
+    return coordinates
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
