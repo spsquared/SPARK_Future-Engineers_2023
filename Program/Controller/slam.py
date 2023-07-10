@@ -2,7 +2,6 @@ from IO import io
 from Util import server
 import numpy
 import math
-import scipy
 from scipy.optimize import least_squares
 
 # does EKF SLAM
@@ -17,11 +16,11 @@ GREEN = 1
 
 # make numpy/cupy matrix so we can poke with GPU for sPEEEEEEEEEEED?
 storedLandmarks = [
-    [0, 0, True], # OUter wall corners
+    [0, 0, True], # Outer wall corners
     [300, 0, True],
     [0, 300, True],
     [300, 300, True],
-    [0, 0, False], # INNer wall corners
+    [0, 0, False], # Inner wall corners
     [0, 0, False],
     [0, 0, False],
     [0, 0, False],
@@ -35,11 +34,23 @@ storedLandmarks = [
     [0, 0, False],
 ]
 
-possibleWallLandmarks = [
+possibleInnerWallLandmarks = [
+    [60, 60],
+    [100, 60],
+    [60, 100],
     [100, 100],
-    [100, 200],
+    [200, 60],
+    [240, 60],
     [200, 100],
+    [240, 100],
+    [60, 200],
+    [100, 200],
+    [60, 240],
+    [100, 240],
     [200, 200],
+    [240, 200],
+    [200, 240],
+    [240, 240],
 ]
 
 possiblePillarLandmarks = [
@@ -73,8 +84,8 @@ carX = -1
 carY = -1
 carAngle = 0
 
-COUNTER_CLOCKWISE = 0
-CLOCKWISE = 1
+COUNTER_CLOCKWISE = 1
+CLOCKWISE = -1
 carDirection = COUNTER_CLOCKWISE
 
 carSpeed = 0
@@ -98,14 +109,31 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         def getDistance(a, b):
             return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
-        for i in range(len(outerWalls)):
+        for wall in outerWalls:
             # find nearest landmark
             nearestLandmark = storedLandmarks[0]
-            for j in range(1, 4):
-                if (getDistance(storedLandmarks[j], outerWalls[i]) < getDistance(nearestLandmark, outerWalls[i])):
+            for j in range(0, 4):
+                if getDistance(storedLandmarks[j], wall) < getDistance(nearestLandmark, wall):
                     nearestLandmark = storedLandmarks[j]
             
-            nearestLandmark[DISTANCE] = getDistance([carX, carY], outerWalls[i])
+            nearestLandmark[DISTANCE] = getDistance([carX, carY], wall)
+            landmarks.append(nearestLandmark)
+        
+        for wall in innerWalls:
+            # find nearest landmark
+            nearestLandmark = None
+            for j in range(4, 8):
+                if storedLandmarks[j][2]:
+                    if nearestLandmark == None:
+                        nearestLandmark = storedLandmarks[j]
+                    elif getDistance(storedLandmarks[j], wall) < getDistance(nearestLandmark, wall):
+                        nearestLandmark = storedLandmarks[j]
+            nearestPossibleLandmark = storedLandmarks[4]
+            for j in range(0, 8):
+                if getDistance(possibleInnerWallLandmarks[j], wall) < getDistance(nearestPossibleLandmark, wall):
+                    nearestPossibleLandmark = possibleInnerWallLandmarks[j]
+            
+            nearestLandmark[DISTANCE] = getDistance([carX, carY], wall)
             landmarks.append(nearestLandmark)
         
         def positionEquations(guess):
