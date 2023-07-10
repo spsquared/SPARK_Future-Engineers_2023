@@ -73,6 +73,10 @@ carX = -1
 carY = -1
 carAngle = 0
 
+COUNTER_CLOCKWISE = 0
+CLOCKWISE = 1
+carDirection = COUNTER_CLOCKWISE
+
 carSpeed = 0
 
 def slam(outerWalls, innerWalls, redBlobs, greenBlobs):

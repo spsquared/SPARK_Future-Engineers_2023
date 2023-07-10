@@ -93,12 +93,15 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         dist = wallHeight * focalLength / a[0]
-        return (dir * (cameraOffsetX + a[1] * dist), (cameraOffsetY + a[2] * dist), dist)
+        x = dir * (cameraOffsetX + a[1] * dist)
+        y = (cameraOffsetY + a[2] * dist)
+        return (x, y, dist, math.atan2(y, x))
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
 
-    return numpy.concatenate((leftCoordinates, rightCoordinates))
+    // sort by angle @sampleprovider(SP)
+    return numpy.sort(numpy.concatenate((leftCoordinates, rightCoordinates)), kind='mergesort')
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
@@ -128,7 +131,12 @@ def processBlobs(blobs):
     
     return blobs
 
-def getLandmarks(idk):
+def getLandmarks(distances, rBlobs, gBlobs):
+    # x, y, distance, angle
+    # all relative to car center
+    if carDirection == COUNTER_CLOCKWISE:
+    else:
+    numpy.apply_along_axis(getWallLandmarks, 1, distances, -1)
     return False
 
 def setColors(data, sendServer: bool):
