@@ -1,5 +1,6 @@
 body {
     overflow: hidden;
+    --min-sidebar-width: 40vw;
 }
 div {
     font-family: sans-serif;
@@ -24,23 +25,23 @@ img {
 }
 
 #leftPane {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
+    display: flex;
     position: absolute;
     top: 0px;
     left: 0px;
-    width: calc(calc(100vw - min(80vw, 100vh)) - 4px);
+    width: var(--sidebar-width);
     height: 100vh;
-    /* flex-direction: column; */
+    flex-direction: column;
+    align-items: stretch;
     container-type: size;
     border-right: 4px solid grey;
+    --sidebar-width: calc(100vw - min(calc(100vw - var(--min-sidebar-width)), 100vh) - 4px);
 }
 #rightPane {
     position: absolute;
     top: 0px;
     right: 0px;
-    width: min(80vw, 100vh);
+    width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     height: 100vh;
     background-color: #444;
 }
@@ -48,19 +49,20 @@ img {
 #header {
     white-space: nowrap;
     overflow-x: hidden;
+    min-height: min(97px, var(--min-sidebar-width));
 }
 #logo {
     display: inline-block;
-    width: min(81px, calc(20vw - 16px));
+    width: min(81px, calc(var(--min-sidebar-width) - 20px));
     margin: 8px;
+    margin-bottom: 0px;
 }
 #banner {
     display: inline-block;
     height: 81px;
-    margin-bottom: 8px;
     transition: 100ms linear opacity;
 }
-@container (max-width: 416px) {
+@container (max-width: 420px) {
     #banner {
         opacity: 0;
     }
@@ -71,11 +73,21 @@ img {
     }
 }
 
-#log {
+#logButtonsCollapsible {
+    flex-grow: 1;
     display: grid;
-    min-height: 20vh;
+    grid-template-columns: 1fr 1fr;
     border-top: 4px solid black;
-    border-bottom: 4px solid black;
+    color:
+}
+
+#buttons {
+    border-right: 4px solid black;
+    overflow-y: auto;
+}
+
+#log {
+    height: 100%;
     background-color: white;
     font-size: 20px;
     overflow-y: scroll;
@@ -86,9 +98,10 @@ img {
     padding: 4px 16px;
     margin-top: 6px;
     margin-bottom: 2px;
+    line-break: anywhere;
 }
 .connectNow {
-    width: 20%;
+    float: right;
     height: 24px;
     margin-left: 16px;
     font: 12px sans-serif;
@@ -99,14 +112,16 @@ img {
 }
 
 #display {
-    width: 100%;
     display: flex;
-    flex-grow: 1;
+    width: var(--sidebar-width);
+    min-height: calc((var(--sidebar-width) * 77) / 272); /* because aspect-ratio wasn't enough */
     flex-direction: row;
     container-type: size;
+    aspect-ratio: 272 / 77;
 }
 #display0, #display1 {
     position: relative;
+    width: 50%;
     background-color: black;
     aspect-ratio: 136 / 77;
 }
@@ -116,7 +131,6 @@ img {
     left: 0px;
     width: 100%;
     height: 100%;
-    aspect-ratio: 136 / 77;
     border: none;
 }
 #display0Overlay, #display1Overlay {
@@ -126,10 +140,69 @@ img {
     width: 100%;
     height: 100%;
 }
-@container (max-width: 30vw) {
+@container (max-width: 70vh) {
     #display {
         flex-direction: column;
+        min-height: calc((var(--sidebar-width) * 154) / 136);
+        aspect-ratio: 136 / 154;
     }
+    #display0, #display1 {
+        width: 100%;
+    }
+}
+
+#historyControlsWrapper {
+    position: relative;
+}
+#historyControls {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: var(--sidebar-width);
+    min-height: 6vh;
+}
+#historyControlsBody {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    padding-top: 16px;
+    transition: 100ms linear transform;
+    transform: translateY(100%);
+}
+#historyPrevious, #historyNext {
+    width: 6vh;
+    height: 8vh;
+    font-size: 5vh;
+    font-family: Impact, 'Arial Narrow Bold', sans-serif;
+    color: black;
+    background-color: #AAA;
+    border: 0.5vh solid white;
+    margin: 1.5vh;
+    cursor: pointer;
+}
+#historyPrevious:disabled, #historyNext:disabled {
+    color: gray;
+    cursor: not-allowed;
+}
+#historySlider {
+    min-width: none;
+    width: none;
+    height: 4vh;
+    margin-top: 3vh;
+    background-color: #AAA;
+    border: 0.5vh solid white;
+}
+#historySlider::-webkit-slider-thumb {
+    width: 4vh;
+    height: 8vh;
+    background-color: lightgray;
+    border: 0.5vh solid grey;
+}
+#historyControls:hover #historyControlsBody {
+    transform: translateY(0);
 }
 
 #dropdown {
@@ -170,8 +243,8 @@ img {
     position: absolute;
     bottom: 0px;
     right: 0px;
-    width: min(80vw, 100vh);
-    height: min(80vw, 100vh);
+    width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
+    height: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     background-color: black;
 }
 
@@ -218,4 +291,8 @@ img {
 }
 .sliderV::-webkit-slider-thumb {
     background-color: hsl(var(--hue), var(--saturation), var(--value));
+}
+
+#disconnect {
+    display: none;
 }

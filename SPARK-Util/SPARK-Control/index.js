@@ -22,8 +22,15 @@ let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
-    connected = true;
-    appendLog('Connected!', 'lime');
+    let num = Math.random();
+    socket.on('pong', function confirm(n) {
+        if (n == num) {
+            connected = true;
+            appendLog('Connected!', 'lime');
+            socket.off('pong', confirm);
+        }
+    });
+    socket.emit('ping', num);
 });
 let ondisconnect = () => {
     connected = false;
@@ -66,7 +73,7 @@ function connect() {
 };
 window.addEventListener('load', connect);
 
-socket.on('pong', () => console.log('PING REPLY'));
+socket.on('pong', playSound);
 
 // messages
 const pendingsounds = [];
@@ -312,16 +319,16 @@ function setColors(colors) {
 socket.on('colors', setColors);
 
 // stop
-document.getElementById('emergencyStop').onclick = () => {
-    send('stop', {});
-};
+// document.getElementById('emergencyStop').onclick = () => {
+//     send('stop', {});
+// };
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
 });
 
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {
-    socket.close();
+    socket.disconnect();
     toReconnect = false;
     autoReconnect = false;
     if (rickrolled) return;

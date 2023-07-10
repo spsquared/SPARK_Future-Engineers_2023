@@ -20,11 +20,11 @@ def emit(ev: str, data):
 
 @__socket.on('disconnect')
 def __disconnect():
-    print('disconnected')
+    print('----- SERVER DISCONNECTED')
 @__socket.on('connect')
 def __connect():
-    print('connected')
+    print('----- SERVER CONNECTED')
 
 @__socket.on('ping')
-def __ping():
-    __socket.emit('pong')
+def __ping(n):
+    __socket.emit('pong', n)

@@ -131,7 +131,7 @@ def processBlobs(blobs):
 def getLandmarks(idk):
     return False
 
-def setColors(data, sendServer: bool = False):
+def setColors(data, sendServer: bool):
     global redMax, redMin, greenMax, greenMin
     redMax = (int(data[0]), int(data[2]), int(data[4]))
     greenMax = (int(data[1]), int(data[3]), int(data[5]))
