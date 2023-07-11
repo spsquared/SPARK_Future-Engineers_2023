@@ -14,7 +14,6 @@ def main():
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         def drive(data):
-            print(data)
             io.drive.throttle(data[0]['throttle'])
             io.drive.steer(data[0]['steering'])
         def capture(data):
@@ -52,7 +51,7 @@ def main():
             ]
             server.emit('capture', encoded)
         def viewFilter(data):
-            filter.setColors(data)
+            filter.setColors(data[0])
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode(),
@@ -63,7 +62,7 @@ def main():
             filter.predict(io.camera.read(), server, False)
             server.emit('message', 'Ran prediction on image')
         def colors(data):
-            filter.setColors(data)
+            filter.setColors(data[0])
         server.on('drive', drive)
         server.on('capture', capture)
         server.on('captureFilter', captureFilter)

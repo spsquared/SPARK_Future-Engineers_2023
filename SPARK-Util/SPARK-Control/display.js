@@ -23,7 +23,9 @@ function addCapture(images) {
 function addData(data) {
 
 };
-function display
+function display() {
+
+};
 function downloadFrame() {
     const downloadCanvas = document.createElement('canvas');
     downloadCanvas.width = 272;
