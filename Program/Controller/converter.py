@@ -1,7 +1,6 @@
-# from IO import io
-# from Util import server
-# from Controller import slam
-import slam
+from IO import io
+from Util import server
+from Controller import slam
 import numpy
 import cv2
 import math
@@ -115,7 +114,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return [coordinates, rawHeightsLeft]
+    return coordinates
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
