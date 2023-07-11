@@ -1,8 +1,11 @@
 // capture display
 let maxHistory = 1000;
-let historyIndex = 0;
 const history = [];
 const historyControls = {
+    slider: document.getElementById('historySlider'),
+    previousButton: document.getElementById('historyPrevious'),
+    nextButton: document.getElementById('historyNext'),
+    index: 0,
     back: false,
     forwards: false,
     slowmode: false,
@@ -10,7 +13,8 @@ const historyControls = {
     maxSize: 5000
 };
 const fpsTimes = [];
-const fps = document.getElementById('fps');
+let fps = 0;
+const fpsDisplay = document.getElementById('fps');
 const display0Img = document.getElementById('display0Img');
 const display1Img = document.getElementById('display1Img');
 function addCapture(images) {
@@ -19,9 +23,13 @@ function addCapture(images) {
         images: [
             'data:image/jpeg;base64,' + images[0],
             'data:image/jpeg;base64,' + images[1]
-        ]
+        ],
+        fps: fps
     });
     if (history.length > historyControls.maxSize) history.pop();
+    let scrollWith = historyControls.slider.value == historyControls.slider.max;
+    historyControls.slider.max = history.length;
+    if (scrollWith) historyControls.slider.value = history.length;
     fpsTimes.push(performance.now());
     display();
 };
@@ -31,14 +39,21 @@ function addData(data) {
         images: [
             'data:image/jpeg;base64,' + images[0],
             'data:image/jpeg;base64,' + images[1]
-        ]
+        ],
+        distances: [],
+        pos: [],
+        landmarks: [],
+        fps: fps
     });
     if (history.length > historyControls.maxSize) history.pop();
+    let scrollWith = historyControls.slider.value == historyControls.slider.max;
+    historyControls.slider.max = history.length;
+    if (scrollWith) historyControls.slider.value = history.length;
     fpsTimes.push(performance.now());
     display();
 };
 function display() {
-    const data = history[0];
+    const data = history[historyControls.index];
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {
@@ -47,6 +62,20 @@ function display() {
 };
 
 // controls
+historyControls.slider.oninput = (e) => {
+    historyControls.index = history.length - parseInt(historyControls.slider.value);
+    display();
+};
+historyControls.nextButton.onclick = (e) => {
+    historyControls.index = Math.max(0, historyControls.index - 1);
+    historyControls.slider.value = history.length - historyControls.index;
+    display();
+};
+historyControls.previousButton.onclick = (e) => {
+    historyControls.index = Math.min(history.length - 1, historyControls.index + 1);
+    historyControls.slider.value = history.length - historyControls.index;
+    display();
+};
 function downloadFrame() {
     const downloadCanvas = document.createElement('canvas');
     downloadCanvas.width = 272;
@@ -98,8 +127,9 @@ function importSession() {
 };
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
-    fps.innerText = 'FPS: ' + fpsTimes.length;
-}, 1000);
+    fps = fpsTimes.length;
+    fpsDisplay.innerText = 'FPS: ' + fps;
+}, 50);
 document.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = true;
@@ -128,6 +158,17 @@ document.addEventListener('keyup', (e) => {
         historyControls.slowmode = false;
     }
 });
+historyControls.slider.onkeydown = (e) => {
+    historyControls.slider.blur()
+};
+let timer = 0;
+setInterval(() => {
+    timer = (timer + 1) % 8;
+    if (historyControls.slowmode && timer % 8 != 0) return;
+    if (!historyControls.quickmode && timer % 4 != 0) return;
+    if (historyControls.back) historyControls.previousButton.onclick();
+    if (historyControls.forwards) historyControls.nextButton.onclick();
+}, 25);
 socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');
 
