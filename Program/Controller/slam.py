@@ -221,6 +221,6 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         print(err)
 
 
-def findStartingPosition(outerWalls, innerWalls, redBlobs, greenBlobs):
+def findStartingPosition(frontWall, leftWall, rightWall, outerWalls, innerWalls, redBlobs, greenBlobs):
     # oof
     return "stop"
