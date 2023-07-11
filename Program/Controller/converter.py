@@ -1,7 +1,6 @@
 # from IO import io
 # from Util import server
-# from Controller import slam
-import slam
+from Controller import slam
 import numpy
 import cv2
 import math
@@ -107,18 +106,18 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
             dist = wallHeight * focalLength / a[0]
             x = dir * (cameraOffsetX) + a[2] * dist
             y = (cameraOffsetY) + a[1] * dist
-            return (x, y, math.sqrt(x**2 + y**2), math.atan2(y, x) - math.pi / 4)
+            return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 4 + math.pi) % (math.pi * 2) - math.pi)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    # ref = coordinates.ravel().view(dtype)
-    # ref.sort(order=['theta', 'dist', 'x', 'y'])
+    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    ref = coordinates.ravel().view(dtype)
+    ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return [coordinates, croppedLeft, rawHeightsLeft]
+    return coordinates
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:

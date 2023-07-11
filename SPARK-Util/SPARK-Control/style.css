@@ -59,14 +59,45 @@ img {
 }
 #banner {
     display: inline-block;
-    height: 81px;
-    transition: 100ms linear opacity;
+    height: 80px;
+    width: 304px;
+    background-image: url("./assets/banner.png");
+    transition: 250ms linear background-image, 100ms linear opacity;
 }
 @container (max-width: 420px) {
+    #banner {
+        width: 240px;
+        background-image: url("./assets/banner4.png")
+    }
+}
+@container (max-width: 356px) {
+    #banner {
+        width: 176px;
+        background-image: url("./assets/banner3.png")
+    }
+}
+@container (max-width: 292px) {
+    #banner {
+        width: 112px;
+        background-image: url("./assets/banner2.png")
+    }
+}
+@container (max-width: 228px) {
+    #banner {
+        width: 48px;
+        background-image: url("./assets/banner1.png")
+    }
+}
+@container (max-width: 164px) {
     #banner {
         opacity: 0;
     }
 }
+/* @container (max-width: 420px) {
+    #banner {
+        opacity: 0;
+    }
+} */
 @container (max-width: 97px) {
     #banner {
         display: none;
