@@ -114,11 +114,11 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    ref = coordinates.ravel().view(dtype)
-    ref.sort(order=['theta', 'dist', 'x', 'y'])
+    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    # ref = coordinates.ravel().view(dtype)
+    # ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return [ref, croppedLeft, rawHeightsLeft]
+    return [coordinates, croppedLeft, rawHeightsLeft]
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
