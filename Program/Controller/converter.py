@@ -16,8 +16,8 @@ gM = greenMax = (110, 255, 255)
 # other constants
 horizontalFov = 155
 verticalFov = 115
-imageWidth = 272
-imageHeight = 154
+imageWidth = 544
+imageHeight = 308
 focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
 wallHeight = 10
 centerOffset = 10

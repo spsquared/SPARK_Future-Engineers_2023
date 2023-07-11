@@ -18,6 +18,8 @@ def main():
             io.drive.steer(data[0]['steering'])
         def capture(data):
             io.camera.capture(False, True)
+        def rawCapture(data):
+            io.camera.fullCapture(True)
         def captureFilter(data):
             converter.setColors(data[0], True)
             io.camera.capture(True, True)
@@ -34,13 +36,13 @@ def main():
                 io.camera.stopSaveStream(True)
         def stream(data):
             if data[0]['state'] == True:
-                io.camera.startStream(False, True)
+                io.camera.startStream(False)
             else:
                 io.camera.startStream(True)
         def filterstream(data):
             converter.setColors(data[0], True)
             if data[0]['state'] == True:
-                io.camera.startStream(True, True)
+                io.camera.startStream(True)
             else:
                 io.camera.startStream(True)
         def view(data):
@@ -65,6 +67,7 @@ def main():
             filter.setColors(data[0])
         server.on('drive', drive)
         server.on('capture', capture)
+        server.on('rawCapture', rawCapture)
         server.on('captureFilter', captureFilter)
         server.on('captureStream', captureStream)
         server.on('captureFilterStream', captureFilterStream)
