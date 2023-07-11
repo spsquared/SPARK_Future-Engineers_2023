@@ -25,12 +25,15 @@ socket.on('connect', () => {
     let num = Math.random();
     socket.on('pong', function confirm(n) {
         if (n == num) {
+            clearInterval(pingspam)
             connected = true;
             appendLog('Connected!', 'lime');
             socket.off('pong', confirm);
         }
     });
-    socket.emit('ping', num);
+    let pingspam = setInterval(() => {
+        socket.emit('ping', num);
+    }, 5000);
 });
 let ondisconnect = () => {
     connected = false;
@@ -72,8 +75,6 @@ function connect() {
     req.send();
 };
 window.addEventListener('load', connect);
-
-socket.on('pong', playSound);
 
 // messages
 const pendingsounds = [];
