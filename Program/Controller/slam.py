@@ -28,7 +28,15 @@ storedLandmarks = [
     [0, 0, False],
     [0, 0, False],
     [0, 0, False],
+    [0, 0, False],
+    [0, 0, False],
+    [0, 0, False],
+    [0, 0, False],
     [0, 0, False], # green pillarS
+    [0, 0, False],
+    [0, 0, False],
+    [0, 0, False],
+    [0, 0, False],
     [0, 0, False],
     [0, 0, False],
     [0, 0, False],
@@ -119,30 +127,51 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
             nearestLandmark[DISTANCE] = getDistance([carX, carY], wall)
             landmarks.append(nearestLandmark)
         
-        for wall in innerWalls:
-            # find nearest landmark
-            nearestLandmark = None
-            for j in range(4, 8):
-                if storedLandmarks[j][2]:
-                    if nearestLandmark == None:
-                        nearestLandmark = storedLandmarks[j]
-                    elif getDistance(storedLandmarks[j], wall) < getDistance(nearestLandmark, wall):
-                        nearestLandmark = storedLandmarks[j]
-            nearestPossibleLandmark = storedLandmarks[4]
-            for j in range(0, 8):
-                if getDistance(possibleInnerWallLandmarks[j], wall) < getDistance(nearestPossibleLandmark, wall):
-                    nearestPossibleLandmark = possibleInnerWallLandmarks[j]
-            
-            nearestLandmark[DISTANCE] = getDistance([carX, carY], wall)
-            landmarks.append(nearestLandmark)
+        # unknown landmarks
+        def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStride, index, maxLandmarks):
+            for landmark in landmarkData:
+                # find nearest landmark
+                nearestLandmark = None
+
+                newLandmark = False
+                newLandmarkIndex = None
+
+                for j in range(index, index + maxLandmarks):
+                    if storedLandmarks[j][2]:
+                        if nearestLandmark == None:
+                            nearestLandmark = storedLandmarks[j]
+                            newLandmark = False
+                        elif getDistance(storedLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
+                            nearestLandmark = storedLandmarks[j]
+                            newLandmark = False
+                    else:
+                        for k in range((j - index) * possibleLandmarkStride, (j - index) * possibleLandmarkStride + possibleLandmarkStride):
+                            if nearestLandmark == None:
+                                nearestLandmark = possibleLandmarks[j]
+                                newLandmark = True
+                                newLandmarkIndex = k
+                            elif getDistance(possibleLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
+                                nearestLandmark = possibleLandmarks[j]
+                                newLandmark = True
+                                newLandmarkIndex = k
+                
+                if newLandmark:
+                    storedLandmarks[newLandmarkIndex / possibleLandmarkStride + index] = [nearestLandmark[X], nearestLandmark[Y], True]
+                
+                nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
+                landmarks.append(nearestLandmark)
+        
+        updateUnknownLandmarks(innerWalls, possibleInnerWallLandmarks, 4, 4, 4)
+        updateUnknownLandmarks(redBlobs, possiblePillarLandmarks, 6, 8, 8)
+        updateUnknownLandmarks(greenBlobs, possiblePillarLandmarks, 6, 16, 8)
         
         def positionEquations(guess):
             x, y = guess
             
             array = []
 
-            for i in range(len(landmarks)):
-                array.append(math.pow(x - landmarks[i][X], 2) + math.pow(y - landmarks[i][Y], 2) - math.pow(landmarks[i][DISTANCE], 2))
+            for landmark in landmarks:
+                array.append(math.pow(x - landmark[X], 2) + math.pow(y - landmark[Y], 2) - math.pow(landmark[DISTANCE], 2))
             
             return tuple(array)
 
@@ -164,8 +193,8 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
             
             array = []
 
-            for i in range(len(landmarks)):
-                array.append(math.pow(math.atan2(lmCarX - landmarks[i][Y], lmCarY - landmarks[i][X]) - a, 2))
+            for landmark in landmarks:
+                array.append(math.pow(math.atan2(lmCarX - landmark[Y], lmCarY - landmark[X]) - a, 2))
             
             return tuple(array)
 
