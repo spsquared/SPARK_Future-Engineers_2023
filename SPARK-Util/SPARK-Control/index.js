@@ -204,9 +204,9 @@ function updateControllers() {
 setInterval(function () {
     updateControllers();
     if (controls.forward || controls.backward || controls.left || controls.right) {
-        send('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
+        socket.emit('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
     } else if (controls.throttle != 0 || controls.steering != 0) {
-        send('drive', { throttle: controls.throttle, steering: controls.steering });
+        socket.emit('drive', { throttle: controls.throttle, steering: controls.steering });
     }
 }, 50);
 
@@ -323,7 +323,7 @@ socket.on('colors', setColors);
 //     send('stop', {});
 // };
 document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() == 'c' && e.ctrlKey) send('stop', {});
+    if (e.key.toLowerCase() == 'c' && e.ctrlKey) socket.emit('stop');
 });
 
 let rickrolled = false;
