@@ -4,12 +4,12 @@ window.addEventListener('error', (e) => {
 
 const initcolors = [
     [
-        [ 25, 255, 255 ],
-        [ 0, 95, 75 ]
+        [25, 255, 255],
+        [0, 95, 75]
     ],
     [
-        [ 110, 255, 255 ],
-        [ 30, 30, 40 ]
+        [110, 255, 255],
+        [30, 30, 40]
     ],
 ];
 
@@ -29,17 +29,23 @@ socket.on('connect', () => {
             connected = true;
             appendLog('Connected!', 'lime');
             socket.off('pong', confirm);
+            stream.disabled = false;
+            capture.disabled = false;
+            socket.emit('getStreamState');
+            socket.emit('getColors');
         }
     });
     let pingspam = setInterval(() => {
         socket.emit('ping', num);
-    }, 5000);
+    }, 500);
 });
 let ondisconnect = () => {
     connected = false;
     if (autoReconnect) toReconnect = true;
     appendLog('Connection closed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
     setTimeout(reconnect, 10000);
+    stream.disabled = true;
+    capture.disabled = true;
 };
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
@@ -312,6 +318,13 @@ function updateSlider(i) {
         sliders[i].style.setProperty('--value', sliders[i].value * (50 / 255) + '%');
     }
 };
+function getColors() {
+    let colors = [];
+    for (let i in sliders) {
+        colors[i] = sliders[i].value;
+    }
+    return colors;
+};
 function setColors(colors) {
     for (let i in colors) {
         sliders[i].value = colors[i];
@@ -497,7 +510,7 @@ async function animateAll2() {
     var blur = 0;
     var invert = 0;
     document.body.style.transformOrigin = "center center";
-    ultraSecretInterval = setInterval(function() {
+    ultraSecretInterval = setInterval(function () {
         hue += Math.random() * 2;
         brightness += Math.random() * 0.01 * brightnessDirection;
         contrast += Math.random() * 0.01 * contrastDirection;

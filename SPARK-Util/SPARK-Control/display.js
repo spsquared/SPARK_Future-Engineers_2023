@@ -1,5 +1,3 @@
-
-
 // capture display
 let maxHistory = 1000;
 let historyIndex = 0;
@@ -39,7 +37,6 @@ function addData(data) {
     fpsTimes.push(performance.now());
     display();
 };
-
 function display() {
     const data = history[0];
     display0Img.src = data.images[0];
@@ -48,6 +45,8 @@ function display() {
         // stuff
     }
 };
+
+// controls
 function downloadFrame() {
     const downloadCanvas = document.createElement('canvas');
     downloadCanvas.width = 272;
@@ -131,3 +130,35 @@ document.addEventListener('keyup', (e) => {
 });
 socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');
+
+// controls 2: electric boogaloo
+const modSave = document.getElementById('modSave');
+const modFilter = document.getElementById('modFilter');
+const stream = document.getElementById('stream');
+const capture = document.getElementById('capture');
+const streamToggle = document.getElementById('streamToggle');
+socket.on('streamState', (state) => {
+    streamToggle.checked = state[0];
+    modFilter.checked = state[1];
+    modSave.checked = state[2];
+    if (streamToggle.checked) {
+        stream.style.backgroundColor = 'red';
+        stream.innerText = 'STOP STREAM';
+        modFilter.disabled = true;
+        modSave.disabled = true;
+    } else {
+        stream.style.backgroundColor = '';
+        stream.innerText = 'START STREAM';
+        modFilter.disabled = false;
+        modSave.disabled = false;
+    }
+});
+stream.onclick = () => {
+    streamToggle.checked = !streamToggle.checked;
+    socket.emit('stream', { save: modSave.checked, filter: modFilter.checked, colors: getColors() });
+};
+capture.onclick = () => {
+    socket.emit('capture', { save: modSave.checked, filter: modFilter.checked, colors: getColors() });
+};
+stream.disabled = true;
+capture.disabled = true;

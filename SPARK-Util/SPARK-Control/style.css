@@ -10,8 +10,10 @@ img {
     image-rendering: pixelated;
 }
 
+*:disabled {
+    cursor: not-allowed;
+}
 .largeButton {
-    width: 268px;
     height: 32px;
     margin: 16px 16px;
     margin-bottom: 0px;
@@ -22,6 +24,76 @@ img {
 }
 .largeButton:active {
     border-style: inset;
+}
+.largeButton:disabled {
+    color: initial;
+    background-color: gray !important;
+    cursor: not-allowed !important;
+}
+.largeButton:disabled:active {
+    border-style: outset;
+}
+.toggle {
+    position: relative;
+    bottom: 4px;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+.toggleInput {
+    opacity: 0px;
+    width: 0px;
+    height: 0px;
+}
+.toggleSlider {
+    position: absolute;
+    top: 2px;
+    left: 0px;
+    width: 36px;
+    height: 10px;
+    background-color: #EE0000;
+    border: 2px solid black;
+    transition: 0.1s linear;
+    cursor: pointer;
+}
+.toggleSlider::before {
+    position: absolute;
+    top: -6px;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    content: '';
+    background-color: lightgrey;
+    border: 2px solid black;
+    transition: 0.1s linear;
+    transform: translateX(-4px);
+}
+.toggleInput:checked + .toggleSlider {
+    background-color: #00AA00;
+}
+.toggleInput:checked + .toggleSlider::before {
+    transform: translateX(16px);
+}
+.toggleInput:disabled + .toggleSlider, .toggleInput:disabled + .toggleSlider::before {
+    cursor: not-allowed !important;
+}
+.slider {
+    appearance: none;
+    min-width: 0px;
+    height: 10px;
+    background-color: lightgray;
+    border: 2px solid black;
+    margin-right: 8px;
+}
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid black;
+    cursor: grab;
+}
+.slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
 }
 
 #leftPane {
@@ -36,6 +108,7 @@ img {
     container-type: size;
     border-right: 4px solid grey;
     --sidebar-width: calc(100vw - min(calc(100vw - var(--min-sidebar-width)), 100vh) - 4px);
+    z-index: 1;
 }
 #rightPane {
     position: absolute;
@@ -44,6 +117,7 @@ img {
     width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     height: 100vh;
     background-color: #444;
+    z-index: 0;
 }
 
 #header {
@@ -80,13 +154,14 @@ img {
     grid-template-columns: 1fr 1fr;
     min-height: 0px;
     border-top: 4px solid black;
+    border-bottom: 4px solid black;
 }
 
 #buttonsContainer {
     position: relative;
     height: 100%;
     border-right: 4px solid black;
-    overflow: visible;
+    pointer-events: none;
 }
 #slideout {
     position: absolute;
@@ -95,6 +170,7 @@ img {
     width: 100%;
     height: 100%;
     --tabImage: url(./assets/arrow-right.svg);
+    pointer-events: all;
 }
 #slideoutTab {
     display: none;
@@ -105,7 +181,6 @@ img {
     height: 100%;
     background-color: lightgray;
     border: 4px solid black;
-    border-bottom: none;
     background-position: center;
     background-repeat: no-repeat;
     background-size: 80% 80%;
@@ -115,13 +190,34 @@ img {
 #slideoutTabCheckbox {
     opacity: 0;
 }
-#buttons {
+#slideoutBody {
     min-height: calc(100% - 16px);
     max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
     padding: 8px 8px;
     margin-right: -4px;
     border-right: 4px solid black;
     overflow-y: auto;
+}
+#buttons {
+    display: flex;
+    flex-direction: column;
+}
+#buttonModifiers {
+    width: 100%;
+    margin-top: 8px;
+    text-align: center;
+}
+#streamToggle {
+    display: none;
+}
+#stream {
+    background-color: lime;
+}
+#capture {
+    background-color: lime;
+}
+#modSave {
+
 }
 
 #log {
@@ -198,16 +294,16 @@ img {
         position: absolute;
         top: 0px;
         left: 0px;
-        width: 100%;
+        width: calc(100vw - 32px);
         border-right: none;
-        z-index: 1;
+        z-index: 100;
     }
     #slideout {
         top: -4px;
         border: 4px solid black;
         border-left: none;
-        border-bottom: none;
         width: unset;
+        margin-bottom: -4px;
         transform: translateX(-100%);
         transition: 200ms ease transform;
     }
@@ -218,7 +314,7 @@ img {
         transform: translateX(0);
         --tabImage: url(./assets/arrow-left.svg);
     }
-    #buttons {
+    #slideoutBody {
         background-color: lightgray;
     }
 
@@ -349,23 +445,6 @@ img {
     grid-template-columns: repeat(2, auto);
     grid-template-rows: repeat(2, 24px);
     grid-auto-flow: column;
-}
-.slider {
-    appearance: none;
-    height: 10px;
-    background-color: lightgray;
-    border: 2px solid black;
-    margin-right: 8px;
-}
-.slider::-webkit-slider-thumb {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid black;
-    cursor: grab;
-}
-.slider::-webkit-slider-thumb:active {
-    cursor: grabbing;
 }
 .sliderH::-webkit-slider-thumb {
     background-color: hsl(var(--hue), 100%, 50%);

@@ -22,9 +22,23 @@
             <div id="buttonsContainer">
                 <input type="checkbox" id="slideoutTabCheckbox"> <!-- dumb CSS thing -->
                 <div id="slideout">
-                    <div id="buttons">
-                        <div id="buttonModifiers">
-                            
+                    <div id="slideoutBody">
+                        <div id="buttons">
+                            <div id="buttonModifiers">
+                                <label for="modSave">Save: </label>
+                                <label class="toggle">
+                                    <input type="checkbox" id="modSave" class="toggleInput">
+                                    <span class="toggleSlider"></span>
+                                </label>
+                                <label for="modSave">Filter: </label>
+                                <label class="toggle">
+                                    <input type="checkbox" id="modFilter" class="toggleInput">
+                                    <span class="toggleSlider"></span>
+                                </label>
+                            </div>
+                            <button id="stream" class="largeButton">START STREAM</button>
+                            <input type="checkbox" id="streamToggle">
+                            <button id="capture" class="largeButton">CAPTURE</button>
                         </div>
                     </div>
                     <label id="slideoutTab" for="slideoutTabCheckbox"></label>
