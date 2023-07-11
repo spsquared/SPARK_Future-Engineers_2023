@@ -94,7 +94,7 @@ carAngle = 0
 
 COUNTER_CLOCKWISE = 1
 CLOCKWISE = -1
-carDirection = COUNTER_CLOCKWISE
+carDirection = CLOCKWISE
 
 carSpeed = 0
 

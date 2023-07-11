@@ -95,7 +95,6 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     
     def rawToCartesian(a, dir):
         dist = wallHeight * focalLength / a[0]
-        if a[0] == 0: dist = wallHeight * focalLength
         x = dir * (cameraOffsetX + a[1] * dist)
         y = (cameraOffsetY + a[2] * dist)
         # focal length fix for non-cylindrical projection
@@ -170,9 +169,13 @@ def getLandmarks(distances, rBlobs, gBlobs):
                     innerWallLandmarks.append(last)
                     angleAverage = None
                 else:
-                    angleDifference = abs(angle - angleAverage)
-                    if angleDifference < -45 * slam.carDirection:
-                        outerWallLandmarks.append(last)
+                    angleDifference = angle - angleAverage
+                    if slam.carDirection == slam.CLOCKWISE:
+                        if angleDifference < -math.pi / 4:
+                            outerWallLandmarks.append(last)
+                    else:
+                        if angleDifference > math.pi / 4:
+                            outerWallLandmarks.append(last)
                     angleAverage = angle / 2 + angleAverage / 2
         last = point
     
