@@ -136,6 +136,7 @@ const modSave = document.getElementById('modSave');
 const modFilter = document.getElementById('modFilter');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
+const rawcapture = document.getElementById('rawCapture');
 const streamToggle = document.getElementById('streamToggle');
 socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
@@ -160,5 +161,9 @@ stream.onclick = () => {
 capture.onclick = () => {
     socket.emit('capture', { save: modSave.checked, filter: modFilter.checked, colors: getColors() });
 };
+rawcapture.onclick = () => {
+    socket.emit('rawCapture');
+};
 stream.disabled = true;
 capture.disabled = true;
+rawcapture.disabled = true;
