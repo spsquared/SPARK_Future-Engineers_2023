@@ -1,7 +1,6 @@
-# from IO import io
-# from Util import server
-# from Controller import slam
-import slam
+from IO import io
+from Util import server
+from Controller import slam
 import numpy
 import cv2
 import math

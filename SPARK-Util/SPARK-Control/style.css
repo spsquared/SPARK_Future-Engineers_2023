@@ -150,6 +150,7 @@ img {
 }
 
 #display {
+    position: relative;
     display: flex;
     width: var(--sidebar-width);
     /* because aspect-ratio wasn't enough */
@@ -157,6 +158,15 @@ img {
     flex-direction: row;
     container-type: size;
     aspect-ratio: 272 / 77;
+}
+#fps {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 4px 4px;
+    font-size: 14px;
+    color: white;
+    background-color: #000A;
 }
 #display0, #display1 {
     position: relative;
