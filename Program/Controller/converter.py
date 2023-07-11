@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import slam
 import numpy
 import cv2
@@ -90,14 +90,15 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
-    wallStart = 79
-    wallEnd = 125
-    croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
+    wallStart = round(imageHeight /2)
+    wallEnd = round(imageHeight * 3 /4)
+    croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
+    croppedRight = numpy.flip(numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
 
     # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = (croppedLeft != 0).argmax(axis=1)
-    rawHeightsRight = (croppedRight != 0).argmax(axis=1)
+    rawHeightsLeft = (wallEnd - wallStart) - croppedLeft.argmax(axis=1)
+    rawHeightsRight = (wallEnd - wallStart) - croppedRight.argmax(axis=1)
     
     def rawToCartesian(a, dir):
         if a[0] == 0:
@@ -106,18 +107,19 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
             dist = wallHeight * focalLength / a[0]
             x = dir * (cameraOffsetX) + a[2] * dist
             y = (cameraOffsetY) + a[1] * dist
-            return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 4 + math.pi) % (math.pi * 2) - math.pi)
+            return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
-    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
+    # rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
-    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
+    # coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    ref = coordinates.ravel().view(dtype)
-    ref.sort(order=['theta', 'dist', 'x', 'y'])
+    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    # ref = coordinates.ravel().view(dtype)
+    # ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return coordinates
+    return leftCoordinates, croppedLeft, rawHeightsLeft
+    # return coordinates
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
@@ -188,10 +190,10 @@ def getLandmarks(distances, rBlobs, gBlobs):
         last = point
     
     # get distance info for blobs
-    for blob in rBlobs:
-        rBlobLandmarks.append(distances[blob[0]])
-    for blob in gBlobs:
-        gBlobLandmarks.append(distances[blob[0]])
+    # for blob in rBlobs:
+    #     rBlobLandmarks.append(distances[blob[0]])
+    # for blob in gBlobs:
+    #     gBlobLandmarks.append(distances[blob[0]])
 
     return [outerWallLandmarks, innerWallLandmarks, rBlobLandmarks, gBlobLandmarks]
 
