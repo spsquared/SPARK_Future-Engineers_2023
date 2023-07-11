@@ -19,7 +19,7 @@ def main():
         def capture(data):
             io.camera.capture(False, True)
         def rawCapture(data):
-            io.camera.fullCapture(True)
+            io.camera.captureFull(True)
         def captureFilter(data):
             converter.setColors(data[0], True)
             io.camera.capture(True, True)
@@ -27,24 +27,24 @@ def main():
             if data[0]['state'] == True:
                 io.camera.startSaveStream(False, True)
             else:
-                io.camera.stopSaveStream(True)
+                io.camera.stopSaveStream()
         def captureFilterStream(data):
             converter.setColors(data[0]['colors'])
             if data[0]['state'] == True:
                 io.camera.startSaveStream(True, True)
             else:
-                io.camera.stopSaveStream(True)
+                io.camera.stopSaveStream()
         def stream(data):
             if data[0]['state'] == True:
                 io.camera.startStream(False)
             else:
-                io.camera.startStream(True)
+                io.camera.stopStream()
         def filterstream(data):
             converter.setColors(data[0], True)
             if data[0]['state'] == True:
                 io.camera.startStream(True)
             else:
-                io.camera.startStream(True)
+                io.camera.stopStream()
         def view(data):
             encoded = [
                 base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
