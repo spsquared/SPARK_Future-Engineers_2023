@@ -9,22 +9,44 @@ const historyControls = {
     forwards: false,
     slowmode: false,
     quickmode: false,
+    maxSize: 5000
 };
 const fpsTimes = [];
-const displayImg = document.getElementById('displayImg');
-const FPS = document.getElementById('fps');
+const fps = document.getElementById('fps');
+const display0Img = document.getElementById('display0Img');
+const display1Img = document.getElementById('display1Img');
 function addCapture(images) {
     history.unshift({
+        type: 0,
         images: [
-            'data:image/jpeg;base64,'
+            'data:image/jpeg;base64,' + images[0],
+            'data:image/jpeg;base64,' + images[1]
         ]
     });
+    if (history.length > historyControls.maxSize) history.pop();
+    fpsTimes.push(performance.now());
+    display();
 };
 function addData(data) {
-
+    history.unshift({
+        type: 1,
+        images: [
+            'data:image/jpeg;base64,' + images[0],
+            'data:image/jpeg;base64,' + images[1]
+        ]
+    });
+    if (history.length > historyControls.maxSize) history.pop();
+    fpsTimes.push(performance.now());
+    display();
 };
-function display() {
 
+function display() {
+    const data = history[0];
+    display0Img.src = data.images[0];
+    display1Img.src = data.images[1];
+    if (data.type == 1) {
+        // stuff
+    }
 };
 function downloadFrame() {
     const downloadCanvas = document.createElement('canvas');
@@ -77,7 +99,7 @@ function importSession() {
 };
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
-    // FPS.innerHTML = 'FPS: ' + fpsTimes.length;
+    fps.innerText = 'FPS: ' + fpsTimes.length;
 }, 1000);
 document.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowLeft') {
@@ -107,5 +129,5 @@ document.addEventListener('keyup', (e) => {
         historyControls.slowmode = false;
     }
 });
-socket.on('capture', (images) => {console.log(images[0]);console.log(images[1])}); // 0 is jpeg, 1 is png
+socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');
