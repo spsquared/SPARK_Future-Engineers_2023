@@ -62,7 +62,7 @@ img {
     height: 80px;
     width: 304px;
     background-image: url("./assets/banner.png");
-    transition: 250ms linear background-image, 100ms linear opacity;
+    transition: 250ms linear background-image, 250ms linear width, 100ms linear opacity;
 }
 @container (max-width: 420px) {
     #banner {
