@@ -13,6 +13,16 @@ const historyControls = {
 const fpsTimes = [];
 const displayImg = document.getElementById('displayImg');
 const FPS = document.getElementById('fps');
+function addCapture(images) {
+    history.unshift({
+        images: [
+            'data:image/jpeg;base64,'
+        ]
+    });
+};
+function addData(data) {
+
+};
 function downloadFrame() {
     const downloadCanvas = document.createElement('canvas');
     downloadCanvas.width = 272;
@@ -94,5 +104,5 @@ document.addEventListener('keyup', (e) => {
         historyControls.slowmode = false;
     }
 });
-socket.on('capture', (images) => console.log(images)); // 0 is jpeg, 1 is png
+socket.on('capture', (images) => {console.log(images[0]);console.log(images[1])}); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');

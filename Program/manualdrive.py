@@ -14,6 +14,7 @@ def main():
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         def drive(data):
+            print(data)
             io.drive.throttle(data['throttle'])
             io.drive.steer(data['steering'])
         def capture(data):

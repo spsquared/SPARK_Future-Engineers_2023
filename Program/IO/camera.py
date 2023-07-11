@@ -11,10 +11,14 @@ import numpy
 
 # wrapper for camera functions
 
-imageWidthRaw = 544
-imageHeightRaw = 308
-imageWidth = 272
-imageHeight = 154
+# imageWidthRaw = 544
+# imageHeightRaw = 308
+# imageWidth = 272
+# imageHeight = 154
+imageWidthRaw = 3264
+imageHeightRaw = 1848
+imageWidth = 3264
+imageHeight = 1848
 
 camera0 = CSICamera(capture_device=0, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
 camera1 = CSICamera(capture_device=1, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
