@@ -1,6 +1,7 @@
-from IO import io
-from Util import server
-from Controller import slam
+# from IO import io
+# from Util import server
+# from Controller import slam
+import slam
 import numpy
 import cv2
 import math
@@ -87,7 +88,7 @@ leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global focalLength, wallHeight, imgSinAngles, imgCosAngles
+    global focalLength, wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
     wallStart = 79
@@ -101,26 +102,23 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     
     def rawToCartesian(a, dir):
         if a[0] == 0:
-            dist = 10000
+            return (-1.0, -1.0, -1.0, -1.0)
         else:
             dist = wallHeight * focalLength / a[0]
-        x = dir * (cameraOffsetX) + a[2] * dist
-        y = (cameraOffsetY) + a[1] * dist
-        # focal length fix for non-cylindrical projection
-        # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
-        # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
-        return (x, y, dist, math.atan2(y, x))
+            x = dir * (cameraOffsetX) + a[2] * dist
+            y = (cameraOffsetY) + a[1] * dist
+            return (x, y, math.sqrt(x**2 + y**2), math.atan2(y, x) - math.pi / 4)
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
     rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    ref = coordinates.ravel().view(dtype)
-    ref.sort(order=['theta', 'dist', 'x', 'y'])
+    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    # ref = coordinates.ravel().view(dtype)
+    # ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return [ref, croppedLeft, rawHeightsLeft]
+    return [coordinates, croppedLeft, rawHeightsLeft]
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
@@ -168,6 +166,8 @@ def getLandmarks(distances, rBlobs, gBlobs):
     last = [None]
     angleAverage = None
     for point in list(distances):
+        if point[2] == -1:
+            continue
         if last[0] != None:
             slope = (point[2] - last[2]) / (point[3] - last[3])
             angle = math.atan2(slope, 1)
