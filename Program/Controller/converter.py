@@ -73,13 +73,19 @@ def filter(imgIn: numpy.ndarray):
         print(err)
 
 # distance scanner
-imgSinAngles = []
-imgCosAngles = []
+leftImgSinAngles = []
+leftImgCosAngles = []
+rightImgSinAngles = []
+rightImgCosAngles = []
 for i in range(imageWidth):
-    imgSinAngles.append(math.sin(math.pi / 6 - math.atan2(i - (imageWidth / 2), focalLength)))
-    imgCosAngles.append(math.cos(math.pi / 6 - math.atan2(i - (imageWidth / 2), focalLength)))
-imgSinAngles = numpy.array(imgSinAngles)
-imgCosAngles = numpy.array(imgCosAngles)
+    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+leftImgSinAngles = numpy.array(leftImgSinAngles)
+leftImgCosAngles = numpy.array(leftImgCosAngles)
+rightImgSinAngles = numpy.array(rightImgSinAngles)
+rightImgCosAngles = numpy.array(rightImgCosAngles)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, imgSinAngles, imgCosAngles
 
@@ -98,15 +104,15 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
             dist = 10000
         else:
             dist = wallHeight * focalLength / a[0]
-        x = dir * (cameraOffsetX) + a[1] * dist
-        y = (cameraOffsetY) + a[2] * dist
+        x = dir * (cameraOffsetX) + a[2] * dist
+        y = (cameraOffsetY) + a[1] * dist
         # focal length fix for non-cylindrical projection
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         return (x, y, dist, math.atan2(y, x))
 
-    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles), -1), -1)
-    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles), -1), 1)
+    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
+    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
