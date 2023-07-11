@@ -96,6 +96,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     
     def rawToCartesian(a, dir):
         dist = wallHeight * focalLength / a[0]
+        if a[0] == 0: dist = wallHeight * focalLength
         x = dir * (cameraOffsetX + a[1] * dist)
         y = (cameraOffsetY + a[2] * dist)
         # focal length fix for non-cylindrical projection

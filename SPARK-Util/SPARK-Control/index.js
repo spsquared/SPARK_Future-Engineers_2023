@@ -25,12 +25,15 @@ socket.on('connect', () => {
     let num = Math.random();
     socket.on('pong', function confirm(n) {
         if (n == num) {
+            clearInterval(pingspam)
             connected = true;
             appendLog('Connected!', 'lime');
             socket.off('pong', confirm);
         }
     });
-    socket.emit('ping', num);
+    let pingspam = setInterval(() => {
+        socket.emit('ping', num);
+    }, 5000);
 });
 let ondisconnect = () => {
     connected = false;
@@ -72,8 +75,6 @@ function connect() {
     req.send();
 };
 window.addEventListener('load', connect);
-
-socket.on('pong', playSound);
 
 // messages
 const pendingsounds = [];
@@ -124,21 +125,26 @@ const controls = {
     right: 0,
     throttle: 0,
     steering: 0,
-    trim: 0.05
+    trim: 0.05,
+    updated: false
 };
 document.onkeydown = function (e) {
     switch (e.key.toLowerCase()) {
         case 'w':
             controls.forward = 100;
+            controls.updated = true;
             break;
         case 's':
             controls.backward = -100;
+            controls.updated = true;
             break;
         case 'a':
             controls.left = -100;
+            controls.updated = true;
             break;
         case 'd':
             controls.right = 100;
+            controls.updated = true;
             break;
     }
 };
@@ -146,15 +152,19 @@ document.onkeyup = function (e) {
     switch (e.key.toLowerCase()) {
         case 'w':
             controls.forward = 0;
+            controls.updated = true;
             break;
         case 's':
             controls.backward = -0;
+            controls.updated = true;
             break;
         case 'a':
             controls.left = -0;
+            controls.updated = true;
             break;
         case 'd':
             controls.right = 0;
+            controls.updated = true;
             break;
     }
 };
@@ -203,10 +213,13 @@ function updateControllers() {
 };
 setInterval(function () {
     updateControllers();
-    if (controls.forward || controls.backward || controls.left || controls.right) {
-        socket.emit('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
-    } else if (controls.throttle != 0 || controls.steering != 0) {
-        socket.emit('drive', { throttle: controls.throttle, steering: controls.steering });
+    if (controls.updated) {
+        if (controls.throttle != 0 || controls.steering != 0) {
+            socket.emit('drive', { throttle: controls.throttle, steering: controls.steering });
+        } else {
+            socket.emit('drive', { throttle: controls.forward + controls.backward, steering: controls.left + controls.right });
+        }
+        controls.updated = false;
     }
 }, 50);
 

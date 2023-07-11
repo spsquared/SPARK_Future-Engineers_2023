@@ -14,32 +14,32 @@ def main():
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         def drive(data):
-            print(data)
-            io.drive.throttle(data['throttle'])
-            io.drive.steer(data['steering'])
+            io.drive.throttle(data[0]['throttle'])
+            io.drive.steer(data[0]['steering'])
         def capture(data):
             io.camera.capture(False, True)
         def captureFilter(data):
-            converter.setColors(data, True)
+            converter.setColors(data[0], True)
             io.camera.capture(True, True)
         def captureStream(data):
-            if data['state'] == True:
+            if data[0]['state'] == True:
                 io.camera.startSaveStream(False, True)
             else:
                 io.camera.stopSaveStream(True)
         def captureFilterStream(data):
-            converter.setColors(data['colors'])
-            if data['state'] == True:
+            converter.setColors(data[0]['colors'])
+            if data[0]['state'] == True:
                 io.camera.startSaveStream(True, True)
             else:
                 io.camera.stopSaveStream(True)
         def stream(data):
-            if data['state'] == True:
+            if data[0]['state'] == True:
                 io.camera.startStream(False, True)
             else:
                 io.camera.startStream(True)
         def filterstream(data):
-            if data['state'] == True:
+            converter.setColors(data[0], True)
+            if data[0]['state'] == True:
                 io.camera.startStream(True, True)
             else:
                 io.camera.startStream(True)
@@ -51,7 +51,7 @@ def main():
             ]
             server.emit('capture', encoded)
         def viewFilter(data):
-            filter.setColors(data)
+            filter.setColors(data[0])
             encoded = [
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[0])[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', io.camera.read()[1])[1]).decode(),
@@ -62,7 +62,7 @@ def main():
             filter.predict(io.camera.read(), server, False)
             server.emit('message', 'Ran prediction on image')
         def colors(data):
-            filter.setColors(data)
+            filter.setColors(data[0])
         server.on('drive', drive)
         server.on('capture', capture)
         server.on('captureFilter', captureFilter)

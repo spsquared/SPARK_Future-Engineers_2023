@@ -41,9 +41,13 @@ hostio.on('connection', (socket) => {
     }
     console.log('Connection from server');
     hostConnectionCount++;
-    socket.on('disconnect', () => hostConnectionCount--);
-    socket.on('timeout', () => hostConnectionCount--);
-    socket.on('error', () => hostConnectionCount--);
+    let handleDisconnect = () => {
+        hostConnectionCount--;
+        io.sockets.sockets.forEach((socket) => socket.disconnect());
+    };
+    socket.on('disconnect', handleDisconnect);
+    socket.on('timeout', handleDisconnect);
+    socket.on('error', handleDisconnect);
     if (hostConnectionCount > 1) {
         io.emit('multipleHosts');
         hostio.emit('multipleHosts');
