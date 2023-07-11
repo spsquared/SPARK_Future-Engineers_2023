@@ -64,10 +64,10 @@ def filter(imgIn: numpy.ndarray):
         # edge detection
         lower = 50
         upper = 125
-        edgesImage = cv2.Canny(blurredImg, lower, upper, 3)
+        edgesImg = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
-        # return [grayImage, blurredR, blurredG]
-        return cv2.merge((edgesImage, blurredG, blurredR))
+        return [blurredImg, edgesImg, blurredR, blurredG]
+        # return cv2.merge((edgesImage, blurredG, blurredR))
     except Exception as err:
         io.error()
         print(err)
@@ -86,19 +86,24 @@ leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
-def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, rightBlurredIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
     wallStart = round(imageHeight /2)
     wallEnd = round(imageHeight * 3 /4)
-    croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
     # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
     croppedRight = numpy.flip(numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
 
     # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = (wallEnd - wallStart) - croppedLeft.argmax(axis=1)
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
     rawHeightsRight = (wallEnd - wallStart) - croppedRight.argmax(axis=1)
+
+    for i in range(len(rawHeightsLeft)):
+        # rawHeightsLeft[i] = leftBlurredIn[wallStart + int(rawHeightsLeft[i]) + 1][i]
+        rawHeightsLeft[i] = (wallEnd - wallStart) - (rawHeightsLeft[i] - leftBlurredIn[wallEnd - int(rawHeightsLeft[i]) + 1][i] / 7 + 15)
     
     def rawToCartesian(a, dir):
         if a[0] == 0:
