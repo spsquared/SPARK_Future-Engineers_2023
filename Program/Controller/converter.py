@@ -1,6 +1,7 @@
-from IO import io
-from Util import server
-from Controller import slam
+# from IO import io
+# from Util import server
+# from Controller import slam
+import slam
 import numpy
 import cv2
 import math
@@ -94,7 +95,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
     
     def rawToCartesian(a, dir):
-        dist = wallHeight * focalLength / a[0]
+        if a[0] == 0:
+            dist = 10000
+        else:
+            dist = wallHeight * focalLength / a[0]
         x = dir * (cameraOffsetX + a[1] * dist)
         y = (cameraOffsetY + a[2] * dist)
         # focal length fix for non-cylindrical projection
@@ -111,7 +115,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return coordinates
+    return [coordinates, rawHeightsLeft]
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
