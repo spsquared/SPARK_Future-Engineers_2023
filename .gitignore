@@ -3,4 +3,4 @@ node_modules/
 Program/Util/auth.json
 SPARK-Util/SPARK-Control/config.js
 
-*/__pycache__/
+__pycache__/
