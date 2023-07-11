@@ -29,7 +29,6 @@ const io = new SocketIO(server2, {
 });
 const authIds = require('./auth.json');
 
-const recentData = {};
 let hostConnectionCount = 0;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
@@ -53,10 +52,6 @@ hostio.on('connection', (socket) => {
         hostio.emit('multipleHosts');
     }
     socket.onAny((event, ...args) => { // python socketio only allows 1 argument but sure
-        if (event === 'data') {
-            // store in recentData
-        }
-        console.log(event, args)
         io.emit(event, ...args);
     });
 });
@@ -81,11 +76,6 @@ io.on('connection', (socket) => {
             onevent.call(socket, packet);
         };
         socket.onAny((event, ...args) => {
-            if (event === 'error') return;
-            if (event === 'getRecentData') {
-                socket.emit('recentData', recentData);
-                return;
-            }
             hostio.emit(event, args); // arguments are condensed into one array for python socketio
         });
     });
