@@ -29,4 +29,25 @@ imgpoints.append(corners2)
 # Draw and display the corners
 cv.drawChessboardCorners(img, (7,6), corners2, ret)
 
-cv.imwrite('distorted-corners.png')
+cv.imwrite('distorted-corners.png', img)
+
+ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+
+h, w = img.shape[:2]
+newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
+
+# using cv2.undistort()
+dst = cv.undistort(img, mtx, dist, None, newcameramtx)
+x, y, w, h = roi
+cv.imwrite('undistorted-cv2undistort.png', dst)
+dst = dst[y:y+h, x:x+w]
+cv.imwrite('undistorted-cv2undistort-cropped.png', dst)
+
+# using remap function
+mapx, mapy = cv.initUndistortRectifyMap(mtx, dist, None, newcameramtx, (w,h), 5)
+dst = cv.remap(img, mapx, mapy, cv.INTER_LINEAR)
+cv.imwrite('undistorted-remap.png', dst)
+# crop the image
+x, y, w, h = roi
+dst = dst[y:y+h, x:x+w]
+cv.imwrite('undistorted-remap-cropped.png', dst)
