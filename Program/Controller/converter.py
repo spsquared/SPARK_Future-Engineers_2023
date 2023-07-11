@@ -77,12 +77,12 @@ def filter(imgIn: numpy.ndarray):
 imgSinAngles = []
 imgCosAngles = []
 for i in range(imageWidth):
-    imgSinAngles.append(math.sin(60 - math.atan2((imageWidth / 2) - i, focalLength)))
-    imgCosAngles.append(math.cos(60 - math.atan2((imageWidth / 2) - i, focalLength)))
+    imgSinAngles.append(math.sin(math.pi / 6 - math.atan2(i - (imageWidth / 2), focalLength)))
+    imgCosAngles.append(math.cos(math.pi / 6 - math.atan2(i - (imageWidth / 2), focalLength)))
 imgSinAngles = numpy.array(imgSinAngles)
 imgCosAngles = numpy.array(imgCosAngles)
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global focalLength, wallHeight, imgAngles
+    global focalLength, wallHeight, imgSinAngles, imgCosAngles
 
     # crop for wall detection, then flip
     wallStart = 79
@@ -99,15 +99,15 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
             dist = 10000
         else:
             dist = wallHeight * focalLength / a[0]
-        x = dir * (cameraOffsetX + a[1] * dist)
-        y = (cameraOffsetY + a[2] * dist)
+        x = dir * (cameraOffsetX) + a[1] * dist
+        y = (cameraOffsetY) + a[2] * dist
         # focal length fix for non-cylindrical projection
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         return (x, y, dist, math.atan2(y, x))
 
-    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
-    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles)), 1)
+    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles), -1), -1)
+    rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, imgSinAngles, imgCosAngles), -1), 1)
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
@@ -115,7 +115,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return [coordinates, rawHeightsLeft]
+    return [ref, croppedLeft, rawHeightsLeft]
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
