@@ -93,6 +93,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
         # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
         # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         dist = wallHeight * focalLength / a[0]
+        if a[0] == 0: dist = wallHeight * focalLength
         x = dir * (cameraOffsetX + a[1] * dist)
         y = (cameraOffsetY + a[2] * dist)
         return (x, y, dist, math.atan2(y, x))
