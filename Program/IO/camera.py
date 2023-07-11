@@ -11,19 +11,16 @@ import numpy
 
 # wrapper for camera functions
 
-imageWidthRaw = 544
-imageHeightRaw = 308
-imageWidth = 272
-imageHeight = 154
-# imageWidthRaw = 3264
-# imageHeightRaw = 1848
-# imageWidth = 3264
-# imageHeight = 1848
+imageWidthRaw = 1088
+imageHeightRaw = 616
+imageWidth = 544
+imageHeight = 308
 
 camera0 = CSICamera(capture_device=0, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
 camera1 = CSICamera(capture_device=1, width=imageWidthRaw, height=imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
 running = True
-currentImages = [[[[]]], [[[]]]]
+currentRawImages = [None, None]
+currentImages = [None, None]
 thread = None
 
 camera0.running = True
@@ -34,8 +31,10 @@ def __capture():
         # update loop that constantly updates the most recent image which can be read at any time
         while running:
             start = time.time()
-            currentImages[0] = downscale(undistort(camera0.value))
-            currentImages[1] = downscale(undistort(camera1.value))
+            currentRawImages[0] = undistort(camera0.value)
+            currentRawImages[1] = undistort(camera1.value)
+            currentImages[0] = downscale(currentRawImages[0])
+            currentImages[1] = downscale(currentRawImages[1])
             time.sleep(max(0.02-(time.time()-start), 0))
     except Exception as err:
         print(err)
@@ -62,11 +61,10 @@ def downscale(img: numpy.ndarray):
 # single image save
 serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 def capture(filter: bool, sendServer: bool):
-    global currentImages
     try:
         name = str(round(time.time()*1000))
         if filter:
-            filteredImgs = converter.filter(currentImages, False)
+            filteredImgs = converter.filter(read(), False)
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured (filtered) ' + name + '.png')
@@ -88,10 +86,23 @@ def capture(filter: bool, sendServer: bool):
                 ]
                 server.emit('capture', encoded)
             print('Captured ' + name + '.png')
-        return currentImages
+        return True
     except Exception as err:
         print(err)
         io.error()
+        return False
+def captureFull(sendServer: bool):
+    name = str(round(time.time()*1000)) + '-f'
+    cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((currentRawImages[0], currentRawImages[1]), axis=1))
+    if sendServer:
+        server.emit('message', 'Captured ' + name + '.png')
+        encoded = [
+            base64.b64encode(cv2.imencode('.jpg', currentRawImages[0], serverQuality)[1]).decode(),
+            base64.b64encode(cv2.imencode('.jpg', currentRawImages[1], serverQuality)[1]).decode(),
+            0
+        ]
+        server.emit('capture', encoded)
+    print('Captured ' + name + '.png')
 
 # save a stream of images at 10 fps
 streamThread = None
@@ -111,13 +122,13 @@ def startSaveStream(filter: bool, sendServer: bool):
         else:
             os.mkdir('./image_out/' + name)
         def loop():
-            global currentImages, streaming, totalCaptured
+            global streaming, totalCaptured
             try:
                 index = 0
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = converter.filter(currentImages, False)
+                        filteredImgs = converter.filter(read(), False)
                         cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if sendServer:
                             encoded = [
@@ -158,47 +169,44 @@ def stopSaveStream():
         totalCaptured = 0
         return True
     return False
-def startStream(filter: bool, sendServer: bool):
+def startStream(filter: bool):
     global streamThread, streaming, streamServing, streamSaving
     if not streaming:
-        streamServing = sendServer
+        streamServing = True
         streamSaving = False
         streaming = True
         def loop():
-            global currentImages, streaming
+            global streaming
             try:
                 index = 0
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = converter.filter(currentImages, False)
-                        if sendServer:
-                            encoded = [
-                                base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
-                                base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
-                                1
-                            ]
-                            server.emit('capture', encoded)
+                        filteredImgs = converter.filter(read(), False)
+                        encoded = [
+                            base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
+                            base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
+                            1
+                        ]
+                        server.emit('capture', encoded)
                     else:
-                        if sendServer:
-                            encoded = [
-                                base64.b64encode(cv2.imencode('.jpg', currentImages[0], serverQuality)[1]).decode(),
-                                base64.b64encode(cv2.imencode('.jpg', currentImages[1], serverQuality)[1]).decode(),
-                                0
-                            ]
-                            server.emit('capture', encoded)
+                        encoded = [
+                            base64.b64encode(cv2.imencode('.jpg', currentImages[0], serverQuality)[1]).decode(),
+                            base64.b64encode(cv2.imencode('.jpg', currentImages[1], serverQuality)[1]).decode(),
+                            0
+                        ]
+                        server.emit('capture', encoded)
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
             except Exception as err:
                 print(err)
         streamThread = Thread(target = loop)
         streamThread.start()
-        if sendServer:
-            server.emit('message', 'Began stream')
+        server.emit('message', 'Began stream')
         print('Began stream')
         return True
     return False
-def stopSaveStream():
+def stopStream():
     global streamThread, streaming, streamServing
     if streaming and not streamSaving:
         streaming = False
