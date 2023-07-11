@@ -64,7 +64,7 @@ def capture(filter: bool, sendServer: bool):
     try:
         name = str(round(time.time()*1000))
         if filter:
-            filteredImgs = converter.filter(read(), False)
+            filteredImgs = converter.filter(read())
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured (filtered) ' + name + '.png')
