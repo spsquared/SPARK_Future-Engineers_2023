@@ -1,5 +1,7 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
+# from Controller import slam
+import slam
 import numpy
 import cv2
 import math
@@ -31,8 +33,9 @@ params.filterByCircularity = True
 params.minCircularity = 0.3
 params.filterByConvexity = True
 params.minConvexity = 0.7
-params.filterByInertia = True
-params.minInertiaRatio = 0
+# params.filterByInertia = True
+# params.minInertiaRatio = 0
+# params.maxInertiaRatio = 1
 blobDetector = cv2.SimpleBlobDetector_create(params)
 
 def filter(imgIn: numpy.ndarray):
@@ -57,11 +60,14 @@ def filter(imgIn: numpy.ndarray):
         # blur images to remove noise
         blurredR = cv2.medianBlur(rMask, 5)
         blurredG = cv2.medianBlur(gMask, 5)
-        gray_image = cv2.cvtColor(imgIn, cv2.COLOR_RGB2GRAY)
-        blurredImg = cv2.GaussianBlur(gray_image, (3, 3), 0)
+        grayImage = cv2.cvtColor(imgIn, cv2.COLOR_RGB2GRAY)
+        blurredImg = cv2.GaussianBlur(grayImage, (3, 3), 0)
         # edge detection
-        edgesImage = cv2.Canny(blurredImg, 50, 125, 3)
+        lower = 50
+        upper = 125
+        edgesImage = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
+        # return [grayImage, blurredR, blurredG]
         return cv2.merge((edgesImage, blurredG, blurredR))
     except Exception as err:
         io.error()
@@ -89,12 +95,12 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = (croppedRight != 0).argmax(axis=1)
     
     def rawToCartesian(a, dir):
-        # focal length fix for non-cylindrical projection
-        # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
-        # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         dist = wallHeight * focalLength / a[0]
         x = dir * (cameraOffsetX + a[1] * dist)
         y = (cameraOffsetY + a[2] * dist)
+        # focal length fix for non-cylindrical projection
+        # dist = wallHeight * math.sqrt(focalLength**2 + (xcoordinate - center)**2) / a[0]
+        # return (dir * (3 + a[1] * dist), (10 + a[2] * dist), dist)
         return (x, y, dist, math.atan2(y, x))
 
     leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, imgSinAngles, imgCosAngles)), -1)
@@ -126,15 +132,21 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
         blobDetector.empty()
         gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
+
+        return [numpy.concatenate((rLeftBlobs, rRightBlobs), axis=None), numpy.concatenate((gLeftBlobs, gRightBlobs), axis=None)]
+        # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
+
     except Exception as err:
         io.error()
         print(err)
 
 def processBlobs(blobs):
-    for i in range(len(blobs)):
-        blobs[i] = blobs[i].pt[0]
+    newBlobs = []
+    for blob in blobs:
+        newBlobs.append(blob.pt[0])
+        # newBlobs.append([0, 0])
     
-    return blobs
+    return newBlobs
 
 def getLandmarks(distances, rBlobs, gBlobs):
     outerWallLandmarks = []
@@ -145,10 +157,10 @@ def getLandmarks(distances, rBlobs, gBlobs):
     # all relative to car center
 
     # get outer and inner walls
-    last = None
+    last = [None]
     angleAverage = None
     for point in list(distances):
-        if last != None:
+        if last[0] != None:
             slope = (point[2] - last[2]) / (point[3] - last[3])
             angle = math.atan2(slope, 1)
             if angleAverage == None:
@@ -158,8 +170,8 @@ def getLandmarks(distances, rBlobs, gBlobs):
                     innerWallLandmarks.append(last)
                     angleAverage = None
                 else:
-                    angleDifference = math.abs(angle - angleAverage)
-                    if angleDifference < -45 * carDirection:
+                    angleDifference = abs(angle - angleAverage)
+                    if angleDifference < -45 * slam.carDirection:
                         outerWallLandmarks.append(last)
                     angleAverage = angle / 2 + angleAverage / 2
         last = point
