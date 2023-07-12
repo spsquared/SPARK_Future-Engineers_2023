@@ -296,7 +296,6 @@ const filterAdjustIndicators = document.getElementById('filterAdjustIndicators')
     for (let a in indicators) {
         for (let b in indicators[a]) {
             const block = document.createElement('div');
-            block.style.width = '100px';
             const label = document.createElement('span');
             label.innerHTML = '&nbsp;&nbsp;' + b + ':&nbsp;';
             block.appendChild(label);
