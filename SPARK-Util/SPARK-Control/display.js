@@ -29,9 +29,11 @@ function addCapture(images) {
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
-    if (scrollWith) historyControls.slider.value = history.length;
+    if (scrollWith) {
+        historyControls.slider.value = history.length;
+        display();
+    }
     fpsTimes.push(performance.now());
-    display();
 };
 function addData(data) {
     history.unshift({
@@ -48,9 +50,11 @@ function addData(data) {
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
-    if (scrollWith) historyControls.slider.value = history.length;
+    if (scrollWith) {
+        historyControls.slider.value = history.length;
+        display();
+    }
     fpsTimes.push(performance.now());
-    display();
 };
 function display() {
     const data = history[historyControls.index];
