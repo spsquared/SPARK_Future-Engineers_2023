@@ -357,6 +357,24 @@ document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) socket.emit('stop');
 });
 
+// autogenerating toggles
+let toggleGens = document.querySelectorAll('.generateToggle');
+for (let div of toggleGens) {
+    if (div.hasAttribute('toggleLabel')) {
+        const label = document.createElement('label');
+        label.style.position = 'relative';
+        label.style.bottom = '4px';
+        label.innerHTML = div.getAttribute('toggleLabel');
+        div.appendChild(label);
+    }
+    const toggleLabel = document.createElement('label');
+    toggleLabel.classList.add('toggle');
+    const toggleInput = document.createElement('input');
+    toggleInput.type = 'checkbox';
+    toggleInput.id = div.getAttribute('toggleID');
+    toggleInput.classList.add('toggleInput');
+}
+
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {
     socket.disconnect();
@@ -438,14 +456,6 @@ document.getElementById('disconnect').onclick = async () => {
         rickrolled = false;
         document.getElementById('disconnect').click();
     };
-};
-
-// errors
-window.onerror = function (err) {
-    appendLog(err, '#f00f09');
-};
-document.onerror = function (err) {
-    appendLog(err, '#f00f09');
 };
 
 async function animate(slider, backwards) {

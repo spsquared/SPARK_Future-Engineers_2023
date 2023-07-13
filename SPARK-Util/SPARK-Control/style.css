@@ -229,10 +229,6 @@ img {
 #rawCapture {
     background-color: lime;
 }
-label[for="modSave"], label[for="modFilter"] {
-    position: relative;
-    bottom: 4px;
-}
 
 #sessionFileControls {
     text-align: center;
