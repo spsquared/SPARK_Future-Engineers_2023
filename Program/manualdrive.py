@@ -64,6 +64,8 @@ def main():
                     io.camera.startStream(data[0]['filter'])
         def getColors(data):
             server.emit('colors', converter.getColors())
+        def setColors(data):
+            converter.setColors(data[0], True)
         def getStreamState(data):
             server.emit('streamState', io.camera.streamState())
         server.on('drive', drive)
@@ -71,6 +73,7 @@ def main():
         server.on('rawCapture', rawCapture)
         server.on('stream', stream)
         server.on('getColors', getColors)
+        server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)
         global running
         running = True

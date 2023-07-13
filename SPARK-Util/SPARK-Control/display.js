@@ -115,6 +115,8 @@ setInterval(() => {
     fps = fpsTimes.length;
     fpsDisplay.innerText = 'FPS: ' + fps;
 }, 50);
+document.getElementById('importSession').onclick = importSession;
+document.getElementById('exportSession').onclick = exportSession;
 document.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = true;
