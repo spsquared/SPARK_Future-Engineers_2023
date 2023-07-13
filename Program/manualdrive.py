@@ -26,10 +26,9 @@ def main():
                 else:
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
-                        print(converter.filter(io.camera.read()[0]))
                         encoded = [
-                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])))[1]).decode(),
-                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[1])))[1]).decode(),
+                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])[:3]))[1]).decode(),
+                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[1])[:3]))[1]).decode(),
                             1
                         ]
                         server.emit('capture', encoded)

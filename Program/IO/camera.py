@@ -133,7 +133,7 @@ def startSaveStream(filter: bool, sendServer: bool):
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
+                        filteredImgs = [cv2.merge(converter.filter(read()[0])[:3]), cv2.merge(converter.filter(read()[1])[:3])]
                         cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if sendServer:
                             encoded = [
@@ -192,7 +192,7 @@ def startStream(filter: bool):
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
+                        filteredImgs = [cv2.merge(converter.filter(read()[0])[:3]), cv2.merge(converter.filter(read()[1])[:3])]
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
