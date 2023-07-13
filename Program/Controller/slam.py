@@ -92,8 +92,8 @@ carX = -1
 carY = -1
 carAngle = 0
 
-COUNTER_CLOCKWISE = 1
-CLOCKWISE = -1
+CLOCKWISE = 1
+COUNTER_CLOCKWISE = -1
 carDirection = CLOCKWISE
 
 carSpeed = 0
