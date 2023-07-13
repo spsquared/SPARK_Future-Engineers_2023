@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import slam
 import numpy
 import cv2
@@ -19,6 +19,7 @@ verticalFov = 115
 imageWidth = 544
 imageHeight = 308
 focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
+focalLengthA = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
 wallHeight = 10
 centerOffset = 10
 cameraOffsetX = 3
@@ -79,10 +80,10 @@ leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLengthA) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLengthA) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLengthA) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLengthA) + math.pi / 3))
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
@@ -91,7 +92,9 @@ def __rawToCartesian(a, dir):
     if a[0] == 0:
         return (-1.0, -1.0, -1.0, -1.0)
     else:
-        dist = wallHeight * focalLength / a[0]
+        # dist = wallHeight * focalLength / a[0]
+        dist = wallHeight * focalLength / a[0] * ((abs(imageWidth / 2 - a[3]) / (imageWidth / 2) + 1) ** 2 + 1)
+        # return (dist * math.sin((imageWidth / 2 - a[3]) * horizontalFov))
         x = dir * (cameraOffsetX) + a[2] * dist
         y = (cameraOffsetY) + a[1] * dist
         return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
@@ -104,9 +107,29 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
     # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
     croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
     # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.flip(numpy.swapaxes(numpy.concatenate((rightEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
 
     # get wall heights by finding the bottom edge of the wall
+    rawHeightsLeft = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+
+    # sampleSize = 5
+    # varSlopeChange = None
+    # for i in range(len(rawHeightsLeft) - sampleSize):
+    #     var_change = rawHeightsLeft[i + sampleSize - 1] - rawHeightsLeft[i]
+    #     if varSlopeChange == None:
+    #         varSlopeChange = var_change
+    #     else:
+    #         if varSlopeChange
+
+    # for i in range(len(rawHeightsLeft)):
+    #     # rawHeightsLeft[i] = leftBlurredIn[wallStart + int(rawHeightsLeft[i]) + 1][i]
+    #     rawHeightsLeft[i] = (wallEnd - wallStart) - (rawHeightsLeft[i] - leftBlurredIn[wallEnd -     int(rawHeightsLeft[i]) + 1][i] / 7 + 15)
+    #     rawHeightsLeft[i] = (wallEnd - wallStart) - (rawHeightsLeft[i] - leftBlurredIn[wallEnd -     int(rawHeightsLeft[i]) + 1][i] / 7 + 15)
+    
+
+    leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles, range(imageWidth)), -1), -1)
+    # rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
     rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
     # rawHeightsRight = (wallEnd - wallStart) - croppedRight.argmax(axis=1)
@@ -114,8 +137,6 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
     for i in range(len(rawHeightsLeft)):
         rawHeightsLeft[i] = (wallEnd - wallStart) - (rawHeightsLeft[i] - leftBlurredIn[wallEnd - int(rawHeightsLeft[i]) + 1][i] / 7 + 15)
 
-    leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
-    rightCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
