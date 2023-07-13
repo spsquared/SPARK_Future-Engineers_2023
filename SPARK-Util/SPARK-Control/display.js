@@ -58,6 +58,7 @@ function addData(data) {
 };
 function display() {
     const data = history[historyControls.index];
+    if (data === undefined) return;
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {

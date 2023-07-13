@@ -1,5 +1,5 @@
 window.addEventListener('error', (e) => {
-    appendLog(`An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
+    appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
 
 const initcolors = [
@@ -84,7 +84,7 @@ function connect() {
 };
 window.addEventListener('load', connect);
 
-// messages
+// log
 const pendingsounds = [];
 let first = true;
 async function playSound() {
@@ -120,9 +120,13 @@ function appendLog(text, color) {
     log.appendChild(div);
     if (scroll) log.scrollTop = log.scrollHeight;
 };
-socket.on('message', (data) => {
+socket.on('message', (msg) => {
     playSound();
-    appendLog(data);
+    appendLog(msg);
+});
+socket.on('message', (err) => {
+    playSound();
+    appendLog(`<strong>[REMOTE]</strong> An error occured:${err}`, 'red');
 });
 
 // manual driving

@@ -95,6 +95,14 @@ img {
 .slider::-webkit-slider-thumb:active {
     cursor: grabbing;
 }
+.divider {
+    width: 80%;
+    height: 2px;
+    background-color: gray;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    align-self: center;
+}
 
 #leftPane {
     display: flex;
@@ -135,7 +143,6 @@ img {
     display: inline-block;
     height: 80px;
     width: 304px;
-    background-image: url("./assets/banner.png");
     transition: 100ms linear opacity;
 }
 @container (max-width: 420px) {
@@ -200,6 +207,7 @@ img {
     border-right: 4px solid black;
     overflow-y: auto;
 }
+
 #buttons {
     display: flex;
     flex-direction: column;
@@ -221,8 +229,28 @@ img {
 #rawCapture {
     background-color: lime;
 }
-#modSave {
+label[for="modSave"], label[for="modFilter"] {
+    position: relative;
+    bottom: 4px;
+}
 
+#sessionFileControls {
+    text-align: center;
+}
+#importSession, #exportSession {
+    width: min(60px, calc(50% - 8px));
+    height: unset;
+    margin: 4px 4px;
+    aspect-ratio: 1.4;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80% 80%;
+}
+#importSession {
+    background-image: url(./assets/import.svg);
+}
+#exportSession {
+    background-image: url(./assets/export.svg);
 }
 
 #log {
@@ -299,7 +327,7 @@ img {
         position: absolute;
         top: 0px;
         left: 0px;
-        width: calc(100vw - 32px);
+        width: calc(100vw - 28px);
         border-right: none;
         z-index: 100;
     }

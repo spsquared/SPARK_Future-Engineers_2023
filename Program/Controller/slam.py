@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 import numpy
 import math
 from scipy.optimize import least_squares
@@ -219,6 +219,7 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
     except Exception as err:
         io.error()
         print(err)
+        server.emit('programError', err)
 
 
 def findStartingPosition(frontWall, leftWall, rightWall, outerWalls, innerWalls, redBlobs, greenBlobs):
