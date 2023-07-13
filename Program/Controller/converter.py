@@ -1,6 +1,7 @@
 from IO import io
 from Util import server
 from Controller import slam
+import traceback
 import numpy
 import cv2
 import math
@@ -20,7 +21,7 @@ imageWidth = 544
 imageHeight = 308
 focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
 focalLength = 252
-focalLength *= math.cos(math.pi / 6)
+focalLength *= math.cos(math.pi / 6) # why?
 wallHeight = 10
 centerOffset = 10
 cameraOffsetX = 3
@@ -71,7 +72,7 @@ def filter(imgIn: numpy.ndarray):
         return [blurredImg, edgesImg, blurredR, blurredG]
         # return cv2.merge((edgesImage, blurredG, blurredR))
     except Exception as err:
-        print(err)
+        traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
 
@@ -150,10 +151,6 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
     return leftCoordinates, croppedLeft, rawHeightsLeft
     # return coordinates
 
-
-# 36 = f /70
-
-
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
         # add borders to fix blob detection
@@ -177,7 +174,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
 
     except Exception as err:
-        print(err)
+        traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
 

@@ -9,14 +9,8 @@ function appendLog(text, color) {
     log.appendChild(div);
     if (scroll) log.scrollTop = log.scrollHeight;
 };
-const onerror = (e) => {
-    appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
-};
-window.addEventListener('error', onerror);
-window.onerror = onerror;
-document.onerror = onerror;
 window.addEventListener('error', (e) => {
-    console.log(e)
+    appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
 
 const initcolors = [

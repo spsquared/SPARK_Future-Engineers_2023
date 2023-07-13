@@ -1,5 +1,6 @@
 from IO import io
 from Util import server
+import traceback
 import numpy
 import math
 from scipy.optimize import least_squares
@@ -217,7 +218,7 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
     except Exception as err:
-        print(err)
+        traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
 
