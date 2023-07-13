@@ -124,7 +124,7 @@ socket.on('message', (msg) => {
     playSound();
     appendLog(msg);
 });
-socket.on('message', (err) => {
+socket.on('programError', (err) => {
     playSound();
     appendLog(`<strong>[REMOTE]</strong> An error occured:${err}`, 'red');
 });
