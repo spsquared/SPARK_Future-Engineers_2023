@@ -1,6 +1,7 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 from Controller import slam
+import traceback
 import numpy
 import cv2
 import math
@@ -71,12 +72,11 @@ def filter(imgIn: numpy.ndarray):
         upper = 125
         edgesImg = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
-        return [blurredImg, edgesImg, blurredR, blurredG]
-        # return cv2.merge((edgesImage, blurredG, blurredR))
+        return [blurredR, blurredG, edgesImg, blurredImg]
     except Exception as err:
+        traceback.print_exc()
         io.error()
-        print(err)
-        server.emit('programError', err)
+        server.emit('programError', str(err))
 
 # distance scanner
 leftImgSinAngles = []
@@ -243,9 +243,9 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
 
     except Exception as err:
+        traceback.print_exc()
         io.error()
-        print(err)
-        server.emit('programError', err)
+        server.emit('programError', str(err))
 
 def processBlobs(blobs):
     newBlobs = []

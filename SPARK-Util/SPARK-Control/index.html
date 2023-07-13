@@ -24,22 +24,17 @@
                 <div id="slideout">
                     <div id="slideoutBody">
                         <div id="buttons">
-                            <div id=""
-                            <div id="buttonModifiers">
-                                <label for="modSave">Save: </label>
-                                <label class="toggle">
-                                    <input type="checkbox" id="modSave" class="toggleInput">
-                                    <span class="toggleSlider"></span>
-                                </label>
-                                <label for="modSave">Filter: </label>
-                                <label class="toggle">
-                                    <input type="checkbox" id="modFilter" class="toggleInput">
-                                    <span class="toggleSlider"></span>
-                                </label>
+                            <div id="streamButtonContainer">
+                                <button id="stream" class="largeButton">START STREAM</button>
+                                <input type="checkbox" id="streamToggle">
+                                <div class="generateToggle" toggleID="streamModSave" toggleLabel="Save:"></div>
+                                <div class="generateToggle" toggleID="streamModFilter" toggleLabel="Filter:"></div>
                             </div>
-                            <button id="stream" class="largeButton">START STREAM</button>
-                            <input type="checkbox" id="streamToggle">
-                            <button id="capture" class="largeButton">CAPTURE</button>
+                            <div id="captureButtonContainer">
+                                <button id="capture" class="largeButton">CAPTURE</button>
+                                <div class="generateToggle" toggleID="captureModSave" toggleLabel="Save:"></div>
+                                <div class="generateToggle" toggleID="captureModFilter" toggleLabel="Filter:"></div>
+                            </div>
                             <button id="rawCapture" class="largeButton">HI-RES CAPTURE</button>
                             <div class="divider"></div>
                             <div id="sessionFileControls">
@@ -85,6 +80,7 @@
                 </div>
                 <div id="filterAdjustSliders"></div>
                 <div id="filterAdjustIndicators"></div>
+                <button id="filterApply">APPLY</button>
             </div>
             <label id="dropdownTab" for="dropdownTabCheckbox"></label>
         </div>

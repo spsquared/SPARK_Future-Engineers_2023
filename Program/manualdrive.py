@@ -2,6 +2,7 @@ from IO import io
 from Util import server
 from Controller import driver
 from Controller import converter
+import traceback
 import cv2
 import base64
 
@@ -17,26 +18,31 @@ def main():
             io.drive.throttle(data[0]['throttle'])
             io.drive.steer(data[0]['steering'])
         def capture(data):
-            if data[0]['save'] == True:
-                if data[0]['filter'] == True:
-                    converter.setColors(data[0]['colors'], True)
-                io.camera.capture(data[0]['filter'], True)
-            else:
-                if data[0]['filter'] == True:
-                    converter.setColors(data[0]['colors'], True)
-                    encoded = [
-                        base64.b64encode(cv2.imencode('.png', converter.filter(io.camera.read()[0]))[1]).decode(),
-                        base64.b64encode(cv2.imencode('.png', converter.filter(io.camera.read()[1]))[1]).decode(),
-                        1
-                    ]
-                    server.emit('capture', encoded)
+            try:
+                if data[0]['save'] == True:
+                    if data[0]['filter'] == True:
+                        converter.setColors(data[0]['colors'], True)
+                    io.camera.capture(data[0]['filter'], True)
                 else:
-                    encoded = [
-                        base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
-                        base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
-                        0
-                    ]
-                    server.emit('capture', encoded)
+                    if data[0]['filter'] == True:
+                        converter.setColors(data[0]['colors'], True)
+                        encoded = [
+                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])[:3]))[1]).decode(),
+                            base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[1])[:3]))[1]).decode(),
+                            1
+                        ]
+                        server.emit('capture', encoded)
+                    else:
+                        encoded = [
+                            base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
+                            base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
+                            0
+                        ]
+                        server.emit('capture', encoded)
+            except Exception as err:
+                traceback.print_exc()
+                io.error()
+                server.emit('programError', str(err))
         def rawCapture(data):
             io.camera.captureFull(True)
         def stream(data):
@@ -58,6 +64,8 @@ def main():
                     io.camera.startStream(data[0]['filter'])
         def getColors(data):
             server.emit('colors', converter.getColors())
+        def setColors(data):
+            converter.setColors(data[0], True)
         def getStreamState(data):
             server.emit('streamState', io.camera.streamState())
         server.on('drive', drive)
@@ -65,6 +73,7 @@ def main():
         server.on('rawCapture', rawCapture)
         server.on('stream', stream)
         server.on('getColors', getColors)
+        server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)
         global running
         running = True
@@ -85,8 +94,9 @@ def main():
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
         print('---------------------- AN ERROR OCCURED ----------------------')
-        print(err)
+        traceback.print_exc()
         io.error()
+        server.emit('programError', str(err))
     running = False
     server.close()
     io.close()

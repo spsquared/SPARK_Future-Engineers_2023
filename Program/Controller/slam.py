@@ -1,5 +1,6 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
+import traceback
 import numpy
 import math
 from scipy.optimize import least_squares
@@ -217,9 +218,9 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
     except Exception as err:
+        traceback.print_exc()
         io.error()
-        print(err)
-        server.emit('programError', err)
+        server.emit('programError', str(err))
 
 
 def findStartingPosition(frontWall, leftWall, rightWall, outerWalls, innerWalls, redBlobs, greenBlobs):

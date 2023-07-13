@@ -2,6 +2,7 @@ from Controller import converter
 from Util import server
 from jetcam.csi_camera import CSICamera
 from IO import io
+import traceback
 import cv2
 import os
 from threading import Thread
@@ -37,9 +38,9 @@ def __capture():
             currentImages[1] = downscale(currentRawImages[1])
             time.sleep(max(0.02-(time.time()-start), 0))
     except Exception as err:
-        print(err)
+        traceback.print_exc()
         io.error()
-        server.emit('programError', err)
+        server.emit('programError', str(err))
 
 def stop():
     global running, camera0, camera1, thread
@@ -65,7 +66,7 @@ def capture(filter: bool, sendServer: bool):
     try:
         name = str(round(time.time()*1000))
         if filter:
-            filteredImgs = converter.filter(read())
+            filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured (filtered) ' + name + '.png')
@@ -89,9 +90,9 @@ def capture(filter: bool, sendServer: bool):
             print('Captured ' + name + '.png')
         return True
     except Exception as err:
-        print(err)
+        traceback.print_exc()
         io.error()
-        server.emit('programError', err)
+        server.emit('programError', str(err))
         return False
 def captureFull(sendServer: bool):
     name = str(round(time.time()*1000)) + '-f'
@@ -132,7 +133,7 @@ def startSaveStream(filter: bool, sendServer: bool):
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = converter.filter(read())
+                        filteredImgs = [cv2.merge(converter.filter(read()[0])[:3]), cv2.merge(converter.filter(read()[1])[:3])]
                         cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if sendServer:
                             encoded = [
@@ -154,9 +155,9 @@ def startSaveStream(filter: bool, sendServer: bool):
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
             except Exception as err:
+                traceback.print_exc()
                 io.error()
-                print(err)
-                server.emit('programError', err)
+                server.emit('programError', str(err))
         streamThread = Thread(target = loop)
         streamThread.start()
         if sendServer:
@@ -191,7 +192,7 @@ def startStream(filter: bool):
                 while streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = converter.filter(read())
+                        filteredImgs = [cv2.merge(converter.filter(read()[0])[:3]), cv2.merge(converter.filter(read()[1])[:3])]
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
@@ -208,9 +209,9 @@ def startStream(filter: bool):
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
             except Exception as err:
+                traceback.print_exc()
                 io.error()
-                print(err)
-                server.emit('programError', err)
+                server.emit('programError', str(err))
         streamThread = Thread(target = loop)
         streamThread.start()
         server.emit('message', 'Began stream')

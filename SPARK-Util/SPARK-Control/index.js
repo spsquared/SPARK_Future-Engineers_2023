@@ -1,3 +1,14 @@
+const log = document.getElementById('log');
+function appendLog(text, color) {
+    const div = document.createElement('div');
+    div.classList.add('logBlock');
+    div.innerHTML = text;
+    div.style.backgroundColor = color ?? '';
+    let scroll = false;
+    if (log.scrollTop + log.clientHeight >= log.scrollHeight - 5) scroll = true;
+    log.appendChild(div);
+    if (scroll) log.scrollTop = log.scrollHeight;
+};
 window.addEventListener('error', (e) => {
     appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
 });
@@ -108,17 +119,6 @@ async function playSound() {
     ping.addEventListener('loadeddata', function () {
         pendingsounds.push(ping);
     });
-};
-const log = document.getElementById('log');
-function appendLog(text, color) {
-    const div = document.createElement('div');
-    div.classList.add('logBlock');
-    div.innerHTML = text;
-    div.style.backgroundColor = color ?? '';
-    let scroll = false;
-    if (log.scrollTop + log.clientHeight >= log.scrollHeight - 5) scroll = true;
-    log.appendChild(div);
-    if (scroll) log.scrollTop = log.scrollHeight;
 };
 socket.on('message', (msg) => {
     playSound();
@@ -357,6 +357,27 @@ document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) socket.emit('stop');
 });
 
+// autogenerating toggles
+let toggleGens = document.querySelectorAll('.generateToggle');
+for (const div of toggleGens) {
+    if (div.hasAttribute('toggleLabel')) {
+        const label = document.createElement('label');
+        label.innerHTML = div.getAttribute('toggleLabel');
+        div.appendChild(label);
+    }
+    const toggleLabel = document.createElement('label');
+    toggleLabel.classList.add('toggle');
+    const toggleInput = document.createElement('input');
+    toggleInput.type = 'checkbox';
+    toggleInput.id = div.getAttribute('toggleID');
+    toggleInput.classList.add('toggleInput');
+    toggleLabel.appendChild(toggleInput);
+    const toggleSlider = document.createElement('span');
+    toggleSlider.classList.add('toggleSlider');
+    toggleLabel.appendChild(toggleSlider);
+    div.appendChild(toggleLabel);
+}
+
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {
     socket.disconnect();
@@ -438,14 +459,6 @@ document.getElementById('disconnect').onclick = async () => {
         rickrolled = false;
         document.getElementById('disconnect').click();
     };
-};
-
-// errors
-window.onerror = function (err) {
-    appendLog(err, '#f00f09');
-};
-document.onerror = function (err) {
-    appendLog(err, '#f00f09');
 };
 
 async function animate(slider, backwards) {
