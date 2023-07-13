@@ -130,10 +130,20 @@ All our code is in python (except the SPARK Control Panel and SPARK Randomizer, 
 
 Dependencies:
 * Jetson-GPIO
+* jetcam
 * numpy
 * cv2
 * adafruit-servokit
+* adafruit-circuitpython-mpu6050
 * python-socketio
+* math
+* asyncio
+* typing
+* traceback
+* os
+* base64
+* time
+* threading
 
 The **entire** `Program` directory must be uploaded in order for the program to run. Make sure the directory in `path` in `/Program/IO/io.py` is set correctly (you can use any existing directory with a `lock.txt`, but the uploaded folder is recommended)
 
