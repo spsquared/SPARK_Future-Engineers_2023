@@ -1,5 +1,22 @@
-window.addEventListener('error', (e) => {
+const log = document.getElementById('log');
+function appendLog(text, color) {
+    const div = document.createElement('div');
+    div.classList.add('logBlock');
+    div.innerHTML = text;
+    div.style.backgroundColor = color ?? '';
+    let scroll = false;
+    if (log.scrollTop + log.clientHeight >= log.scrollHeight - 5) scroll = true;
+    log.appendChild(div);
+    if (scroll) log.scrollTop = log.scrollHeight;
+};
+const onerror = (e) => {
     appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
+};
+window.addEventListener('error', onerror);
+window.onerror = onerror;
+document.onerror = onerror;
+window.addEventListener('error', (e) => {
+    console.log(e)
 });
 
 const initcolors = [
@@ -108,17 +125,6 @@ async function playSound() {
     ping.addEventListener('loadeddata', function () {
         pendingsounds.push(ping);
     });
-};
-const log = document.getElementById('log');
-function appendLog(text, color) {
-    const div = document.createElement('div');
-    div.classList.add('logBlock');
-    div.innerHTML = text;
-    div.style.backgroundColor = color ?? '';
-    let scroll = false;
-    if (log.scrollTop + log.clientHeight >= log.scrollHeight - 5) scroll = true;
-    log.appendChild(div);
-    if (scroll) log.scrollTop = log.scrollHeight;
 };
 socket.on('message', (msg) => {
     playSound();
@@ -359,11 +365,9 @@ document.addEventListener('keydown', (e) => {
 
 // autogenerating toggles
 let toggleGens = document.querySelectorAll('.generateToggle');
-for (let div of toggleGens) {
+for (const div of toggleGens) {
     if (div.hasAttribute('toggleLabel')) {
         const label = document.createElement('label');
-        label.style.position = 'relative';
-        label.style.bottom = '4px';
         label.innerHTML = div.getAttribute('toggleLabel');
         div.appendChild(label);
     }
@@ -373,6 +377,11 @@ for (let div of toggleGens) {
     toggleInput.type = 'checkbox';
     toggleInput.id = div.getAttribute('toggleID');
     toggleInput.classList.add('toggleInput');
+    toggleLabel.appendChild(toggleInput);
+    const toggleSlider = document.createElement('span');
+    toggleSlider.classList.add('toggleSlider');
+    toggleLabel.appendChild(toggleSlider);
+    div.appendChild(toggleLabel);
 }
 
 let rickrolled = false;

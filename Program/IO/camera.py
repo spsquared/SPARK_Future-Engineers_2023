@@ -39,7 +39,7 @@ def __capture():
     except Exception as err:
         print(err)
         io.error()
-        server.emit('programError', err)
+        server.emit('programError', str(err))
 
 def stop():
     global running, camera0, camera1, thread
@@ -91,7 +91,7 @@ def capture(filter: bool, sendServer: bool):
     except Exception as err:
         print(err)
         io.error()
-        server.emit('programError', err)
+        server.emit('programError', str(err))
         return False
 def captureFull(sendServer: bool):
     name = str(round(time.time()*1000)) + '-f'
@@ -154,9 +154,9 @@ def startSaveStream(filter: bool, sendServer: bool):
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
             except Exception as err:
-                io.error()
                 print(err)
-                server.emit('programError', err)
+                io.error()
+                server.emit('programError', str(err))
         streamThread = Thread(target = loop)
         streamThread.start()
         if sendServer:
@@ -208,9 +208,9 @@ def startStream(filter: bool):
                     time.sleep(max(0.1-(time.time()-start), 0))
                     index += 1
             except Exception as err:
-                io.error()
                 print(err)
-                server.emit('programError', err)
+                io.error()
+                server.emit('programError', str(err))
         streamThread = Thread(target = loop)
         streamThread.start()
         server.emit('message', 'Began stream')

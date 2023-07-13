@@ -87,6 +87,7 @@ def main():
         print('---------------------- AN ERROR OCCURED ----------------------')
         print(err)
         io.error()
+        server.emit('programError', str(err))
     running = False
     server.close()
     io.close()

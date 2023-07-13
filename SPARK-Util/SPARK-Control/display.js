@@ -178,34 +178,36 @@ socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', () => 'idk');
 
 // controls 2: electric boogaloo
-const modSave = document.getElementById('modSave');
-const modFilter = document.getElementById('modFilter');
+const streamModSave = document.getElementById('streamModSave');
+const streamModFilter = document.getElementById('streamModFilter');
+const captureModSave = document.getElementById('captureModSave');
+const captureModFilter = document.getElementById('captureModFilter');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
 const rawcapture = document.getElementById('rawCapture');
 const streamToggle = document.getElementById('streamToggle');
 socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
-    modFilter.checked = state[1];
-    modSave.checked = state[2];
+    streamModFilter.checked = state[1];
+    streamModSave.checked = state[2];
     if (streamToggle.checked) {
         stream.style.backgroundColor = 'red';
         stream.innerText = 'STOP STREAM';
-        modFilter.disabled = true;
-        modSave.disabled = true;
+        streamModFilter.disabled = true;
+        streamModSave.disabled = true;
     } else {
         stream.style.backgroundColor = '';
         stream.innerText = 'START STREAM';
-        modFilter.disabled = false;
-        modSave.disabled = false;
+        streamModFilter.disabled = false;
+        streamModSave.disabled = false;
     }
 });
 stream.onclick = () => {
     streamToggle.checked = !streamToggle.checked;
-    socket.emit('stream', { save: modSave.checked, filter: modFilter.checked, colors: getColors() });
+    socket.emit('stream', { save: streamModSave.checked, filter: streamModFilter.checked, colors: getColors() });
 };
 capture.onclick = () => {
-    socket.emit('capture', { save: modSave.checked, filter: modFilter.checked, colors: getColors() });
+    socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, colors: getColors() });
 };
 rawcapture.onclick = () => {
     socket.emit('rawCapture');
