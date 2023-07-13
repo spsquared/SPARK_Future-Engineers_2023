@@ -16,7 +16,8 @@ def on(ev: str, cb: typing.Callable[[typing.Any], None]):
         cb(data)
 
 def emit(ev: str, data):
-    __socket.emit(ev, data)
+    if __socket.connected:
+        __socket.emit(ev, data)
 
 @__socket.on('disconnect')
 def __disconnect():

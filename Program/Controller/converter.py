@@ -71,6 +71,7 @@ def filter(imgIn: numpy.ndarray):
     except Exception as err:
         io.error()
         print(err)
+        server.emit('programError', err)
 
 # distance scanner
 leftImgSinAngles = []
@@ -86,6 +87,14 @@ leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
+def __rawToCartesian(a, dir):
+    if a[0] == 0:
+        return (-1.0, -1.0, -1.0, -1.0)
+    else:
+        dist = wallHeight * focalLength / a[0]
+        x = dir * (cameraOffsetX) + a[2] * dist
+        y = (cameraOffsetY) + a[1] * dist
+        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
 def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, rightBlurredIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global focalLength, wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
@@ -99,32 +108,23 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
 
     # get wall heights by finding the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = (wallEnd - wallStart) - croppedRight.argmax(axis=1)
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    # rawHeightsRight = (wallEnd - wallStart) - croppedRight.argmax(axis=1)
 
     for i in range(len(rawHeightsLeft)):
-        # rawHeightsLeft[i] = leftBlurredIn[wallStart + int(rawHeightsLeft[i]) + 1][i]
         rawHeightsLeft[i] = (wallEnd - wallStart) - (rawHeightsLeft[i] - leftBlurredIn[wallEnd - int(rawHeightsLeft[i]) + 1][i] / 7 + 15)
-    
-    def rawToCartesian(a, dir):
-        if a[0] == 0:
-            return (-1.0, -1.0, -1.0, -1.0)
-        else:
-            dist = wallHeight * focalLength / a[0]
-            x = dir * (cameraOffsetX) + a[2] * dist
-            y = (cameraOffsetY) + a[1] * dist
-            return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
 
-    leftCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
-    # rightCoordinates = numpy.apply_along_axis(rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
+    leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles), -1), -1)
+    rightCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles), -1), 1)
 
-    # coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
+    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    # ref = coordinates.ravel().view(dtype)
-    # ref.sort(order=['theta', 'dist', 'x', 'y'])
+    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    ref = coordinates.ravel().view(dtype)
+    ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return leftCoordinates, croppedLeft, rawHeightsLeft
-    # return coordinates
+    # return leftCoordinates, croppedLeft, rawHeightsLeft
+    return coordinates
     
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     try:
@@ -151,6 +151,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
     except Exception as err:
         io.error()
         print(err)
+        server.emit('programError', err)
 
 def processBlobs(blobs):
     newBlobs = []
