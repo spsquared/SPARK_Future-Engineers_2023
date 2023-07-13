@@ -18,9 +18,12 @@ horizontalFov = 155
 verticalFov = 115
 imageWidth = 544
 imageHeight = 308
-focalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
-focalLength = 252
+verticalFocalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
+horizontalFocalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
+focalLength = 220
 focalLength *= math.cos(math.pi / 6)
+verticalFocalLength = focalLength
+horizontalFocalLength = focalLength
 wallHeight = 10
 centerOffset = 10
 cameraOffsetX = 3
@@ -81,10 +84,10 @@ leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi / 3))
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
@@ -94,17 +97,17 @@ def __rawToCartesian(a, dir):
         return (-1.0, -1.0, -1.0, -1.0)
     else:
         # dist = wallHeight * math.sqrt(focalLength**2 + (a[3] - imageWidth / 2)**2) / a[0]
-        dist = wallHeight * math.sqrt(focalLength**2 + (a[3] - imageWidth / 2)**2 * -0.25) / a[0]
+        dist = wallHeight * math.sqrt(verticalFocalLength**2 + (a[3] - imageWidth / 2)**2) / (a[0])
         # dist = wallHeight * focalLength / a[0] * ((abs(imageWidth / 2 - a[3]) / (imageWidth / 2) + 1) ** 2 + 1)
         # return (dist * math.sin((imageWidth / 2 - a[3]) * horizontalFov))
         x = dir * (cameraOffsetX) + a[2] * dist
         y = (cameraOffsetY) + a[1] * dist
         return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
 def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, rightBlurredIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global focalLength, wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
+    global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
-    wallStart = round(imageHeight /2)
+    wallStart = round(imageHeight /2) + 15
     wallEnd = round(imageHeight * 3 /4)
     wallEnd = imageHeight
     # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
@@ -150,6 +153,69 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
     return leftCoordinates, croppedLeft, rawHeightsLeft
     # return coordinates
 
+def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+    global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
+
+    # crop for wall detection, then flip
+    wallStart = round(imageHeight / 2) + 15
+    wallEnd = round(imageHeight * 3 / 4)
+    wallEnd = imageHeight
+    # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
+    # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
+    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
+
+    # get wall heights by finding the bottom edge of the wall
+    rawHeightsLeft = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+
+    return [rawHeightsLeft, rawHeightsRight]
+
+
+def getWallLandmarks(heights, blobs):
+    for blob in blobs:
+        for i in range(blob[0] - blob[1], blob[0] + blob[1]):
+            heights[i] = -1
+
+    heights = numpy.array(heights, dtype="float")
+
+    sampleSize = 20
+    
+    slopeChanges = numpy.full(imageWidth - sampleSize, 0)
+
+    for i in range(imageWidth - sampleSize):
+        slope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
+        difference = 0
+        for j in range(i, i + sampleSize):
+            error = (heights[j] - (heights[i] + slope * (j - i)))
+            # if error == 1:
+            #     difference += 2
+            # else:
+            if abs(error) < 1:
+                difference += abs(error)
+            else:
+                difference += error ** 2
+            # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
+        print(difference)
+        if abs(difference) > sampleSize:
+            slopeChanges[i] = difference
+
+    slopeChanging = 0
+    landmarks = []
+    for i in range(imageWidth - sampleSize):
+        # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
+        if (slopeChanges[i] == 0 and slopeChanging >= 1) or slopeChanging >= sampleSize:
+            # landmarks.append([i - round(slopeChanging / 2), slopeChanges[i - round(slopeChanging / 2)]])
+            landmarks.append([i - 1, slopeChanges[i - 1]])
+            slopeChanging = 0
+        # if slopeChanges[i] != 0:
+        #     landmarks.append([i, slopeChanges[i]])
+        if slopeChanges[i] == 0:
+            slopeChanging = 0
+        else:
+            slopeChanging += 1
+    
+    return landmarks
 
 # 36 = f /70
 
@@ -173,7 +239,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         blobDetector.empty()
         gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
 
-        return [numpy.concatenate((rLeftBlobs, rRightBlobs), axis=None), numpy.concatenate((gLeftBlobs, gRightBlobs), axis=None)]
+        return [numpy.concatenate((rLeftBlobs, gLeftBlobs), axis=None), numpy.concatenate((gLeftBlobs, gRightBlobs), axis=None)]
         # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
 
     except Exception as err:
@@ -184,7 +250,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
 def processBlobs(blobs):
     newBlobs = []
     for blob in blobs:
-        newBlobs.append(blob.pt[0])
+        newBlobs.append([blob.pt[0], round(math.sqrt(blob.size))])
         # newBlobs.append([0, 0])
     
     return newBlobs
