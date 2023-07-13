@@ -19,12 +19,9 @@ horizontalFov = 155
 verticalFov = 115
 imageWidth = 544
 imageHeight = 308
-verticalFocalLength = ((imageHeight / 2) / math.tan(math.pi * (verticalFov / 2) / 180))
-horizontalFocalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
+focalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
 focalLength = 220
 focalLength *= math.cos(math.pi / 6)
-verticalFocalLength = focalLength
-horizontalFocalLength = focalLength
 wallHeight = 10
 centerOffset = 10
 cameraOffsetX = 3
@@ -84,10 +81,10 @@ leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, horizontalFocalLength) + math.pi / 3))
+    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
@@ -96,11 +93,23 @@ def __rawToCartesian(a, dir):
     if a[0] == 0:
         return (-1.0, -1.0, -1.0, -1.0)
     else:
-        # dist = wallHeight * math.sqrt(focalLength**2 + (a[3] - imageWidth / 2)**2) / a[0]
-        dist = wallHeight * math.sqrt(verticalFocalLength**2 + (a[3] - imageWidth / 2)**2) / (a[0])
-        x = dir * (cameraOffsetX) + a[2] * dist
-        y = (cameraOffsetY) + a[1] * dist
-        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) - math.pi / 2 + math.pi) % (math.pi * 2) - math.pi)
+        # dist = wallHeight * focalLength / a[0]
+        dist = wallHeight * math.sqrt(focalLength**2 + (a[3] - imageWidth / 2)**2) / a[0]
+        x = dir * cameraOffsetX + a[2] * dist
+        y = cameraOffsetY + a[1] * dist
+        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
+def getDistance(imgx: int, height: int, dir: int):
+    if height == 0:
+        return (-1.0, -1.0, -1.0, -1.0)
+    else:
+        dist = wallHeight * math.sqrt(focalLength**2 + (imgx - imageWidth / 2)**2) / height
+        if dir == -1:
+            x = -1 * cameraOffsetX + leftImgCosAngles[imgx] * dist
+            y = cameraOffsetY + leftImgSinAngles[imgx] * dist
+        else:
+            x = cameraOffsetX + rightImgCosAngles[imgx] * dist
+            y = cameraOffsetY + rightImgSinAngles[imgx] * dist
+        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
 def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, rightBlurredIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
