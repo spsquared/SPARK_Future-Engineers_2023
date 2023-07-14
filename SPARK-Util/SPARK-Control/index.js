@@ -43,6 +43,7 @@ socket.on('connect', () => {
             stream.disabled = false;
             capture.disabled = false;
             rawcapture.disabled = false;
+            filterApply.disabled = false;
             socket.emit('getStreamState');
             socket.emit('getColors');
         }
@@ -59,6 +60,7 @@ let ondisconnect = () => {
     stream.disabled = true;
     capture.disabled = true;
     rawcapture.disabled = true;
+    filterApply.disabled = true;
 };
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
@@ -240,6 +242,7 @@ let sliders = [];
 const filterAdjust = document.getElementById('filterAdjust');
 const filterAdjustSliders = document.getElementById('filterAdjustSliders');
 const filterAdjustIndicators = document.getElementById('filterAdjustIndicators');
+const filterApply = document.getElementById('filterApply');
 // this is arguably worse than the hard coded tables
 {
     let indicators = {
@@ -310,18 +313,27 @@ const filterAdjustIndicators = document.getElementById('filterAdjustIndicators')
         }
     }
 }
+function hsv2hsl(hsvH, hsvS, hsvV) {
+	let hslL = (200 - hsvS) * hsvV / 200;
+    let hslS = hslL === 0 || hslL === 100 ? 0 : hsvS * hsvV / (hslL <= 50 ? hslL * 2 : 100 - hslL);
+	return [ hsvH, hslS, hslL ];
+};
 function updateSlider(i) {
     document.getElementById(sliders[i].id + 'Indicator').innerText = sliders[i].value;
+    let hueSlider = i;
     if (sliders[i].id.includes('H')) {
-        sliders[i].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 2].style.setProperty('--hue', sliders[i].value * 2);
-        sliders[i + 4].style.setProperty('--hue', sliders[i].value * 2);
     } else if (sliders[i].id.includes('S')) {
-        sliders[i].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
-        sliders[i + 2].style.setProperty('--saturation', sliders[i].value * (100 / 255) + '%');
+        hueSlider -= 2;
     } else if (sliders[i].id.includes('V')) {
-        sliders[i].style.setProperty('--value', sliders[i].value * (50 / 255) + '%');
+        hueSlider -= 4;
     }
+    let [hslH, hslS, hslL] = hsv2hsl(sliders[hueSlider].value * 2, sliders[hueSlider + 2].value * (100 / 255), sliders[hueSlider + 4].value * (100 / 255));
+    sliders[hueSlider].style.setProperty('--hue', hslH);
+    sliders[hueSlider + 2].style.setProperty('--hue', hslH);
+    sliders[hueSlider + 4].style.setProperty('--hue', hslH);
+    sliders[hueSlider + 2].style.setProperty('--saturation', hslS + '%');
+    sliders[hueSlider + 4].style.setProperty('--saturation', hslS + '%');
+    sliders[hueSlider + 4].style.setProperty('--value', hslL + '%');
 };
 function getColors() {
     let colors = [];
@@ -347,6 +359,10 @@ function setColors(colors) {
         updateSlider(parseInt(i));
     }
 }
+filterApply.onclick = (e) => {
+    socket.emit('setColors', getColors());
+};
+filterApply.disabled = true;
 socket.on('colors', setColors);
 
 // stop

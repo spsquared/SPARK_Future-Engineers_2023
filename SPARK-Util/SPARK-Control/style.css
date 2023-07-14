@@ -504,6 +504,12 @@ img {
 .sliderV::-webkit-slider-thumb {
     background-color: hsl(var(--hue), var(--saturation), var(--value));
 }
+#filterApply {
+    width: 20%;
+    margin: 8px 8px;
+    margin-top: 4px;
+    background-color: lime;
+}
 
 #disconnect {
     display: none;
