@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+    from IO import io
+    from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -7,6 +7,8 @@ import cv2
 import math
 
 # converts images into data usable for SLAM and driving
+
+# WALL HEIGHTS ARE FROM EDGES INCLUSIVEs
 
 # colors
 rm = redMin = (0, 95, 75)
@@ -139,17 +141,20 @@ def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
-    wallStart = round(imageHeight / 2) + 15
+    wallStartLeft = 169
+    wallStartRight = 154
+    # wallStart = round(imageHeight / 2) + 15
     wallEnd = round(imageHeight * 3 / 4)
-    wallEnd = imageHeight
+    wallEnd = round(imageHeight * 5 / 6)
+    # wallEnd = imageHeight
     # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
-    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
     # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStart:wallEnd], 0, 1), axis=1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
 
     # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
     return [rawHeightsLeft, rawHeightsRight]
 
@@ -216,7 +221,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         blobDetector.empty()
         gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
 
-        return [numpy.concatenate((rLeftBlobs, gLeftBlobs), axis=None), numpy.concatenate((gLeftBlobs, gRightBlobs), axis=None)]
+        return [numpy.concatenate((rLeftBlobs, gLeftBlobs), axis=None), numpy.concatenate((rRightBlobs, gRightBlobs), axis=None)]
         # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
 
     except Exception as err:
