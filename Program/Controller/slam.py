@@ -5,7 +5,7 @@ import numpy
 import math
 from scipy.optimize import least_squares
 
-# does EKF SLAM
+# does EKF SLAM without the Kalman filter
 
 X = 0
 Y = 1
