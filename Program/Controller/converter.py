@@ -67,7 +67,7 @@ def filter(imgIn: numpy.ndarray):
         upper = 125
         edgesImg = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
-        return [blurredR, blurredG, edgesImg]
+        return [edgesImg, blurredG, blurredR]
     except Exception as err:
         traceback.print_exc()
         io.error()

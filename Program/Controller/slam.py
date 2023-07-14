@@ -1,5 +1,6 @@
 # from IO import io
 # from Util import server
+import converter
 import traceback
 import numpy
 import math
@@ -245,6 +246,8 @@ def slam(walls, redBlobs, greenBlobs):
         server.emit('programError', str(err))
 
 
-def findStartingPosition(frontWall, leftWall, rightWall, redBlobs, greenBlobs):
+def findStartingPosition(leftHeights, rightHeights, redBlobs, greenBlobs):
     # oof
+    frontWall = (leftHeights[376] + rightHeights[converter.imageWidth - 1 - 376]) / 2 #6
+    leftWall = leftHeights[237] #22
     return "stop"
