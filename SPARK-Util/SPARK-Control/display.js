@@ -17,6 +17,10 @@ let fps = 0;
 const fpsDisplay = document.getElementById('fps');
 const display0Img = document.getElementById('display0Img');
 const display1Img = document.getElementById('display1Img');
+const map = document.getElementById('map');
+const ctx = map.getContext('2d');
+map.width = 620;
+map.height = 620;
 function addCapture(images) {
     history.unshift({
         type: 0,
@@ -43,8 +47,10 @@ function addData(data) {
             'data:image/jpeg;base64,' + data.images[1]
         ],
         distances: [],
-        pos: [],
-        landmarks: [],
+        pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
+        landmarks: data.landmarks.map((([x, y, e]) => [x, 300 - y, e])),
+        rawLandmarks: data.rawLandmarks.map((([x, y, e]) => [x, 300 - y, e])),
+        blobs: data.blobs,
         fps: fps
     });
     if (history.length > historyControls.maxSize) history.pop();
@@ -62,8 +68,63 @@ function display() {
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {
-        // stuff
+        ctx.resetTransform();
+        ctx.translate(10, 10);
+        ctx.scale(2, 2);
+        drawLandmarks(data.landmarks);
+        drawCar(data.pos);
     }
+};
+function drawLandmarks(landmarks) {
+    // draw outer walls
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgb(80, 80, 80)';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(-5, -5, 310, 310);
+    // draw inner walls
+    ctx.beginPath();
+    ctx.lineCap = 'square';
+    ctx.moveTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    if (landmarks[4][2]) ctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    if (landmarks[5][2]) ctx.lineTo(landmarks[5][0] - 5, landmarks[5][1] + 5);
+    if (landmarks[6][2]) ctx.lineTo(landmarks[6][0] - 5, landmarks[6][1] - 5);
+    if (landmarks[7][2]) ctx.lineTo(landmarks[7][0] + 5, landmarks[7][1] - 5);
+    if (landmarks[4][2]) ctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    ctx.stroke();
+    // draw red pillars
+    ctx.fillStyle = 'rgb(238, 39, 55)';
+    for (let i = 8; i < 16; i++) {
+        ctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
+    }
+    // draw green pillars
+    ctx.fillStyle = 'rgb(68, 214, 44)';
+    for (let i = 16; i < 24; i++) {
+        ctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
+    }
+    // draw landmark POI "dots"
+    ctx.fillStyle = 'rgb(255, 255, 255)';
+    for (let landmark of landmarks) {
+        if (landmark[2]) ctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
+    }
+};
+function drawRawLandmarks(rawLandmarks) {
+    // probably change some other stuff, maybe dont fill pillars and make walls dashed
+    ctx.opacity = 0.5;
+    drawLandmarks(rawLandmarks);
+};
+function drawCar(pos) {
+    ctx.save();
+    ctx.translate(pos[0], pos[1]);
+    ctx.rotate(pos[3]);
+    ctx.fillStyle = 'rgb(50, 50, 50)';
+    ctx.fillRect(-6.65, -12, 13.3, 24);
+    ctx.restore();
+};
+function drawBlobs(blobs) {
+
+};
+function drawDistances(distances) {
+
 };
 
 // controls
@@ -198,3 +259,35 @@ rawcapture.onclick = () => {
 stream.disabled = true;
 capture.disabled = true;
 rawcapture.disabled = true;
+
+// addData({
+//     images: ['', ''],
+//     landmarks: [
+//         [0, 0, true],
+//         [300, 0, true],
+//         [0, 300, true],
+//         [300, 300, true],
+//         [60, 100, true],
+//         [100, 200, true],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, true],
+//         [0, 0, true],
+//         [0, 0, true],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, true],
+//         [0, 0, true],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//         [0, 0, false],
+//     ],
+//     rawLandmarks: [],
+//     pos: [200, 200, 0]
+// });

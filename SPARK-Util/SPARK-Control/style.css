@@ -337,9 +337,6 @@ img {
         z-index: 100;
     }
     #slideout {
-        top: -4px;
-        border: 4px solid black;
-        border-left: none;
         width: unset;
         margin-bottom: -4px;
         transform: translateX(-100%);
@@ -353,6 +350,7 @@ img {
         --tabImage: url(./assets/arrow-left.svg);
     }
     #slideoutBody {
+        border-bottom: 4px solid black;
         background-color: lightgray;
     }
 
@@ -480,6 +478,7 @@ img {
 }
 #filterAdjustLabels span {
     font-weight: bold;
+    width: 100%;
     padding-left: 8px;
 }
 #filterAdjustSliders {
@@ -503,6 +502,12 @@ img {
 }
 .sliderV::-webkit-slider-thumb {
     background-color: hsl(var(--hue), var(--saturation), var(--value));
+}
+#filterApply {
+    width: 20%;
+    margin: 8px 8px;
+    margin-top: 4px;
+    background-color: lime;
 }
 
 #disconnect {
