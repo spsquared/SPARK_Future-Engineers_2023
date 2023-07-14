@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 import traceback
 import numpy
 import math
@@ -99,7 +99,7 @@ carDirection = CLOCKWISE
 
 carSpeed = 0
 
-def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
+def slam(walls, redBlobs, greenBlobs):
     try:
         # dead reckoning
 
@@ -118,14 +118,37 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         def getDistance(a, b):
             return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
-        for wall in outerWalls:
+        for landmark in walls:
             # find nearest landmark
+
+            newLandmark = False
             nearestLandmark = storedLandmarks[0]
             for j in range(0, 4):
-                if getDistance(storedLandmarks[j], wall) < getDistance(nearestLandmark, wall):
+                if getDistance(storedLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
                     nearestLandmark = storedLandmarks[j]
+            for j in range(5, 8):
+                if storedLandmarks[j][2]:
+                    if nearestLandmark == None:
+                        nearestLandmark = storedLandmarks[j]
+                        newLandmark = False
+                    elif getDistance(storedLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
+                        nearestLandmark = storedLandmarks[j]
+                        newLandmark = False
+                else:
+                    for k in range((j - 4) * 4, (j - 4) * 4 + 4):
+                        if nearestLandmark == None:
+                            nearestLandmark = possibleInnerWallLandmarks[k]
+                            newLandmark = True
+                            newLandmarkIndex = k
+                        elif getDistance(possibleInnerWallLandmarks[k], landmark) < getDistance(nearestLandmark, landmark):
+                            nearestLandmark = possibleInnerWallLandmarks[k]
+                            newLandmark = True
+                            newLandmarkIndex = k
             
-            nearestLandmark[DISTANCE] = getDistance([carX, carY], wall)
+            if newLandmark:
+                storedLandmarks[math.floor(newLandmarkIndex / 4) + 4] = [nearestLandmark[X], nearestLandmark[Y], True]
+
+            nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
             landmarks.append(nearestLandmark)
         
         # unknown landmarks
@@ -162,7 +185,6 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
                 nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
                 landmarks.append(nearestLandmark)
         
-        updateUnknownLandmarks(innerWalls, possibleInnerWallLandmarks, 4, 4, 4)
         updateUnknownLandmarks(redBlobs, possiblePillarLandmarks, 6, 8, 8)
         updateUnknownLandmarks(greenBlobs, possiblePillarLandmarks, 6, 16, 8)
         
@@ -223,6 +245,6 @@ def slam(outerWalls, innerWalls, redBlobs, greenBlobs):
         server.emit('programError', str(err))
 
 
-def findStartingPosition(frontWall, leftWall, rightWall, outerWalls, innerWalls, redBlobs, greenBlobs):
+def findStartingPosition(frontWall, leftWall, rightWall, redBlobs, greenBlobs):
     # oof
     return "stop"
