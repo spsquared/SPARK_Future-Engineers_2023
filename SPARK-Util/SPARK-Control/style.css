@@ -480,6 +480,7 @@ img {
 }
 #filterAdjustLabels span {
     font-weight: bold;
+    width: 100%;
     padding-left: 8px;
 }
 #filterAdjustSliders {
