@@ -1,12 +1,12 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 import converter
 import traceback
 import numpy
 import math
 from scipy.optimize import least_squares
 
-# does EKF SLAM
+# does EKF SLAM without the Kalman filter
 
 X = 0
 Y = 1

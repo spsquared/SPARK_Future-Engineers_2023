@@ -104,7 +104,8 @@ function importSession() {
             for (let i in raw) {
                 history.push(raw[i]);
             }
-            historyControls.slider.max = 0;
+            historyControls.slider.max = history.length;
+            historyControls.slider.value = history.length;
             display();
         };
         reader.readAsText(files[0]);
