@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-import converter
+from Controller import converter
 import traceback
 import numpy
 import math
@@ -246,8 +246,41 @@ def slam(walls, redBlobs, greenBlobs):
         server.emit('programError', str(err))
 
 
-def findStartingPosition(leftHeights, rightHeights, redBlobs, greenBlobs):
-    # oof
-    frontWall = (leftHeights[376] + rightHeights[converter.imageWidth - 1 - 376]) / 2 #6
-    leftWall = leftHeights[237] #22
-    return "stop"
+def findStartingPosition(leftHeights, rightHeights):
+    frontWall = (leftHeights[380] + rightHeights[converter.imageWidth - 1 - 380]) / 2 #13 #18 for closeup
+    leftWall = leftHeights[56] #55
+    rightWall = rightHeights[converter.imageWidth - 1 - 56] #55
+    # long = 29
+
+    print(frontWall, leftWall, rightWall)
+
+    closeFrontWall = 18
+    farFrontWall = 13
+
+    closeSideWall = 55
+    farSideWall = 29
+
+    # needs to be like 40 for side wall threshold
+
+    x = 0
+    y = 0
+
+    if frontWall >= (closeFrontWall + farFrontWall) / 2:
+        y = 125
+    else:
+        y = 175
+    
+    if leftWall >= 65:
+        if rightWall >= 65:
+            if leftWall >= (closeSideWall + farSideWall) / 2:
+                x = 50
+        else:
+            x = 80
+    else:
+        x = 20
+    
+    carX = x
+    carY = y
+    carAngle = math.pi / 2
+    if carDirection == COUNTER_CLOCKWISE:
+        carAngle = 0
