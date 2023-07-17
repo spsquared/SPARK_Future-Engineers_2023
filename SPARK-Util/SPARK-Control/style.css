@@ -28,6 +28,7 @@ img {
 .largeButton:disabled {
     color: initial;
     background-color: gray !important;
+    border-color: grey !important;
     cursor: not-allowed !important;
 }
 .largeButton:disabled:active {
@@ -231,12 +232,14 @@ img {
 #stream, #capture {
     flex-grow: 1;
     background-color: lime;
+    border-color: limegreen;
     margin: 0px 2px;
 }
 #rawCapture {
-    background-color: lime;
     margin: 0px 2px;
     margin-top: 8px;
+    background-color: lime;
+    border-color: limegreen;
 }
 
 #sessionFileControls {
@@ -508,6 +511,7 @@ img {
     margin: 8px 8px;
     margin-top: 4px;
     background-color: lime;
+    border-color: limegreen;
 }
 
 #disconnect {

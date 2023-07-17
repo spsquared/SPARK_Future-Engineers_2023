@@ -12,11 +12,30 @@ statusBlink = 0
 borked = False
 borkedThread = None
 
+def error():
+    global borked, borkedThread, running
+    if borked == False and running:
+        borked = True
+        def borkblink():
+            while running:
+                GPIO.output(__ledRed, GPIO.HIGH)
+                time.sleep(0.1)
+                GPIO.output(__ledRed, GPIO.LOW)
+                time.sleep(0.1)
+                GPIO.output(__ledRed, GPIO.HIGH)
+                time.sleep(0.1)
+                GPIO.output(__ledRed, GPIO.LOW)
+                time.sleep(0.45)
+        borkedThread = Thread(target = borkblink)
+        borkedThread.start()
+        return True
+    return False
+
 # initialize and check if io has been imported multiple times
 fd = open(path + '../lock.txt', 'w+')
 if fd.read() == '1':
     error()
-    raise Exception('ERROR: SETUP HAS DETECTED THAT SETUP IS CURRENTLY RUNNING. PLEASE CLOSE SETUP TO CONTINUE')
+    raise Exception('[!] SETUP HAS DETECTED THAT SETUP IS CURRENTLY RUNNING. PLEASE CLOSE SETUP TO CONTINUE [!]')
 fd.write('1')
 fd.close()
 GPIO.setwarnings(False)
@@ -71,25 +90,6 @@ def __blink():
         if not statusBlink == 1:
             GPIO.output(__ledGreen, GPIO.LOW)
         time.sleep(0.5)
-
-def error():
-    global borked, borkedThread, running
-    if borked == False and running:
-        borked = True
-        def borkblink():
-            while running:
-                GPIO.output(__ledRed, GPIO.HIGH)
-                time.sleep(0.1)
-                GPIO.output(__ledRed, GPIO.LOW)
-                time.sleep(0.1)
-                GPIO.output(__ledRed, GPIO.HIGH)
-                time.sleep(0.1)
-                GPIO.output(__ledRed, GPIO.LOW)
-                time.sleep(0.45)
-        borkedThread = Thread(target = borkblink)
-        borkedThread.start()
-        return True
-    return False
 
 # button
 def waitForButton():

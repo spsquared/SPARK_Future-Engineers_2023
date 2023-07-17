@@ -236,11 +236,13 @@ socket.on('streamState', (state) => {
     streamModSave.checked = state[2];
     if (streamToggle.checked) {
         stream.style.backgroundColor = 'red';
+        stream.style.borderColor = 'firebrick';
         stream.innerText = 'STOP STREAM';
         streamModFilter.disabled = true;
         streamModSave.disabled = true;
     } else {
         stream.style.backgroundColor = '';
+        stream.style.borderColor = '';
         stream.innerText = 'START STREAM';
         streamModFilter.disabled = false;
         streamModSave.disabled = false;
@@ -268,7 +270,7 @@ rawcapture.disabled = true;
 //         [0, 300, true],
 //         [300, 300, true],
 //         [60, 100, true],
-//         [100, 200, true],
+//         [60, 200, true],
 //         [0, 0, false],
 //         [0, 0, false],
 //         [0, 0, true],
@@ -289,5 +291,5 @@ rawcapture.disabled = true;
 //         [0, 0, false],
 //     ],
 //     rawLandmarks: [],
-//     pos: [200, 200, 0]
+//     pos: [260, 160, 0]
 // });
