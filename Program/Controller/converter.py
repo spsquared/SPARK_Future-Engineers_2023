@@ -175,8 +175,8 @@ def getWallLandmarks(heights, blobs):
         invalid = False
         for j in range(i, i + sampleSize):
             if heights[j] == -1:
-                invalid = True;
-                break;
+                invalid = True
+                break
             error = (heights[j] - (heights[i] + slope * (j - i)))
             # if error == 1:
             #     difference += 2
@@ -187,7 +187,7 @@ def getWallLandmarks(heights, blobs):
                 difference += error ** 2
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
         if invalid:
-            break
+            continue
         if abs(difference) > sampleSize:
             slopeChanges[i] = difference
 
