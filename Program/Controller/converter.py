@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -137,15 +137,15 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
 
     return coordinates
 
+wallStartLeft = 169
+wallStartRight = 154
+# wallStart = round(imageHeight / 2) + 15
+wallEnd = round(imageHeight * 3 / 4)
+wallEnd = round(imageHeight * 5 / 6)
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
+    global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
-    wallStartLeft = 169
-    wallStartRight = 154
-    # wallStart = round(imageHeight / 2) + 15
-    wallEnd = round(imageHeight * 3 / 4)
-    wallEnd = round(imageHeight * 5 / 6)
     # wallEnd = imageHeight
     # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
     croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
@@ -172,7 +172,11 @@ def getWallLandmarks(heights, blobs):
     for i in range(imageWidth - sampleSize):
         slope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
         difference = 0
+        invalid = False
         for j in range(i, i + sampleSize):
+            if heights[j] == -1:
+                invalid = True;
+                break;
             error = (heights[j] - (heights[i] + slope * (j - i)))
             # if error == 1:
             #     difference += 2
@@ -182,6 +186,8 @@ def getWallLandmarks(heights, blobs):
             else:
                 difference += error ** 2
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
+        if invalid:
+            break
         if abs(difference) > sampleSize:
             slopeChanges[i] = difference
 
@@ -221,7 +227,12 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         blobDetector.empty()
         gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
 
-        return [numpy.concatenate((rLeftBlobs, gLeftBlobs), axis=None), numpy.concatenate((rRightBlobs, gRightBlobs), axis=None)]
+        for blob in gLeftBlobs:
+            rLeftBlobs.append(blob)
+        for blob in gRightBlobs:
+            rRightBlobs.append(blob)
+
+        return [rLeftBlobs, rRightBlobs]
         # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
 
     except Exception as err:
@@ -232,8 +243,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
 def processBlobs(blobs):
     newBlobs = []
     for blob in blobs:
-        newBlobs.append([blob.pt[0], round(math.sqrt(blob.size))])
-        # newBlobs.append([0, 0])
+        newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
     
     return newBlobs
 
