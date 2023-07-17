@@ -401,7 +401,7 @@ document.getElementById('disconnect').onclick = async () => {
     autoReconnect = false;
     if (rickrolled) return;
     rickrolled = true;
-    animateAll();
+    // animateAll();
     let rickrolls = [];
     let ready = 0;
     for (let i = 0; i < 100; i++) {
