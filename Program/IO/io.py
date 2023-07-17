@@ -40,7 +40,7 @@ fd.write('1')
 fd.close()
 GPIO.setwarnings(False)
 GPIO.cleanup()
-# GPIO.setmode(GPIO.BOARD) stupid forced board mode
+# GPIO.setmode(GPIO.BOARD)
 GPIO.setmode(GPIO.TEGRA_SOC) # stupid forced board mode
 __ledGreen = 'UART2_RTS'
 __ledRed = 'SPI2_SCK'
