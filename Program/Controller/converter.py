@@ -77,6 +77,12 @@ def filter(imgIn: numpy.ndarray):
         io.error()
         server.emit('programError', str(err))
 
+# remapping for distortion correction
+def remapX(x):
+    return x
+def remapY(y):
+    return y
+
 # distance scanner
 leftImgSinAngles = []
 leftImgCosAngles = []
