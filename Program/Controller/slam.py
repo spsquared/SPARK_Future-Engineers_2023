@@ -11,37 +11,36 @@ from scipy.optimize import least_squares
 X = 0
 Y = 1
 FOUND = 2
-COLOR = 3
-DISTANCE = 4
+DISTANCE = 3
 RED = 0
 GREEN = 1
 
 # make numpy/cupy matrix so we can poke with GPU for sPEEEEEEEEEEED?
 storedLandmarks = [
-    [0, 0, True], # Outer wall corners
-    [300, 0, True],
-    [0, 300, True],
-    [300, 300, True],
-    [0, 0, False], # Inner wall corners
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False], # Red Pillars
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False], # green pillarS
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
-    [0, 0, False],
+    [0, 0, True, 0], # Outer wall corners
+    [300, 0, True, 0],
+    [0, 300, True, 0],
+    [300, 300, True, 0],
+    [0, 0, False, 0], # Inner wall corners
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0], # Red Pillars
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0], # green pillarS
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
+    [0, 0, False, 0],
 ]
 
 possibleInnerWallLandmarks = [
@@ -102,13 +101,60 @@ carSpeed = 0
 
 maxErrorDistance = 20
 
+def getDistance(a, b):
+    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+
+def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStride, index, maxLandmarks):
+    landmarks = []
+    for landmark in landmarkData:
+        # find nearest landmark
+        nearestLandmark = None
+
+        newLandmark = False
+        newLandmarkIndex = None
+
+        for j in range(index, index + maxLandmarks):
+            if storedLandmarks[j][2]:
+                if nearestLandmark == None:
+                    nearestLandmark = storedLandmarks[j]
+                    newLandmark = False
+                elif getDistance(storedLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
+                    nearestLandmark = storedLandmarks[j]
+                    newLandmark = False
+            else:
+                for k in range((j - index) * possibleLandmarkStride, (j - index) * possibleLandmarkStride + possibleLandmarkStride):
+                    if nearestLandmark == None:
+                        nearestLandmark = possibleLandmarks[j]
+                        nearestLandmark.append(True)
+                        nearestLandmark.append(0)
+                        newLandmark = True
+                        newLandmarkIndex = k
+                    elif getDistance(possibleLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
+                        nearestLandmark = possibleLandmarks[j]
+                        nearestLandmark.append(True)
+                        nearestLandmark.append(0)
+                        newLandmark = True
+                        newLandmarkIndex = k
+
+        nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
+        if nearestLandmark[DISTANCE] > maxErrorDistance:
+            continue
+        
+        if newLandmark:
+            storedLandmarks[newLandmarkIndex / possibleLandmarkStride + index] = [nearestLandmark[X], nearestLandmark[Y], True]
+        
+        landmarks.append(nearestLandmark)
+    return landmarks
+
 def slam(walls, redBlobs, greenBlobs):
+    global storedLandmarks, possibleInnerWallLandmarks, possiblePillarLandmarks, carX, carY, carAngle, carDirection, carSpeed, maxErrorDistance
     try:
         # dead reckoning
 
         drCarX = carX + math.cos(carAngle) * carSpeed
         drCarY = carY + math.sin(carAngle) * carSpeed
-        drCarAngle = io.imu.gyro.angle
+        # drCarAngle = io.imu.gyro.angle
+        drCarAngle = 0
 
         # get position from landmarks
 
@@ -117,9 +163,6 @@ def slam(walls, redBlobs, greenBlobs):
         lmCarX = 0
         lmCarY = 0
         lmCarAngle = 0
-
-        def getDistance(a, b):
-            return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
         for landmark in walls:
             # find nearest landmark
@@ -141,10 +184,14 @@ def slam(walls, redBlobs, greenBlobs):
                     for k in range((j - 4) * 4, (j - 4) * 4 + 4):
                         if nearestLandmark == None:
                             nearestLandmark = possibleInnerWallLandmarks[k]
+                            nearestLandmark.append(True)
+                            nearestLandmark.append(0)
                             newLandmark = True
                             newLandmarkIndex = k
                         elif getDistance(possibleInnerWallLandmarks[k], landmark) < getDistance(nearestLandmark, landmark):
                             nearestLandmark = possibleInnerWallLandmarks[k]
+                            nearestLandmark.append(True)
+                            nearestLandmark.append(0)
                             newLandmark = True
                             newLandmarkIndex = k
             nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
@@ -157,44 +204,16 @@ def slam(walls, redBlobs, greenBlobs):
             landmarks.append(nearestLandmark)
         
         # unknown landmarks
-        def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStride, index, maxLandmarks):
-            for landmark in landmarkData:
-                # find nearest landmark
-                nearestLandmark = None
-
-                newLandmark = False
-                newLandmarkIndex = None
-
-                for j in range(index, index + maxLandmarks):
-                    if storedLandmarks[j][2]:
-                        if nearestLandmark == None:
-                            nearestLandmark = storedLandmarks[j]
-                            newLandmark = False
-                        elif getDistance(storedLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
-                            nearestLandmark = storedLandmarks[j]
-                            newLandmark = False
-                    else:
-                        for k in range((j - index) * possibleLandmarkStride, (j - index) * possibleLandmarkStride + possibleLandmarkStride):
-                            if nearestLandmark == None:
-                                nearestLandmark = possibleLandmarks[j]
-                                newLandmark = True
-                                newLandmarkIndex = k
-                            elif getDistance(possibleLandmarks[j], landmark) < getDistance(nearestLandmark, landmark):
-                                nearestLandmark = possibleLandmarks[j]
-                                newLandmark = True
-                                newLandmarkIndex = k
-
-                nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
-                if nearestLandmark[DISTANCE] > maxErrorDistance:
-                    continue
-                
-                if newLandmark:
-                    storedLandmarks[newLandmarkIndex / possibleLandmarkStride + index] = [nearestLandmark[X], nearestLandmark[Y], True]
-                
-                landmarks.append(nearestLandmark)
         
-        updateUnknownLandmarks(redBlobs, possiblePillarLandmarks, 6, 8, 8)
-        updateUnknownLandmarks(greenBlobs, possiblePillarLandmarks, 6, 16, 8)
+        redBlobLandmarks = updateUnknownLandmarks(redBlobs, possiblePillarLandmarks, 6, 8, 8)
+        greenBlobLandmarks = updateUnknownLandmarks(greenBlobs, possiblePillarLandmarks, 6, 16, 8)
+
+        for landmark in redBlobLandmarks:
+            landmarks.append(landmark)
+        for landmark in greenBlobLandmarks:
+            landmarks.append(landmark)
+
+        print(landmarks)
         
         def positionEquations(guess):
             x, y = guess
@@ -236,7 +255,7 @@ def slam(walls, redBlobs, greenBlobs):
         # use least squares
         angleResult = least_squares(angleEquations, initialAngleGuess)
 
-        lmCarAngle = angleResult
+        lmCarAngle = angleResult.x[0]
 
         # set car speed
 
@@ -248,8 +267,10 @@ def slam(walls, redBlobs, greenBlobs):
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
 
+        print(carX, carY, carAngle)
+
         # update gyro angle to prevent drifting
-        io.imu.gyro.setAngle(carAngle)
+        # io.imu.gyro.setAngle(carAngle)
     except Exception as err:
         traceback.print_exc()
         io.error()
@@ -257,6 +278,7 @@ def slam(walls, redBlobs, greenBlobs):
 
 
 def findStartingPosition(leftHeights, rightHeights):
+    global carX, carY, carAngle, carDirection
     frontWall = (leftHeights[380] + rightHeights[converter.imageWidth - 1 - 380]) / 2 #13 #18 for closeup
     leftWall = leftHeights[56] #55
     rightWall = rightHeights[converter.imageWidth - 1 - 56] #55
