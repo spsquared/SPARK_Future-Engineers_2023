@@ -44,7 +44,7 @@ def calibrate():
     print('')
     print('Place this number in "/IO/imu.py" in "__trim"')
 
-
+# gyro stuff
 def angle():
     return __angle
 def resetAngle(newAngle: int):
