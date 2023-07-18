@@ -169,11 +169,11 @@ document.onkeyup = function (e) {
             controls.updated = true;
             break;
         case 's':
-            controls.backward = -0;
+            controls.backward = 0;
             controls.updated = true;
             break;
         case 'a':
-            controls.left = -0;
+            controls.left = 0;
             controls.updated = true;
             break;
         case 'd':
