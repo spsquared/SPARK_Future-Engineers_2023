@@ -106,7 +106,7 @@ def slam(walls, redBlobs, greenBlobs):
 
         drCarX = carX + math.cos(carAngle) * carSpeed
         drCarY = carY + math.sin(carAngle) * carSpeed
-        drCarAngle = io.gyro.read()
+        drCarAngle = io.imu.gyro.angle
 
         # get position from landmarks
 
@@ -240,6 +240,8 @@ def slam(walls, redBlobs, greenBlobs):
         carX = (drCarX + lmCarX) / 2
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
+
+        io.imu.gyro.setAngle(carAngle)
     except Exception as err:
         traceback.print_exc()
         io.error()
