@@ -32,8 +32,8 @@ def __update():
         # update loop that constantly updates the most recent image which can be read at any time
         while __running:
             start = time.time()
-            __currentRawImages[0] = undistort(__camera0.value)
-            __currentRawImages[1] = undistort(__camera1.value)
+            __currentRawImages[0] = __camera0.value
+            __currentRawImages[1] = __camera1.value
             __currentImages[0] = downscale(__currentRawImages[0])
             __currentImages[1] = downscale(__currentRawImages[1])
             time.sleep(max(0.02-(time.time()-start), 0))
@@ -55,8 +55,6 @@ def read():
     global __currentImages
     return __currentImages
 
-def undistort(img: numpy.ndarray):
-    return img
 def downscale(img: numpy.ndarray):
     return cv2.resize(img, (__imageWidth, __imageHeight), interpolation=cv2.INTER_NEAREST)
 
