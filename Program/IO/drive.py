@@ -5,9 +5,6 @@ import board
 # drive module that does driving stuff
 
 __pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
-    
-__pwm.continuous_servo[0].throttle = 0.1
-__pwm.servo[1].angle = 0
 
 __currThr = 0
 __currStr = 0
@@ -31,8 +28,8 @@ def trim(trim: int):
     steer(__currStr)
 
 def stop():
-    __pwm.continuous_servo[0].throttle = None
-    __pwm.servo[1].angle = None
+    steer(0)
+    throttle(0)
 
 steer(0)
 throttle(0)
