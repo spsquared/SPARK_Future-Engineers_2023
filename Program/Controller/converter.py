@@ -161,8 +161,12 @@ def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     return [rawHeightsLeft, rawHeightsRight]
 
-def getWallLandmarks(heights, blobs):
-    for blob in blobs:
+def getWallLandmarks(heights, rBlobs, gBlobs):
+    for blob in rBlobs:
+        for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+            if i >= 0 and i < imageWidth:
+                heights[i] = -1
+    for blob in gBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
                 heights[i] = -1
@@ -189,8 +193,6 @@ def getWallLandmarks(heights, blobs):
             #     difference += abs(error)
             # else:
 
-            if i == 420:
-                print(error)
             difference += (error * 3) ** 3 / 3
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
         if invalid:
@@ -236,13 +238,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         blobDetector.empty()
         gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
 
-        for blob in gLeftBlobs:
-            rLeftBlobs.append(blob)
-        for blob in gRightBlobs:
-            rRightBlobs.append(blob)
-
-        return [rLeftBlobs, rRightBlobs]
-        # return [numpy.concatenate(numpy.array(rLeftBlobs), numpy.array(rRightBlobs)), numpy.concatenate(numpy.array(gLeftBlobs), numpy.array(gRightBlobs))]
+        return [rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs]
 
     except Exception as err:
         traceback.print_exc()
@@ -256,48 +252,6 @@ def processBlobs(blobs):
         newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
-
-def getLandmarks(distances, rBlobs, gBlobs):
-    outerWallLandmarks = []
-    innerWallLandmarks = []
-    rBlobLandmarks = []
-    gBlobLandmarks = []
-    # x, y, distance, angle
-    # all relative to car center
-
-    # get outer and inner walls
-    last = [None]
-    angleAverage = None
-    for point in list(distances):
-        if point[2] == -1:
-            continue
-        if last[0] != None:
-            slope = (point[2] - last[2]) / (point[3] - last[3])
-            angle = math.atan2(slope, 1)
-            if angleAverage == None:
-                angleAverage = angle
-            else:
-                if point[2] - last[2] > 20:
-                    innerWallLandmarks.append(last)
-                    angleAverage = None
-                else:
-                    angleDifference = angle - angleAverage
-                    if slam.carDirection == slam.CLOCKWISE:
-                        if angleDifference < -math.pi / 4:
-                            outerWallLandmarks.append(last)
-                    else:
-                        if angleDifference > math.pi / 4:
-                            outerWallLandmarks.append(last)
-                    angleAverage = angle / 2 + angleAverage / 2
-        last = point
-    
-    # get distance info for blobs
-    # for blob in rBlobs:
-    #     rBlobLandmarks.append(distances[blob[0]])
-    # for blob in gBlobs:
-    #     gBlobLandmarks.append(distances[blob[0]])
-
-    return [outerWallLandmarks, innerWallLandmarks, rBlobLandmarks, gBlobLandmarks]
 
 def setColors(data, sendServer: bool):
     global redMax, redMin, greenMax, greenMin
