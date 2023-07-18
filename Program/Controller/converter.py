@@ -307,12 +307,12 @@ def getColors():
         if i % 2 == 0:
             array.append(redMax[math.ceil(i / 3)])
         else:
-            array.append(greenMax[math.ceil(i / 3)])
+            array.append(greenMax[math.floor(i / 3)])
     for i in range(6):
         if i % 2 == 0:
             array.append(redMin[math.ceil(i / 3)])
         else:
-            array.append(greenMin[math.ceil(i / 3)])
+            array.append(greenMin[math.floor(i / 3)])
     return array
 def setDefaultColors():
     global rM, rm, gM, gm
