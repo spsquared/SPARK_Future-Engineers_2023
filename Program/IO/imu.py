@@ -47,7 +47,7 @@ def calibrate():
 # gyro stuff
 def angle():
     return __angle
-def resetAngle(newAngle: int):
+def setAngle(newAngle: int):
     global __angle
     __angle = newAngle
 
