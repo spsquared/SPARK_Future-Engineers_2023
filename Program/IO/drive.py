@@ -9,28 +9,30 @@ __pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
 __pwm.continuous_servo[0].throttle = 0.1
 __pwm.servo[1].angle = 0
 
-currThr = 0
-currStr = 0
-throttleFwd = 0.10
-throttleRev = -0.15
-steeringCenter = 90
-steeringRange = 35
-steeringTrim = 1
+__currThr = 0
+__currStr = 0
+__throttleFwd = 0.10
+__throttleRev = -0.15
+__steeringCenter = 90
+__steeringRange = 35
+__steeringTrim = 9
 def steer(str: int):
-    global __pwm, currStr, steeringCenter, steeringRange, steeringTrim
-    currStr = max(-100, min(str, 100))
-    __pwm.servo[1].angle = (currStr * steeringRange / 100) + steeringCenter + steeringTrim
-
+    global __pwm, __currStr, __steeringCenter, __steeringRange, __steeringTrim
+    __currStr = max(-100, min(str, 100))
+    __pwm.servo[1].angle = (__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim
 def throttle(thr: int):
-    global __pwm, currThr, throttleFwd, throttleRev
-    currThr = max(-100, min(thr, 100))
-    if (currThr < 0):__pwm.continuous_servo[0].throttle = (currThr / 100) * (-throttleRev) + 0.1
-    else: __pwm.continuous_servo[0].throttle = (currThr / 100) * throttleFwd + 0.1
-
+    global __pwm, __currThr, __throttleFwd, __throttleRev
+    __currThr = max(-100, min(thr, 100))
+    if (__currThr < 0):__pwm.continuous_servo[0].throttle = (__currThr / 100) * (-__throttleRev) + 0.1
+    else: __pwm.continuous_servo[0].throttle = (__currThr / 100) * __throttleFwd + 0.1
 def trim(trim: int):
-    global steeringTrim, __pwm
-    steeringTrim = trim
-    steer(currStr)
+    global __steeringTrim, __pwm
+    __steeringTrim = trim
+    steer(__currStr)
+
+def stop():
+    __pwm.continuous_servo[0].throttle = None
+    __pwm.servo[1].angle = None
 
 steer(0)
 throttle(0)

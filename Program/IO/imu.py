@@ -13,13 +13,13 @@ __mpu = adafruit_mpu6050.MPU6050(busio.I2C(board.SCL, board.SDA))
 
 __angle = 0
 __trim = 0.017629823913751886 # change this to calibrated number
-thread = None
-running = True
+__thread = None
+__running = True
 def __update():
-    global __angle, running
+    global __angle, __running
     lastTick = time.time()
     try:
-        while running:
+        while __running:
             __angle += (time.time() - lastTick) * (__mpu.gyro[2] + __trim)
             lastTick = time.time()
             time.sleep(0.02)
@@ -52,10 +52,10 @@ def setAngle(newAngle: int):
     __angle = newAngle
 
 def stop():
-    global running
-    running = False
-    thread.join()
+    global __running
+    __running = False
+    __thread.join()
     return
 
-thread = Thread(target = __update)
-thread.start()
+__thread = Thread(target = __update)
+__thread.start()
