@@ -7,7 +7,7 @@ import board
 __pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
     
 __pwm.continuous_servo[0].throttle = 0.1
-__pwm.servo[1].angle = 90
+__pwm.servo[1].angle = 0
 
 currThr = 0
 currStr = 0
@@ -31,3 +31,6 @@ def trim(trim: int):
     global steeringTrim, __pwm
     steeringTrim = trim
     steer(currStr)
+
+steer(0)
+throttle(0)
