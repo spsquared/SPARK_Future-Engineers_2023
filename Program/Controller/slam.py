@@ -100,6 +100,8 @@ carDirection = CLOCKWISE
 
 carSpeed = 0
 
+maxErrorDistance = 20
+
 def slam(walls, redBlobs, greenBlobs):
     try:
         # dead reckoning
@@ -145,11 +147,13 @@ def slam(walls, redBlobs, greenBlobs):
                             nearestLandmark = possibleInnerWallLandmarks[k]
                             newLandmark = True
                             newLandmarkIndex = k
+            nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
+            if nearestLandmark[DISTANCE] > maxErrorDistance:
+                continue
             
             if newLandmark:
                 storedLandmarks[math.floor(newLandmarkIndex / 4) + 4] = [nearestLandmark[X], nearestLandmark[Y], True]
 
-            nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
             landmarks.append(nearestLandmark)
         
         # unknown landmarks
@@ -179,11 +183,14 @@ def slam(walls, redBlobs, greenBlobs):
                                 nearestLandmark = possibleLandmarks[j]
                                 newLandmark = True
                                 newLandmarkIndex = k
+
+                nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
+                if nearestLandmark[DISTANCE] > maxErrorDistance:
+                    continue
                 
                 if newLandmark:
                     storedLandmarks[newLandmarkIndex / possibleLandmarkStride + index] = [nearestLandmark[X], nearestLandmark[Y], True]
                 
-                nearestLandmark[DISTANCE] = getDistance([carX, carY], landmark)
                 landmarks.append(nearestLandmark)
         
         updateUnknownLandmarks(redBlobs, possiblePillarLandmarks, 6, 8, 8)
@@ -241,6 +248,7 @@ def slam(walls, redBlobs, greenBlobs):
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
 
+        # update gyro angle to prevent drifting
         io.imu.gyro.setAngle(carAngle)
     except Exception as err:
         traceback.print_exc()
