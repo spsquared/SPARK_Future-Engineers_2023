@@ -60,8 +60,14 @@ def undistort(img: numpy.ndarray):
 def downscale(img: numpy.ndarray):
     return cv2.resize(img, (imageWidth, imageHeight), interpolation=cv2.INTER_NEAREST)
 
+# make folder if doesn't exist
+if not os.path.exists('image_out/'):
+    os.mkdir('image_out/')
+if not os.path.exists('filtered_out/'):
+    os.mkdir('filtered_out/')
+
 # single image save
-serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
+serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 0]
 def capture(filter: bool, sendServer: bool):
     try:
         name = str(round(time.time()*1000))

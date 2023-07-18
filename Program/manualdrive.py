@@ -13,7 +13,7 @@ def main():
     try:
         server.open()
         io.setStatusBlink(2)
-        quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
+        quality = [int(cv2.IMWRITE_JPEG_QUALITY), 0]
         streaming = False
         def drive(data):
             io.drive.throttle(data[0]['throttle'])
