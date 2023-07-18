@@ -67,7 +67,7 @@ if not os.path.exists('filtered_out/'):
     os.mkdir('filtered_out/')
 
 # single image save
-serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 0]
+serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 def capture(filter: bool, sendServer: bool):
     try:
         name = str(round(time.time()*1000))
