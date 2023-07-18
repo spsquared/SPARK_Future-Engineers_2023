@@ -11,8 +11,8 @@ import math
 # WALL HEIGHTS ARE FROM EDGES INCLUSIVEs
 
 # colors
-rm = redMin = (0, 95, 75)
-rM = redMax = (25, 255, 255)
+rm = redMin = (0, 80, 75)
+rM = redMax = (55, 255, 255)
 gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
@@ -31,6 +31,7 @@ cameraOffsetY = 10
 params = cv2.SimpleBlobDetector_Params()
 params.filterByArea = True
 params.minArea = 65
+params.maxArea = 128941274721
 params.filterByCircularity = True
 params.minCircularity = 0.3
 params.filterByConvexity = True
@@ -40,6 +41,8 @@ params.minConvexity = 0.7
 # params.maxInertiaRatio = 1
 blobDetector = cv2.SimpleBlobDetector_create(params)
 
+blobSizeConstant = 0.5
+
 def filter(imgIn: numpy.ndarray):
     try:
         global redMax, redMin, greenMax, greenMin
@@ -48,9 +51,8 @@ def filter(imgIn: numpy.ndarray):
         # red filter
         # red is at 0 and also 180, accounting for HSV wraparound
         rMask1 = cv2.inRange(hsv, redMin, redMax)
-        redMaxH = redMax[0]
         redMinList = list(redMin)
-        redMinList = [180 - redMaxH, redMinList[1], redMinList[2]]
+        redMinList = [180 - redMax[0], redMinList[1], redMinList[2]]
         redMin2 = tuple(redMinList)
         redMaxList = list(redMax)
         redMaxList = [180, redMaxList[1], redMaxList[2]]
@@ -142,6 +144,7 @@ wallStartRight = 154
 # wallStart = round(imageHeight / 2) + 15
 wallEnd = round(imageHeight * 3 / 4)
 wallEnd = round(imageHeight * 5 / 6)
+wallEnd = imageHeight
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
@@ -160,12 +163,13 @@ def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
 def getWallLandmarks(heights, blobs):
     for blob in blobs:
-        for i in range(blob[0] - blob[1], blob[0] + blob[1]):
-            heights[i] = -1
+        for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+            if i >= 0 and i < imageWidth:
+                heights[i] = -1
 
     heights = numpy.array(heights, dtype="float")
 
-    sampleSize = 20
+    sampleSize = 30
     
     slopeChanges = numpy.full(imageWidth - sampleSize, 0)
 
@@ -173,7 +177,7 @@ def getWallLandmarks(heights, blobs):
         slope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
         difference = 0
         invalid = False
-        for j in range(i, i + sampleSize):
+        for j in range(i + 1, i + sampleSize):
             if heights[j] == -1:
                 invalid = True
                 break
@@ -181,13 +185,17 @@ def getWallLandmarks(heights, blobs):
             # if error == 1:
             #     difference += 2
             # else:
-            if abs(error) < 1:
-                difference += abs(error)
-            else:
-                difference += error ** 2
+            # if abs(error) < 1:
+            #     difference += abs(error)
+            # else:
+
+            if i == 420:
+                print(error)
+            difference += (error * 3) ** 3 / 3
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
         if invalid:
             continue
+
         if abs(difference) > sampleSize:
             slopeChanges[i] = difference
 
@@ -196,8 +204,8 @@ def getWallLandmarks(heights, blobs):
     for i in range(imageWidth - sampleSize):
         # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
         if (slopeChanges[i] == 0 and slopeChanging >= sampleSize / 2) or slopeChanging >= sampleSize:
-            # landmarks.append([i - round(slopeChanging / 2), slopeChanges[i - round(slopeChanging / 2)]])
-            landmarks.append([i - 1, slopeChanges[i - 1]])
+            landmarks.append([i - round(slopeChanging / 2) + round(sampleSize / 2), slopeChanges[i - round(slopeChanging / 2) + round(sampleSize / 2)]])
+            # landmarks.append([i - 1, slopeChanges[i - 1]])
             slopeChanging = 0
         # if slopeChanges[i] != 0:
         #     landmarks.append([i, slopeChanges[i]])
@@ -209,14 +217,15 @@ def getWallLandmarks(heights, blobs):
     return landmarks
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
+    global wallStartLeft, wallStartRight, wallEnd
     try:
         # add borders to fix blob detection
-        blobStart = 79
-        blobEnd = 100 # fix???
-        rLeft = cv2.copyMakeBorder(rLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gLeft = cv2.copyMakeBorder(gLeftIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        rRight = cv2.copyMakeBorder(rRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gRight = cv2.copyMakeBorder(gRightIn[blobStart:blobEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        # blobStart = 79
+        # blobEnd = 100 # fix???
+        rLeft = cv2.copyMakeBorder(rLeftIn[wallStartLeft:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gLeft = cv2.copyMakeBorder(gLeftIn[wallStartLeft:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        rRight = cv2.copyMakeBorder(rRightIn[wallStartRight:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gRight = cv2.copyMakeBorder(gRightIn[wallStartRight:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
         blobDetector.empty()
         rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
@@ -243,7 +252,8 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
 def processBlobs(blobs):
     newBlobs = []
     for blob in blobs:
-        newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
+        # newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
+        newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
 
