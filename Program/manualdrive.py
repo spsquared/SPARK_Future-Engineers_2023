@@ -83,16 +83,8 @@ def main():
             running = False
             print('stopped by emergency stop button')
         server.on('stop', stop)
-        t = 0
         while running:
             msg = input()
-            if msg == 'w':
-                t += 1
-            elif msg == 's':
-                t -= 1
-            io.drive.trim(t)
-            print(t)
-            continue
             if msg == 'reset':
                 server.emit('colors', converter.setDefaultColors())
             elif msg == 'calibrate-gyro':
