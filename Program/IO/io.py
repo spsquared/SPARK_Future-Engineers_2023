@@ -35,7 +35,7 @@ def error():
 fd = open(path + '../lock.txt', 'w+')
 if fd.read() == '1':
     error()
-    raise Exception('[!] SETUP HAS DETECTED THAT SETUP IS CURRENTLY RUNNING. PLEASE CLOSE SETUP TO CONTINUE [!]')
+    raise Exception('[!] SETUP HAS DETECTED THAT SETUP IS CURRENTLY RUNNING. PLEASE CLOSE SETUP TO CONTINUE. [!]')
 fd.write('1')
 fd.close()
 GPIO.setwarnings(False)
