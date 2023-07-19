@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -84,24 +84,25 @@ def remapY(y):
     return y
 
 # distance scanner
+wallStartLeft = 169
+wallStartRight = 154
+# wallStart = round(imageHeight / 2) + 15
+wallEnd = round(imageHeight * 3 / 4)
+wallEnd = round(imageHeight * 5 / 6)
+wallEnd = imageHeight
 leftImgSinAngles = []
 leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2((imageWidth / 2) - i, focalLength) + math.pi / 3))
+    leftImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
-def undistort(x, y):
-    u = x - cx
-    v = y - cy
-
-    return 
 def __rawToCartesian(a, dir):
     if a[0] == 0:
         return (-1.0, -1.0, -1.0, -1.0)
@@ -111,6 +112,21 @@ def __rawToCartesian(a, dir):
         x = dir * cameraOffsetX + a[2] * dist
         y = cameraOffsetY + a[1] * dist
         return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
+def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+    global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
+
+    # crop for wall detection, then flip
+    # wallEnd = imageHeight
+    # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
+    # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
+
+    # get wall heights by finding the bottom edge of the wall
+    rawHeightsLeft = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float"))
+    rawHeightsRight = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float"))
+
+    return [rawHeightsLeft, rawHeightsRight]
 def getDistance(imgx: int, height: int, dir: int):
     if height == 0:
         return (-1.0, -1.0, -1.0, -1.0)
@@ -141,37 +157,15 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles, range(imageWidth)), -1), -1)
     rightCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles, range(imageWidth)), -1), 1)
-    # coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
+    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    # ref = coordinates.ravel().view(dtype)
-    # ref.sort(order=['theta', 'dist', 'x', 'y'])
+    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    ref = coordinates.ravel().view(dtype)
+    ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return leftCoordinates
+    return coordinates
 
-wallStartLeft = 169
-wallStartRight = 154
-# wallStart = round(imageHeight / 2) + 15
-wallEnd = round(imageHeight * 3 / 4)
-wallEnd = round(imageHeight * 5 / 6)
-wallEnd = imageHeight
-def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
-
-    # crop for wall detection, then flip
-    # wallEnd = imageHeight
-    # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
-    # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
-
-    # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
-
-    return [rawHeightsLeft, rawHeightsRight]
-
-def getWallLandmarks(heights, rBlobs, gBlobs):
+def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     for blob in rBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
@@ -256,7 +250,7 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         io.error()
         server.emit('programError', str(err))
 
-def processBlobs(blobs):
+def processBlobs(blobs: list):
     newBlobs = []
     for blob in blobs:
         # newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
