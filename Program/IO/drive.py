@@ -20,8 +20,8 @@ def steer(str: int):
 def throttle(thr: int):
     global __pwm, __currThr, __throttleFwd, __throttleRev
     __currThr = max(-100, min(thr, 100))
-    if (__currThr < 0):__pwm.continuous_servo[0].throttle = (__currThr / 100) * (-__throttleRev) + 0.1
-    else: __pwm.continuous_servo[0].throttle = (__currThr / 100) * __throttleFwd + 0.1
+    if (__currThr < 0):__pwm.continuous_servo[0].throttle = (__currThr / 100) * (-__throttleRev)
+    else: __pwm.continuous_servo[0].throttle = (__currThr / 100) * __throttleFwd
 def trim(trim: int):
     global __steeringTrim, __pwm
     __steeringTrim = trim
