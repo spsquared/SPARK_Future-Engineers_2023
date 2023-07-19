@@ -123,7 +123,7 @@ def getDistance(imgx: int, height: int, dir: int):
             x = cameraOffsetX + rightImgCosAngles[imgx] * dist
             y = cameraOffsetY + rightImgSinAngles[imgx] * dist
         return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
-def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, rightBlurredIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
     # crop for wall detection, then flip
@@ -138,17 +138,16 @@ def getDistances(leftBlurredIn: numpy.ndarray, leftEdgesIn: numpy.ndarray, right
     rawHeightsRight = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
 
     leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles, range(imageWidth)), -1), -1)
     rightCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles, range(imageWidth)), -1), 1)
-    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
+    # coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
-    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    ref = coordinates.ravel().view(dtype)
-    ref.sort(order=['theta', 'dist', 'x', 'y'])
+    # dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
+    # ref = coordinates.ravel().view(dtype)
+    # ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return coordinates
+    return leftCoordinates
 
 wallStartLeft = 169
 wallStartRight = 154
