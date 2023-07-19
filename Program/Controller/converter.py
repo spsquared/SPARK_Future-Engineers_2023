@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -91,6 +91,11 @@ leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
+def undistort(x, y):
+    u = x - cx
+    v = y - cy
+
+    return 
 def __rawToCartesian(a, dir):
     if a[0] == 0:
         return (-1.0, -1.0, -1.0, -1.0)
@@ -192,12 +197,13 @@ def getWallLandmarks(heights, rBlobs, gBlobs):
             # if abs(error) < 1:
             #     difference += abs(error)
             # else:
+            if i == 300:
+                print(error)
 
             difference += (error * 3) ** 3 / 3
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
         if invalid:
             continue
-
         if abs(difference) > sampleSize:
             slopeChanges[i] = difference
 
