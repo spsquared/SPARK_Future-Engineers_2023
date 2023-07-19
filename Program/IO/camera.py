@@ -1,6 +1,7 @@
 from Controller import converter
 from Util import server
-from jetcam.csi_camera import CSICamera
+# from jetcam.csi_camera import CSICamera
+from IO.nvcamera import NVCamera
 from IO import io
 import traceback
 import cv2
@@ -17,8 +18,10 @@ __imageHeightRaw = 616
 __imageWidth = 544
 __imageHeight = 308
 
-__camera0 = CSICamera(capture_device=0, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
-__camera1 = CSICamera(capture_device=1, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
+# __camera0 = CSICamera(capture_device=0, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
+# __camera1 = CSICamera(capture_device=1, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
+__camera0 = NVCamera(sid=0, width=__imageWidthRaw, height=__imageHeightRaw)
+__camera1 = NVCamera(sid=1, width=__imageWidthRaw, height=__imageHeightRaw)
 __running = True
 __currentRawImages = [None, None]
 __currentImages = [None, None]
@@ -32,8 +35,8 @@ def __update():
         # update loop that constantly updates the most recent image which can be read at any time
         while __running:
             start = time.time()
-            __currentRawImages[0] = __camera0.value
-            __currentRawImages[1] = __camera1.value
+            __currentRawImages[0] = __camera0.read()
+            __currentRawImages[1] = __camera1.read()
             __currentImages[0] = downscale(__currentRawImages[0])
             __currentImages[1] = downscale(__currentRawImages[1])
             time.sleep(max(0.02-(time.time()-start), 0))

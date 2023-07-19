@@ -64,6 +64,7 @@ logotext.onload = () => {
                     logoX = -0.1;
                     logoYSpeed = 0;
                     logoXSpeed = 0;
+                    cameraShake = 0;
                 } else {
                     draw = false;
                     logocanvas.style.backgroundColor = 'transparent';
