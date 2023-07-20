@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -85,36 +85,47 @@ remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(
 # distance scanner
 wallStartLeft = 169
 wallStartRight = 154
-# wallStart = round(imageHeight / 2) + 15
-wallEnd = round(imageHeight * 3 / 4)
-wallEnd = round(imageHeight * 5 / 6)
 wallEnd = imageHeight
-leftImgSinAngles = []
-leftImgCosAngles = []
-rightImgSinAngles = []
-rightImgCosAngles = []
-leftImageWidthRemapX = remap[wallStartLeft][round(imageWidth / 2)][0]
-rightImageWidthRemapX = remap[wallStartRight][round(imageWidth / 2)][0]
-for i in range(imageWidth):
-    leftRemapXI = remap[wallStartLeft][i][0]
-    rightRemapXI = remap[wallStartRight][i][0]
-    leftImgSinAngles.append(math.sin(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
-leftImgSinAngles = numpy.array(leftImgSinAngles)
-leftImgCosAngles = numpy.array(leftImgCosAngles)
-rightImgSinAngles = numpy.array(rightImgSinAngles)
-rightImgCosAngles = numpy.array(rightImgCosAngles)
-def __rawToCartesian(a, dir):
-    if a[0] == 0:
-        return (-1.0, -1.0, -1.0, -1.0)
-    else:
-        # dist = wallHeight * focalLength / a[0]
-        dist = wallHeight * math.sqrt(focalLength**2 + (a[3] - imageWidth / 2)**2) / a[0]
-        x = dir * cameraOffsetX + a[2] * dist
-        y = cameraOffsetY + a[1] * dist
-        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
+# leftImgSinAngles = []
+# leftImgCosAngles = []
+# rightImgSinAngles = []
+# rightImgCosAngles = []
+# leftImageWidthRemapX = remap[wallStartLeft][round(imageWidth / 2)][0]
+# rightImageWidthRemapX = remap[wallStartRight][round(imageWidth / 2)][0]
+# for i in range(imageWidth):
+#     leftRemapXI = remap[wallStartLeft][i][0]
+#     rightRemapXI = remap[wallStartRight][i][0]
+#     leftImgSinAngles.append(math.sin(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
+#     leftImgCosAngles.append(math.cos(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
+#     rightImgSinAngles.append(math.sin(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
+#     rightImgCosAngles.append(math.cos(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
+# leftImgSinAngles = numpy.array(leftImgSinAngles)
+# leftImgCosAngles = numpy.array(leftImgCosAngles)
+# rightImgSinAngles = numpy.array(rightImgSinAngles)
+# rightImgCosAngles = numpy.array(rightImgCosAngles)
+halfWidth = imageWidth / 2
+distanceTable = [[], []]
+for x in range(imageWidth):
+    distanceTable[0].append([])
+    distanceTable[1].append([])
+    distanceTable[0][0].append((-1, -1, -1, -1))
+    for height in range(1, wallEnd - wallStartLeft + 1):
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((x - halfWidth) ** 2)) / height
+        vAngle = math.atan2(remap[wallStartLeft + height][x][0], remap[wallStartLeft + height][x][1])
+        x = -cameraOffsetX + math.cos(vAngle) * dist
+        y = cameraOffsetY + math.sin(vAngle) * dist
+        cDist = math.sqrt(x ** 2 + y ** 2)
+        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+        distanceTable[0][height].append((x, y, cDist, cAngle))
+    distanceTable[0][1].append((-1, -1, -1, -1))
+    for height in range(1, wallEnd - wallStartRight + 1):
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((x - halfWidth) ** 2)) / height
+        vAngle = math.atan2(remap[wallStartLeft + height][x][0], remap[wallStartLeft + height][x][1])
+        x = cameraOffsetX + math.cos(vAngle) * dist
+        y = cameraOffsetY + math.sin(vAngle) * dist
+        cDist = math.sqrt(x ** 2 + y ** 2)
+        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+        distanceTable[1][height].append((x, y, cDist, cAngle))
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
 
@@ -163,10 +174,8 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
     rawHeightsRight = (wallEnd - wallStart) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-
-    leftCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsLeft, leftImgSinAngles, leftImgCosAngles, range(imageWidth)), -1), -1)
-    rightCoordinates = numpy.apply_along_axis(__rawToCartesian, 1, numpy.stack((rawHeightsRight, rightImgSinAngles, rightImgCosAngles, range(imageWidth)), -1), 1)
+    leftCoordinates = numpy.apply_along_axis(lambda a: distanceTable[0][a[1]][a[0]], 1, numpy.stack((rawHeightsLeft, range(imageWidth)), -1))
+    rightCoordinates = numpy.apply_along_axis(lambda a: distanceTable[1][a[1]][a[0]], 1, numpy.stack((rawHeightsRight, range(imageWidth)), -1))
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
     dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
