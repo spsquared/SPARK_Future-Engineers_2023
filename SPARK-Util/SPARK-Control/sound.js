@@ -1,8 +1,9 @@
 // tick: https://www.beepbox.co/#9n11sbk0l00e00t4Ia2g00j07r3i200o1T0v0u00f0q00d04w2h0E0T2v6u02f0q00d04w4E0b0gp180a8w8so0
 // click: https://www.beepbox.co/#9n12s0k0l00e00t4Ia2g00j07r3i0o4T5v1u85f10l7q011d23HK-LBJrttAAAyqhh0E0T2v3u02f10f6q00d04w1E0T3v6u03f0q00d04S____00000000000E0b4hp1f0aow8so0F2e7600
-// ping: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d04w2h0E0bwp16FyY760
-// shortDing: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d07w2h0E0bwp17FyWlD4w
-// longDing: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v4u00f0qg01d0aw2h0E0bwp16FBY74w
+// ding: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d04w2h0E0bwp16FyY760
+// start: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d07w2h0E0bwp17FyWlD4w
+// stop: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d07w2h0E0bwp17FyXlD4w
+// ping: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v4u00f0qg01d0aw2h0E0bwp16FBY74w
 // connect: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d0aw2h0E0bwp17FE-BxHw
 // disconnect: https://www.beepbox.co/#9n10sbk0l00e00t4Ia2g00j00r3i0o4T0v6u00f0qg01d0aw2h0E0bwp17FE_4EqU
 
@@ -12,9 +13,10 @@ globalVolume.connect(audioContext.destination);
 const sounds = {
     tick: () => {},
     click: () => {},
+    ding: () => {},
+    start: () => {},
+    stop: () => {},
     ping: () => {},
-    shortDing: () => {},
-    longDing: () => {},
     connect: () => {},
     disconnect: () => {}
 };

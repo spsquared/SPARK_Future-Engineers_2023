@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Controller import driver
+from Controller import controller
 from Controller import converter
 import traceback
 import cv2
@@ -30,13 +30,15 @@ def main():
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])))[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[1])))[1]).decode(),
-                            1
+                            1,
+                            0
                         ]
                         server.emit('capture', encoded)
                     else:
                         encoded = [
                             base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
                             base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
+                            0,
                             0
                         ]
                         server.emit('capture', encoded)

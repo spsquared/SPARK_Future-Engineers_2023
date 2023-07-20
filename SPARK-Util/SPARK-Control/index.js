@@ -11,7 +11,7 @@ function appendLog(text, color) {
 };
 window.addEventListener('error', (e) => {
     appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
-    sounds.longDing();
+    sounds.ping();
 });
 
 const initcolors = [
@@ -103,11 +103,11 @@ window.addEventListener('load', connect);
 // log
 socket.on('message', (msg) => {
     appendLog(msg);
-    sounds.shortDing();
+    sounds.ding();
 });
 socket.on('programError', (err) => {
     appendLog(`<strong>[REMOTE]</strong> An error occured:${err}`, 'red');
-    sounds.longDing();
+    sounds.ping();
 });
 
 // manual driving
@@ -312,7 +312,6 @@ function setColors(colors) {
         sliders[i].value = colors[i];
         updateSlider(parseInt(i));
     }
-    sounds.shortDing();
 };
 {
     let k = 0;

@@ -31,7 +31,7 @@ function addCapture(images) {
         ],
         fps: fps
     });
-    if (images[3] == 0) sounds.ping();
+    if (images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
@@ -56,7 +56,7 @@ function addData(data) {
         blobs: data.blobs,
         fps: fps
     });
-    if (data.images[3] == 0) sounds.ping();
+    if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
@@ -244,14 +244,15 @@ socket.on('streamState', (state) => {
         stream.innerText = 'STOP STREAM';
         streamModFilter.disabled = true;
         streamModSave.disabled = true;
+        sounds.start();
     } else {
         stream.style.backgroundColor = '';
         stream.style.borderColor = '';
         stream.innerText = 'START STREAM';
         streamModFilter.disabled = false;
         streamModSave.disabled = false;
+        sounds.stop();
     }
-    sounds.shortDing();
 });
 stream.onclick = () => {
     streamToggle.checked = !streamToggle.checked;

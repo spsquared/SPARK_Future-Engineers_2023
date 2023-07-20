@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -129,10 +129,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft, rawHeightsRight = getRawHeights(leftEdgesIn, rightEdgesIn)
 
-    # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
-    # for i in range(imageWidth):
-    #     rawHeightsLeft[i] = remap[round(wallEnd - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
-    #     rawHeightsRight[i] = remap[round(wallEnd - rawHeightsRight[i] - 1)][i][1] - wallStartRight
+
 
     return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
@@ -275,7 +272,7 @@ def processBlobs(blobs: list):
     return newBlobs
 
 def mergeBlobs(leftBlobs: list, rightBlobs: list):
-    # OOF CONFLICTS
+    # keep angle and distance instead of x and size
     return []
 
 def setColors(data: list, sendServer: bool):

@@ -1,8 +1,9 @@
-# calculates the path the car should follow
 from Controller import converter
 from Controller import slam
 from IO import io
 import math
+
+# calculates the path the car should follow
 
 useServer = True
 def setMode(sendServer: bool = None):
