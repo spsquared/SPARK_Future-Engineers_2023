@@ -1,4 +1,5 @@
 from IO import io
+from Controller import converter
 import numpy
 import cv2
 import base64
@@ -24,8 +25,8 @@ lastSend = 0
 
 debug = False
 
-def predict(imgIn: numpy.ndarray, server = None, infinite = False):
-    global redMax, redMin, greenMax, greenMin, lastSend, rightOnRed, counterClockwise, turnsMade, turnCooldown, passedPillar, debug
+def drive(imgIn: numpy.ndarray, server = None, infinite = False):
+    global lastSend, rightOnRed, counterClockwise, turnsMade, turnCooldown, passedPillar, debug
     try:
         # useless thing
         if infinite: turnsMade = 0
