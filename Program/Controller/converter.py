@@ -22,7 +22,7 @@ verticalFov = 115
 imageWidth = 544
 imageHeight = 308
 focalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
-focalLength = 91
+focalLength = 105
 wallHeight = 10
 cameraOffsetX = 3
 cameraOffsetY = 10
@@ -86,6 +86,7 @@ wallStartLeft = 163
 wallStartRight = 154
 wallEnd = imageHeight
 wallEnd = 249
+wallStartBuffer = 5
 halfWidth = round(imageWidth / 2)
 distanceTable = [[], []]
 for imgx in range(imageWidth):
@@ -113,17 +114,17 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
-    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft + wallStartBuffer:wallEnd], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
 
     # find the bottom edge of the wall
-    rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer + 2
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer + 2
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
-    for i in range(imageWidth):
-        rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
-        rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
+    # for i in range(imageWidth):
+    #     rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
+    #     rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
     return [rawHeightsLeft, rawHeightsRight]
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
@@ -200,7 +201,7 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             # rightDifference += (error * 3) ** 3 / 3
         if invalid:
             continue
-        angle = math.atan(leftSlope) - math.atan(rightSlope)
+        # angle = math.atan(leftSlope) - math.atan(rightSlope)
         # if i == 286 - sampleSize:
         #     print(leftSlope, rightSlope, leftDifference, rightDifference)
         #     print(angle)
@@ -222,7 +223,7 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     landmarks = []
     for i in range(imageWidth - sampleSize):
         # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
-        if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize:
+        if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize * 2 + 2:
             landmarks.append([i - math.ceil(slopeChanging / 2) + sampleSize, slopeChanges[i - math.ceil(slopeChanging / 2) + sampleSize]])
             # landmarks.append([i - 1, slopeChanges[i - 1]])
             slopeChanging = 0
