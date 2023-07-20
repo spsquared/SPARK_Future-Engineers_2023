@@ -12,7 +12,7 @@ __throttleFwd = 0.10
 __throttleRev = -0.15
 __steeringCenter = 90
 __steeringRange = 35
-__steeringTrim = 9
+__steeringTrim = 10
 def steer(str: int):
     global __pwm, __currStr, __steeringCenter, __steeringRange, __steeringTrim
     __currStr = max(-100, min(str, 100))
