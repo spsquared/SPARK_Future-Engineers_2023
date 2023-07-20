@@ -14,7 +14,7 @@ import cv2
 # (8): shade
 # (9): manual
 whitebalance = 7
-exposure = 600_000_000
+exposurecompensation = 2
 
 class NVCamera(traitlets.HasTraits):
     sid: traitlets.Integer()
@@ -46,6 +46,8 @@ class NVCamera(traitlets.HasTraits):
         self.__capture.release()
     
     def __gst_str(self):
-        global whitebalance, exposure
-        return 'nvarguscamerasrc sensor-id=%d awblock=true aelock=true wbmode=%d aeantibanding=1 exposuretimerange="%d %d" ! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
-                self.__sid, whitebalance, exposure, exposure, self.__width, self.__height)
+        global whitebalance, exposurecompensation
+        # return 'nvarguscamerasrc sensor-id=%d awblock=true aelock=true wbmode=%d aeantibanding=1 exposuretimerange="300000000 300000000" exposurecompensation=%d ! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
+        #         self.__sid, whitebalance, exposurecompensation, self.__width, self.__height)
+        return 'nvarguscamerasrc sensor-id=%d ! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
+                self.__sid, self.__width, self.__height)

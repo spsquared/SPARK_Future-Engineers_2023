@@ -8,6 +8,12 @@ import json
 
 # not last year's code as fallback
 
+# wall constants
+LEFT = 0
+CENTER = 1
+RIGHT = 2
+
+# funny config stuff
 rightOnRed = True
 doPillars = True
 counterClockwise = 0
