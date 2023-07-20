@@ -99,17 +99,13 @@ possiblePillarLandmarks = [
 carX = -1
 carY = -1
 carAngle = 0
+carSpeed = 0
 
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 carDirection = CLOCKWISE
 
-carSpeed = 0
-
 maxErrorDistance = 20
-
-def getDistance(a, b):
-    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
 
 def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStride, index, maxLandmarks, landmarkType):
     landmarks = []
@@ -275,12 +271,11 @@ def slam(walls, redBlobs, greenBlobs):
         print(carX, carY, carAngle)
 
         # update gyro angle to prevent drifting
-        # io.imu.gyro.setAngle(carAngle)
+        io.imu.setAngle(carAngle)
     except Exception as err:
         traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
-
 
 def findStartingPosition(leftHeights, rightHeights):
     global carX, carY, carAngle, carDirection
@@ -321,3 +316,10 @@ def findStartingPosition(leftHeights, rightHeights):
     carAngle = math.pi / 2
     if carDirection == COUNTER_CLOCKWISE:
         carAngle = 0
+
+def getDistance(a, b):
+    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+
+def sendServer():
+    # send the stuff to the control panel
+    pass

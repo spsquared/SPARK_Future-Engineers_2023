@@ -1,16 +1,24 @@
 # calculates the path the car should follow
-import slam
+from Controller import converter
+from Controller import slam
+from IO import io
 import math
 
-X = 0
-Y = 1
-def landmarkSort(landmark):
-    return slam.carDirection * (math.atan2(landmark[Y] - 150, landmark[X] - 150) - math.atan2(slam.carY - 150, slam.carX - 150))
-
-def getDistance(a, b):
-    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+useServer = True
+def setMode(sendServer: bool = None):
+    global useServer
+    if sendServer != None: useServer = sendServer
 
 def drive():
+    leftEdgesImg, leftBlurredG, leftBlurredR = converter.filter(io.camera.io.camera.io.camera.io.camera.io.camera.read()[0])
+    rightEdgesImg, rightBlurredG, rightBlurredR = converter.filter(io.camera.io.camera.io.camera.io.camera.io.camera.read()[1])
+    heights = converter.getHeights(leftEdgesImg, rightEdgesImg)
+    red
+    # help heights are separate aaaaaaaaaaaaa
+    pass
+
+def getSteering():
+
     landmarks = slam.storedLandmarks[slam.storedLandmarks[2]].sort(landmarkSort)
     
     nextPoint = [slam.carX, slam.carY]
@@ -19,11 +27,17 @@ def drive():
     for landmark in landmarks:
         if nextPointDistance < getDistance(nextPoint, landmark):
             nextPointDistance -= getDistance(nextPoint, landmark)
-            nextPoint = [landmark[X], landmark[Y]]
+            nextPoint = [landmark[0], landmark[1]]
         else:
-            angle = math.atan2(landmark[Y] - nextPoint[Y], landmark[X] - landmark[X])
+            angle = math.atan2(landmark[1] - nextPoint[1], landmark[0] - landmark[0])
             magnitude = nextPointDistance
-            nextPoint[X] += math.cos(angle) * magnitude
-            nextPoint[Y] += math.sin(angle) * magnitude
+            nextPoint[0] += math.cos(angle) * magnitude
+            nextPoint[1] += math.sin(angle) * magnitude
 
-    return math.atan2(nextPoint[Y] - slam.carY, nextPoint[X] - slam.carX) - slam.carAngle
+    return math.atan2(nextPoint[1] - slam.carY, nextPoint[0] - slam.carX) - slam.carAngle
+
+def landmarkSort(landmark):
+    return slam.carDirection * (math.atan2(landmark[1] - 150, landmark[0] - 150) - math.atan2(slam.carY - 150, slam.carX - 150))
+
+def getDistance(a, b):
+    return math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2)

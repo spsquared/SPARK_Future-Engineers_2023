@@ -24,12 +24,17 @@ passedPillar = 0
 lastSend = 0
 
 debug = False
+useServer = True
+infinite = False
+def setMode(sendServer: bool = None, infiniteMode: bool = None, debugMode: bool = None):
+    global debug, useServer, infinite
+    if sendServer != None: useServer = sendServer
+    if infiniteMode != None: infinite = infiniteMode
+    if debugMode != None: debug = debugMode
 
-def drive(imgIn: numpy.ndarray, server = None, infinite = False):
+def getSteering():
     global lastSend, rightOnRed, counterClockwise, turnsMade, turnCooldown, passedPillar, debug
     try:
-        # useless thing
-        if infinite: turnsMade = 0
 
         # create blob detector
         params = cv2.SimpleBlobDetector_Params()
@@ -48,7 +53,7 @@ def drive(imgIn: numpy.ndarray, server = None, infinite = False):
         edgesImage, gImg, rImg, bImg = cv2.split(blurredImg)
 
         # send images to SPARK Control
-        if server != None and blurredImg.all() != None:
+        if blurredImg.all() != None:
             lastSend += 1
             if (lastSend > 2):
                 lastSend = 0
