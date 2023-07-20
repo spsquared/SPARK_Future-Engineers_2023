@@ -86,23 +86,6 @@ remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(
 wallStartLeft = 169
 wallStartRight = 154
 wallEnd = imageHeight
-# leftImgSinAngles = []
-# leftImgCosAngles = []
-# rightImgSinAngles = []
-# rightImgCosAngles = []
-# leftImageWidthRemapX = remap[wallStartLeft][round(imageWidth / 2)][0]
-# rightImageWidthRemapX = remap[wallStartRight][round(imageWidth / 2)][0]
-# for i in range(imageWidth):
-#     leftRemapXI = remap[wallStartLeft][i][0]
-#     rightRemapXI = remap[wallStartRight][i][0]
-#     leftImgSinAngles.append(math.sin(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
-#     leftImgCosAngles.append(math.cos(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
-#     rightImgSinAngles.append(math.sin(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
-#     rightImgCosAngles.append(math.cos(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
-# leftImgSinAngles = numpy.array(leftImgSinAngles)
-# leftImgCosAngles = numpy.array(leftImgCosAngles)
-# rightImgSinAngles = numpy.array(rightImgSinAngles)
-# rightImgCosAngles = numpy.array(rightImgCosAngles)
 halfWidth = math.round(imageWidth / 2)
 distanceTable = [[], []]
 for x in range(imageWidth):
