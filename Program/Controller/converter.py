@@ -93,11 +93,14 @@ leftImgSinAngles = []
 leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
+imageWidthRemapX = remapX[imageWidth / 2]
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
+    remapXI = remapX[i]
+    leftImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
+    del remapXI
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
