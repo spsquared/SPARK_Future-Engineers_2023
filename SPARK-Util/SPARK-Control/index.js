@@ -139,7 +139,6 @@ const controls = {
     right: 0,
     throttle: 0,
     steering: 0,
-    trim: 0.05,
     updated: false
 };
 document.onkeydown = function (e) {
@@ -182,47 +181,34 @@ document.onkeyup = function (e) {
             break;
     }
 };
-let pressedbuttons = [];
+let pressedbuttons = new Set();
 function updateControllers() {
     let controllers = navigator.getGamepads();
     for (let i in controllers) {
         if (controllers[i] instanceof Gamepad) {
             let controller = controllers[i];
-            throttle = Math.round(controller.axes[1] * -100);
-            steering = Math.round((controller.axes[2] - controls.trim) * 100);
-            if (controller.buttons[8].pressed && pressedbuttons.indexOf(8) == -1) {
-                if (controller.buttons[7].pressed) document.getElementById('captureFilterButton').click();
-                else document.getElementById('captureButton').click();
-                pressedbuttons.push(8);
-            } else if (!controller.buttons[8].pressed && pressedbuttons.indexOf(8) != -1) {
-                pressedbuttons.splice(pressedbuttons.indexOf(8), 1);
-            }
-            if (controller.buttons[9].pressed && pressedbuttons.indexOf(9) == -1) {
-                if (controller.buttons[7].pressed) document.getElementById('captureFilterStreamButton').click();
-                else document.getElementById('captureStreamButton').click();
-                pressedbuttons.push(9);
-            } else if (!controller.buttons[9].pressed && pressedbuttons.indexOf(9) != -1) {
-                pressedbuttons.splice(pressedbuttons.indexOf(9), 1);
-            }
-            if (controller.buttons[0].pressed && pressedbuttons.indexOf(0) == -1) {
-                if (controller.buttons[7].pressed) document.getElementById('filterStreamButton').click();
-                else document.getElementById('streamButton').click();
-                pressedbuttons.push(0);
-            } else if (!controller.buttons[0].pressed && pressedbuttons.indexOf(0) != -1) {
-                pressedbuttons.splice(pressedbuttons.indexOf(0), 1);
-            }
-            if (controller.buttons[1].pressed && pressedbuttons.indexOf(1) == -1) {
-                document.getElementById('predictionButton').click();
-                pressedbuttons.push(1);
-            } else if (!controller.buttons[1].pressed && pressedbuttons.indexOf(1) != -1) {
-                pressedbuttons.splice(pressedbuttons.indexOf(1), 1);
-            }
-            joystickPin.style.bottom = 114 - (controller.axes[1] * 110) + 'px';
-            joystickPin.style.right = 114 - (controller.axes[2] * 110) + 'px';
-            sliderX.style.bottom = 140 - (controller.axes[1] * 110) + 'px';
-            sliderY.style.right = 140 - (controller.axes[2] * 110) + 'px';
+            let lastthrottle = controls.throttle;
+            let laststeering = controls.steering;
+            controls.throttle = Math.abs(controller.axes[1]) < 0.05 ? 0 : Math.round(controller.axes[1] * -100);
+            controls.steering = Math.abs(controller.axes[2]) < 0.1 ? 0 :Math.round(controller.axes[2] * 100);
+            updateButtonState(controller.buttons, 0, () => captureModFilter.checked = !captureModFilter.checked);
+            updateButtonState(controller.buttons, 1, () => captureModSave.checked = !captureModSave.checked);
+            updateButtonState(controller.buttons, 2, () => streamModFilter.checked = !streamModFilter.checked);
+            updateButtonState(controller.buttons, 3, () => streamModSave.checked = !streamModSave.checked);
+            updateButtonState(controller.buttons, 8, () => capture.click());
+            updateButtonState(controller.buttons, 9, () => stream.click());
+            if (lastthrottle != controls.throttle || laststeering != controls.steering) controls.updated = true;
             break;
         }
+    }
+};
+function updateButtonState(buttons, b, onpress, onrelease) {
+    if (buttons[b].pressed && !pressedbuttons.has(b)) {
+        pressedbuttons.add(b);
+        typeof onpress == 'function' && onpress();
+    } else if (!buttons[b].pressed && pressedbuttons.has(b)) {
+        pressedbuttons.delete(b);
+        typeof onrelease == 'function' && onrelease();
     }
 };
 setInterval(function () {
