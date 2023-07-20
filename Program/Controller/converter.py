@@ -78,10 +78,9 @@ def filter(imgIn: numpy.ndarray):
         server.emit('programError', str(err))
 
 # remapping for distortion correction
-def remapX(x):
-    return x
-def remapY(y):
-    return y
+K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
+D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
+remapX, remapY = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), K, (imageWidth, imageHeight), cv2.CV_16SC2)
 
 # distance scanner
 wallStartLeft = 169
