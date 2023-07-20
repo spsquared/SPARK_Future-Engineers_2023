@@ -8,10 +8,10 @@ __pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
 
 __currThr = 0
 __currStr = 0
-__throttleFwd = 0.10
+__throttleFwd = 0.08
 __throttleRev = -0.15
 __steeringCenter = 90
-__steeringRange = 35
+__steeringRange = 40
 __steeringTrim = 10
 def steer(str: int):
     global __pwm, __currStr, __steeringCenter, __steeringRange, __steeringTrim
