@@ -117,7 +117,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
     croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
     # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
+    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
 
     # get wall heights by finding the bottom edge of the wall
     # rawHeightsLeft = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float"))
@@ -126,9 +126,9 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
-    for i in range(imageWidth):
-        rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
-        rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
+    # for i in range(imageWidth):
+    #     rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
+    #     rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
     return [rawHeightsLeft, rawHeightsRight]
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
