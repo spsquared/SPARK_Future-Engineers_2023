@@ -47,7 +47,7 @@ class NVCamera(traitlets.HasTraits):
     
     def __gst_str(self):
         global whitebalance, exposurecompensation
-        # return 'nvarguscamerasrc sensor-id=%d awblock=true aelock=true wbmode=%d aeantibanding=1 exposuretimerange="300000000 300000000" exposurecompensation=%d ! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
+        # return 'nvarguscamerasrc sensor-id=%d awblock=true aelock=true wbmode=%d aeantibanding=1 exposuretimerange="300000000 300000000" exposurecompensation=%d gainrange="8 8" ispdigitalgainrange="8 8"! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
         #         self.__sid, whitebalance, exposurecompensation, self.__width, self.__height)
         return 'nvarguscamerasrc sensor-id=%d ! video/x-raw(memory:NVMM), width=3264, height=1848, format=(string)NV12, framerate=(fraction)28/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink max-buffers=1 drop=true' % (
                 self.__sid, self.__width, self.__height)

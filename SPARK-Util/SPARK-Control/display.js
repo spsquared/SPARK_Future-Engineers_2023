@@ -22,14 +22,16 @@ const ctx = map.getContext('2d');
 map.width = 620;
 map.height = 620;
 function addCapture(images) {
+    let encoding = images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
     history.unshift({
         type: 0,
         images: [
-            'data:image/jpeg;base64,' + images[0],
-            'data:image/jpeg;base64,' + images[1]
+            encoding + images[0],
+            encoding + images[1]
         ],
         fps: fps
     });
+    if (images[3] == 0) sounds.ping();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
@@ -40,11 +42,12 @@ function addCapture(images) {
     fpsTimes.push(performance.now());
 };
 function addData(data) {
+    let encoding = data.images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
     history.unshift({
         type: 1,
         images: [
-            'data:image/jpeg;base64,' + data.images[0],
-            'data:image/jpeg;base64,' + data.images[1]
+            encoding + data.images[0],
+            encoding + data.images[1]
         ],
         distances: [],
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
@@ -53,6 +56,7 @@ function addData(data) {
         blobs: data.blobs,
         fps: fps
     });
+    if (data.images[3] == 0) sounds.ping();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
     historyControls.slider.max = history.length;
@@ -247,6 +251,7 @@ socket.on('streamState', (state) => {
         streamModFilter.disabled = false;
         streamModSave.disabled = false;
     }
+    sounds.shortDing();
 });
 stream.onclick = () => {
     streamToggle.checked = !streamToggle.checked;

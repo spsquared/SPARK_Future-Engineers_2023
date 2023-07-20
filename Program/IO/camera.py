@@ -81,7 +81,8 @@ def capture(filter: bool, sendServer: bool):
                 encoded = [
                     base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                     base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
-                    1
+                    1,
+                    0
                 ]
                 server.emit('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
@@ -92,6 +93,7 @@ def capture(filter: bool, sendServer: bool):
                 encoded = [
                     base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
                     base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
+                    0,
                     0
                 ]
                 server.emit('capture', encoded)
@@ -110,6 +112,7 @@ def captureFull(sendServer: bool):
         encoded = [
             base64.b64encode(cv2.imencode('.jpg', __currentRawImages[0], __serverQuality)[1]).decode(),
             base64.b64encode(cv2.imencode('.jpg', __currentRawImages[1], __serverQuality)[1]).decode(),
+            0,
             0
         ]
         server.emit('capture', encoded)
@@ -147,6 +150,7 @@ def startSaveStream(filter: bool, sendServer: bool):
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                                 base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
+                                1,
                                 1
                             ]
                             server.emit('capture', encoded)
@@ -156,7 +160,8 @@ def startSaveStream(filter: bool, sendServer: bool):
                             encoded = [
                                 base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
                                 base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
-                                0
+                                0,
+                                1
                             ]
                             server.emit('capture', encoded)
                     __totalCaptured += 1
@@ -204,6 +209,7 @@ def startStream(filter: bool):
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
+                            1,
                             1
                         ]
                         server.emit('capture', encoded)
@@ -211,7 +217,8 @@ def startStream(filter: bool):
                         encoded = [
                             base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
                             base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
-                            0
+                            0,
+                            1
                         ]
                         server.emit('capture', encoded)
                     time.sleep(max(0.1-(time.time()-start), 0))
