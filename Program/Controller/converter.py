@@ -196,8 +196,6 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             # if abs(error) < 1:
             #     difference += abs(error)
             # else:
-            if i == 300:
-                print(error)
 
             difference += (error * 3) ** 3 / 3
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
@@ -253,7 +251,6 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
 def processBlobs(blobs: list):
     newBlobs = []
     for blob in blobs:
-        # newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
         newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
