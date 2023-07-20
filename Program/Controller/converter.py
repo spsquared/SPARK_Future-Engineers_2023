@@ -22,7 +22,7 @@ verticalFov = 115
 imageWidth = 544
 imageHeight = 308
 focalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
-focalLength = 91
+focalLength = 105
 wallHeight = 10
 cameraOffsetX = 3
 cameraOffsetY = 10
@@ -86,6 +86,7 @@ wallStartLeft = 163
 wallStartRight = 154
 wallEnd = imageHeight
 wallEnd = 249
+wallStartBuffer = 5
 halfWidth = round(imageWidth / 2)
 distanceTable = [[], []]
 for imgx in range(imageWidth):
@@ -113,12 +114,12 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
-    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft + wallStartBuffer:wallEnd], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
 
     # find the bottom edge of the wall
-    rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer + 2
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer + 2
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
     # for i in range(imageWidth):
@@ -203,7 +204,7 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             # rightDifference += (error * 3) ** 3 / 3
         if invalid:
             continue
-        angle = math.atan(leftSlope) - math.atan(rightSlope)
+        # angle = math.atan(leftSlope) - math.atan(rightSlope)
         # if i == 286 - sampleSize:
         #     print(leftSlope, rightSlope, leftDifference, rightDifference)
         #     print(angle)
