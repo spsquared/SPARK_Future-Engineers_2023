@@ -111,17 +111,12 @@ for imgx in range(imageWidth):
         distanceTable[1][imgx].append((x, y, cDist, cAngle))
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
-
-    # crop for wall detection, then flip
-    # wallEnd = imageHeight
-    # croppedLeft = numpy.flip(numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1), axis=1)
+    
+    # crop and then flip
     croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
-    # croppedLeft = numpy.swapaxes(numpy.concatenate((leftEdgesIn[wallStart:wallEnd], numpy.full((2, imageWidth), 1, dtype=int)), axis=0), 0, 1)
     croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
 
-    # get wall heights by finding the bottom edge of the wall
-    # rawHeightsLeft = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float"))
-    # rawHeightsRight = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float"))
+    # find the bottom edge of the wall
     rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
     rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
@@ -132,54 +127,39 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     return [rawHeightsLeft, rawHeightsRight]
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
-
-    # crop for wall detection, then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
-
-    # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    rawHeightsLeft, rawHeightsRight = getRawHeights(leftEdgesIn, rightEdgesIn)
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
     # for i in range(imageWidth):
     #     rawHeightsLeft[i] = remap[round(wallEnd - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
     #     rawHeightsRight[i] = remap[round(wallEnd - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
-    return [rawHeightsLeft, rawHeightsRight]
+    return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global wallHeight, wallStartLeft, wallStartRight, wallEnd, distanceTable
-
-    # crop for wall detection, then flip
+    global distanceTable
+    
+    # crop and then flip
     croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
     croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
 
-    # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = (wallEnd - wallStartLeft) - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = (wallEnd - wallStartRight) - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    # find the bottom edge of the wall
+    rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
+    # convert heights to coordinates
     leftCoordinates = numpy.apply_along_axis(lambda a: distanceTable[0][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsLeft, range(imageWidth)), 1))
     rightCoordinates = numpy.apply_along_axis(lambda a: distanceTable[1][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsRight, range(imageWidth)), 1))
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
+    # sort coordinates by angle
     dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
     return coordinates
 def getDistance(imgx: int, height: int, dir: int):
-    if height == 0:
-        return (-1.0, -1.0, -1.0, -1.0)
-    else:
-        dist = wallHeight * math.sqrt(focalLength**2 + (imgx - imageWidth / 2)**2) / height
-        if dir == -1:
-            x = -1 * cameraOffsetX + leftImgCosAngles[imgx] * dist
-            y = cameraOffsetY + leftImgSinAngles[imgx] * dist
-        else:
-            x = cameraOffsetX + rightImgCosAngles[imgx] * dist
-            y = cameraOffsetY + rightImgSinAngles[imgx] * dist
-        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
+    global distanceTable
+    return distanceTable[max(dir, 0)][imgx][int(height)]
 
 def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     # for blob in rBlobs:
