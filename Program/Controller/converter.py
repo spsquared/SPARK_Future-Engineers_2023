@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import slam
 import traceback
 import numpy
@@ -41,7 +41,7 @@ params.minConvexity = 0.7
 # params.maxInertiaRatio = 1
 blobDetector = cv2.SimpleBlobDetector_create(params)
 
-blobSizeConstant = 0.5
+blobSizeConstant = 0.6
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -80,7 +80,7 @@ def filter(imgIn: numpy.ndarray):
 # remapping for distortion correction
 K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
 D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
-remapX, remapY = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), K, (imageWidth, imageHeight), cv2.CV_16SC2)
+remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), K, (imageWidth, imageHeight), cv2.CV_16SC2)
 
 # distance scanner
 wallStartLeft = 169
@@ -93,14 +93,15 @@ leftImgSinAngles = []
 leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
-imageWidthRemapX = remapX[imageWidth / 2]
+leftImageWidthRemapX = remap[wallStartLeft][round(imageWidth / 2)][0]
+rightImageWidthRemapX = remap[wallStartRight][round(imageWidth / 2)][0]
 for i in range(imageWidth):
-    remapXI = remapX[i]
-    leftImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
-    del remapXI
+    leftRemapXI = remap[wallStartLeft][i][0]
+    rightRemapXI = remap[wallStartRight][i][0]
+    leftImgSinAngles.append(math.sin(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2(leftImageWidthRemapX - leftRemapXI, focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2(rightImageWidthRemapX - rightRemapXI, focalLength) + math.pi / 3))
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
@@ -125,8 +126,15 @@ def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
 
     # get wall heights by finding the bottom edge of the wall
-    rawHeightsLeft = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float"))
-    rawHeightsRight = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float"))
+    # rawHeightsLeft = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float"))
+    # rawHeightsRight = numpy.apply_along_axis(remapY, 1, numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float"))
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+
+    # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
+    for i in range(imageWidth):
+        rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
+        rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
     return [rawHeightsLeft, rawHeightsRight]
 def getDistance(imgx: int, height: int, dir: int):
@@ -179,32 +187,45 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
 
     heights = numpy.array(heights, dtype="float")
 
-    sampleSize = 30
+    sampleSize = 15
     
     slopeChanges = numpy.full(imageWidth - sampleSize, 0)
 
-    for i in range(imageWidth - sampleSize):
-        slope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
-        difference = 0
+    for i in range(imageWidth - sampleSize * 2):
+        leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
+        rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
+        leftDifference = 0
+        rightDifference = 0
         invalid = False
-        for j in range(i + 1, i + sampleSize):
+        for j in range(i, i + sampleSize):
             if heights[j] == -1:
                 invalid = True
                 break
-            error = (heights[j] - (heights[i] + slope * (j - i)))
-            # if error == 1:
-            #     difference += 2
-            # else:
-            # if abs(error) < 1:
-            #     difference += abs(error)
-            # else:
+            error = (heights[j] - (heights[i] + leftSlope * (j - i)))
 
-            difference += (error * 3) ** 3 / 3
-            # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
+            leftDifference += error ** 2
+            # leftDifference += (error * 3) ** 3 / 3
         if invalid:
             continue
-        if abs(difference) > sampleSize:
-            slopeChanges[i] = difference
+        for j in range(i + sampleSize, i + sampleSize * 2):
+            if heights[j] == -1:
+                invalid = True
+                break
+            error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
+
+            rightDifference += error ** 2
+            # rightDifference += (error * 3) ** 3 / 3
+        if invalid:
+            continue
+        if i == 439 - sampleSize:
+            print(leftSlope, rightSlope, leftDifference, rightDifference)
+        angle = math.atan(leftSlope) - math.atan(rightSlope)
+        if abs(angle) > math.pi / 12 * leftDifference / sampleSize * rightDifference / sampleSize:
+            slopeChanges[i] = 1
+
+        # if abs(leftDifference) < sampleSize / 2 
+        # if abs(difference) > sampleSize:
+        #     slopeChanges[i] = difference
 
     slopeChanging = 0
     landmarks = []

@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 from Controller import converter
 import traceback
 import numpy
@@ -23,7 +23,7 @@ RED_PILLAR = 2
 GREEN_PILLAR = 3
 
 # make numpy/cupy matrix so we can poke with GPU for sPEEEEEEEEEEED?
-storedLandmarks = numpy.array([
+storedLandmarks = [
     [0, 0, OUTER_WALL, True, 0], # Outer wall corners
     [300, 0, OUTER_WALL, True, 0],
     [0, 300, OUTER_WALL, True, 0],
@@ -48,9 +48,9 @@ storedLandmarks = numpy.array([
     [0, 0, GREEN_PILLAR, False, 0],
     [0, 0, GREEN_PILLAR, False, 0],
     [0, 0, GREEN_PILLAR, False, 0],
-])
+]
 
-possibleInnerWallLandmarks = numpy.array([
+possibleInnerWallLandmarks = [
     [60, 60],
     [100, 60],
     [60, 100],
@@ -67,9 +67,9 @@ possibleInnerWallLandmarks = numpy.array([
     [240, 200],
     [200, 240],
     [240, 240],
-])
+]
 
-possiblePillarLandmarks = numpy.array([
+possiblePillarLandmarks = [
     [100, 40], # section 1
     [100, 60],
     [150, 40],
@@ -94,7 +94,7 @@ possiblePillarLandmarks = numpy.array([
     [260, 150],
     [240, 200],
     [260, 200],
-])
+]
 
 carX = -1
 carY = -1
@@ -119,11 +119,11 @@ def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStri
 
         newLandmark = False
         newLandmarkIndex = None
-        nearestLandmark = None
+        nearestLandmark = [None]
 
         for j in range(index, index + maxLandmarks):
             if storedLandmarks[j][2]:
-                if nearestLandmark == None:
+                if nearestLandmark[0] == None:
                     nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
                     newLandmark = False
                 elif getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
@@ -131,7 +131,7 @@ def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStri
                     newLandmark = False
             else:
                 for k in range((j - index) * possibleLandmarkStride, (j - index) * possibleLandmarkStride + possibleLandmarkStride):
-                    if nearestLandmark == None:
+                    if nearestLandmark[0] == None:
                         nearestLandmark = possibleLandmarks[j]
                         newLandmark = True
                         newLandmarkIndex = k
@@ -152,6 +152,7 @@ def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStri
     return landmarks
 
 def transformLandmark(landmark):
+    landmark = list(landmark)
     distance = landmark[DISTANCE]
     angle = landmark[ANGLE]
     landmark[X] = carX + math.cos(angle) * distance
@@ -181,25 +182,18 @@ def slam(walls, redBlobs, greenBlobs):
             transformedLandmark = transformLandmark(landmark)
 
             newLandmark = False
-            nearestLandmark = storedLandmarks[0]
+            nearestLandmark = [storedLandmarks[0][X], storedLandmarks[0][Y]]
             for j in range(0, 4):
                 if getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                     nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
             for j in range(5, 8):
                 if storedLandmarks[j][2]:
-                    if nearestLandmark == None:
-                        nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
-                        newLandmark = False
-                    elif getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
+                    if getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                         nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
                         newLandmark = False
                 else:
                     for k in range((j - 4) * 4, (j - 4) * 4 + 4):
-                        if nearestLandmark == None:
-                            nearestLandmark = possibleInnerWallLandmarks[k]
-                            newLandmark = True
-                            newLandmarkIndex = k
-                        elif getDistance(possibleInnerWallLandmarks[k], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
+                        if getDistance(possibleInnerWallLandmarks[k], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                             nearestLandmark = possibleInnerWallLandmarks[k]
                             newLandmark = True
                             newLandmarkIndex = k
