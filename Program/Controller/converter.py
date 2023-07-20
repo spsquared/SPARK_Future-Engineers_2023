@@ -103,7 +103,7 @@ wallEnd = imageHeight
 # leftImgCosAngles = numpy.array(leftImgCosAngles)
 # rightImgSinAngles = numpy.array(rightImgSinAngles)
 # rightImgCosAngles = numpy.array(rightImgCosAngles)
-halfWidth = imageWidth / 2
+halfWidth = math.round(imageWidth / 2)
 distanceTable = [[], []]
 for x in range(imageWidth):
     distanceTable[0].append([])
