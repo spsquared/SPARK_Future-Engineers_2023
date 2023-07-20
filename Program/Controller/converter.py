@@ -24,24 +24,22 @@ imageHeight = 308
 focalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
 focalLength = 91
 wallHeight = 10
-centerOffset = 10
 cameraOffsetX = 3
 cameraOffsetY = 10
 
 # create blob detectors
-params = cv2.SimpleBlobDetector_Params()
-params.filterByArea = True
-params.minArea = 65
-params.maxArea = 128941274721
-params.filterByCircularity = True
-params.minCircularity = 0.3
-params.filterByConvexity = True
-params.minConvexity = 0.7
-# params.filterByInertia = True
-# params.minInertiaRatio = 0
-# params.maxInertiaRatio = 1
-blobDetector = cv2.SimpleBlobDetector_create(params)
-
+__params = cv2.SimpleBlobDetector_Params()
+__params.filterByArea = True
+__params.minArea = 65
+__params.maxArea = 128941274721
+__params.filterByCircularity = True
+__params.minCircularity = 0.3
+__params.filterByConvexity = True
+__params.minConvexity = 0.7
+# __params.filterByInertia = True
+# __params.minInertiaRatio = 0
+# __params.maxInertiaRatio = 1
+blobDetector = cv2.SimpleBlobDetector_create(__params)
 blobSizeConstant = 0.6
 
 def filter(imgIn: numpy.ndarray):
@@ -111,7 +109,7 @@ for imgx in range(imageWidth):
         cDist = math.sqrt(x ** 2 + y ** 2)
         cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
         distanceTable[1][imgx].append((x, y, cDist, cAngle))
-def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
 
     # crop for wall detection, then flip
@@ -128,14 +126,28 @@ def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
+    for i in range(imageWidth):
+        rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
+        rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
+
+    return [rawHeightsLeft, rawHeightsRight]
+def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+    global wallHeight, wallStartLeft, wallStartRight, wallEnd, leftImgSinAngles, leftImgCosAngles, rightImgSinAngles, rightImgCosAngles
+
+    # crop for wall detection, then flip
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1)
+
+    # get wall heights by finding the bottom edge of the wall
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+
+    # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
     # for i in range(imageWidth):
     #     rawHeightsLeft[i] = remap[round(wallEnd - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
     #     rawHeightsRight[i] = remap[round(wallEnd - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
     return [rawHeightsLeft, rawHeightsRight]
-def getDistance(imgx: int, height: int, dir: int):
-    global distanceTable
-    return distanceTable[max(dir, 0)][imgx][int(height)]
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd, distanceTable
 
@@ -156,6 +168,18 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
     return coordinates
+def getDistance(imgx: int, height: int, dir: int):
+    if height == 0:
+        return (-1.0, -1.0, -1.0, -1.0)
+    else:
+        dist = wallHeight * math.sqrt(focalLength**2 + (imgx - imageWidth / 2)**2) / height
+        if dir == -1:
+            x = -1 * cameraOffsetX + leftImgCosAngles[imgx] * dist
+            y = cameraOffsetY + leftImgSinAngles[imgx] * dist
+        else:
+            x = cameraOffsetX + rightImgCosAngles[imgx] * dist
+            y = cameraOffsetY + rightImgSinAngles[imgx] * dist
+        return (x, y, math.sqrt(x**2 + y**2), (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi)
 
 def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     # for blob in rBlobs:
@@ -261,14 +285,14 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         io.error()
         server.emit('programError', str(err))
 
-def processBlobs(blobs: list):
+def processBlobs(leftBlobs: list, rightBlobs: list):
     newBlobs = []
-    for blob in blobs:
-        newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
+    # for blob in blobs:
+    #     newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
 
-def setColors(data, sendServer: bool):
+def setColors(data: list, sendServer: bool):
     global redMax, redMin, greenMax, greenMin
     redMax = (int(data[0]), int(data[2]), int(data[4]))
     greenMax = (int(data[1]), int(data[3]), int(data[5]))
