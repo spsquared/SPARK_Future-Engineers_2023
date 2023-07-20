@@ -78,7 +78,6 @@ function reconnect(force) {
         document.querySelectorAll('.connectNow').forEach(button => button.remove());
         appendLog('Attempting to reconnect...');
         connect();
-        sounds.shortDing();
     }
 };
 function connect() {
