@@ -78,10 +78,9 @@ def filter(imgIn: numpy.ndarray):
         server.emit('programError', str(err))
 
 # remapping for distortion correction
-def remapX(x):
-    return x
-def remapY(y):
-    return y
+K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
+D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
+remapX, remapY = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), K, (imageWidth, imageHeight), cv2.CV_16SC2)
 
 # distance scanner
 wallStartLeft = 169
@@ -94,11 +93,14 @@ leftImgSinAngles = []
 leftImgCosAngles = []
 rightImgSinAngles = []
 rightImgCosAngles = []
+imageWidthRemapX = remapX[imageWidth / 2]
 for i in range(imageWidth):
-    leftImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
-    leftImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi * 2 / 3))
-    rightImgSinAngles.append(math.sin(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
-    rightImgCosAngles.append(math.cos(math.atan2(remapX(imageWidth / 2) - remapX(i), focalLength) + math.pi / 3))
+    remapXI = remapX[i]
+    leftImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
+    leftImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi * 2 / 3))
+    rightImgSinAngles.append(math.sin(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
+    rightImgCosAngles.append(math.cos(math.atan2(imageWidthRemapX - remapXI, focalLength) + math.pi / 3))
+    del remapXI
 leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
@@ -196,8 +198,6 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             # if abs(error) < 1:
             #     difference += abs(error)
             # else:
-            if i == 300:
-                print(error)
 
             difference += (error * 3) ** 3 / 3
             # difference += (heights[j] - (heights[i] + slope * (j - i)))**1
@@ -253,7 +253,6 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
 def processBlobs(blobs: list):
     newBlobs = []
     for blob in blobs:
-        # newBlobs.append([math.floor(blob.pt[0]), math.ceil(math.sqrt(blob.size))])
         newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
