@@ -127,14 +127,14 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     return [rawHeightsLeft, rawHeightsRight]
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    rawHeightsLeft, rawHeightsRight = getRawHeights(, leftEdgesIn, rightEdgesIn)
+    rawHeightsLeft, rawHeightsRight = getRawHeights(leftEdgesIn, rightEdgesIn)
 
     # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
     # for i in range(imageWidth):
     #     rawHeightsLeft[i] = remap[round(wallEnd - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
     #     rawHeightsRight[i] = remap[round(wallEnd - rawHeightsRight[i] - 1)][i][1] - wallStartRight
 
-    return [rawHeightsLeft, rawHeightsRight]
+    return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global distanceTable
     
@@ -225,8 +225,8 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     landmarks = []
     for i in range(imageWidth - sampleSize):
         # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
-        if slopeChanges[i] == 0 or slopeChanging >= sampleSize:
-            landmarks.append([i - round(slopeChanging / 2) + sampleSize, slopeChanges[i - round(slopeChanging / 2) + sampleSize]])
+        if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize:
+            landmarks.append([i - math.ceil(slopeChanging / 2) + sampleSize, slopeChanges[i - math.ceil(slopeChanging / 2) + sampleSize]])
             # landmarks.append([i - 1, slopeChanges[i - 1]])
             slopeChanging = 0
         # if slopeChanges[i] != 0 or slopeChanging > 0:
@@ -236,6 +236,8 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
         else:
             slopeChanging += 1
     
+    if slopeChanging > 0:
+        landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
     return landmarks
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
@@ -265,12 +267,16 @@ def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.nda
         io.error()
         server.emit('programError', str(err))
 
-def processBlobs(leftBlobs: list, rightBlobs: list):
+def processBlobs(blobs: list):
     newBlobs = []
-    # for blob in blobs:
-    #     newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
+    for blob in blobs:
+        newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
     
     return newBlobs
+
+def mergeBlobs(leftBlobs: list, rightBlobs: list):
+    # OOF CONFLICTS
+    return []
 
 def setColors(data: list, sendServer: bool):
     global redMax, redMin, greenMax, greenMin
