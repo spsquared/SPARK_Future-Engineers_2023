@@ -1,5 +1,6 @@
 import socketio
 import typing
+import asyncio
 
 # connects to internal proxy and uses that as server
 

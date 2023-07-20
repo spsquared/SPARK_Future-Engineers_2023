@@ -101,8 +101,8 @@ def main():
         io.error()
         server.emit('programError', str(err))
     running = False
-    server.close()
     io.close()
+    server.close()
 
 if __name__ == '__main__':
     main()

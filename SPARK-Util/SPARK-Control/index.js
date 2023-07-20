@@ -11,6 +11,7 @@ function appendLog(text, color) {
 };
 window.addEventListener('error', (e) => {
     appendLog(`<strong>[LOCAL]</strong> An error occured:<br>${e.message}<br>${e.filename} ${e.lineno}:${e.colno}`, 'red');
+    sounds.longDing();
 });
 
 const initcolors = [
@@ -46,6 +47,7 @@ socket.on('connect', () => {
             filterApply.disabled = false;
             socket.emit('getStreamState');
             socket.emit('getColors');
+            sounds.connect();
         }
     });
     let pingspam = setInterval(() => {
@@ -61,6 +63,7 @@ let ondisconnect = () => {
     capture.disabled = true;
     rawcapture.disabled = true;
     filterApply.disabled = true;
+    sounds.disconnect();
 };
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
@@ -98,37 +101,13 @@ function connect() {
 window.addEventListener('load', connect);
 
 // log
-const pendingsounds = [];
-let first = true;
-async function playSound() {
-    if (first) {
-        for (let i = 0; i < 10; i++) {
-            await new Promise(function (resolve, reject) {
-                let ping = new Audio('./sounds/ping.mp3');
-                ping.preload = true;
-                ping.addEventListener('loadeddata', function () {
-                    pendingsounds.push(ping);
-                    resolve();
-                });
-            });
-        }
-        first = false;
-    }
-    pendingsounds[0].play();
-    pendingsounds.shift();
-    let ping = new Audio('./sounds/ping.mp3');
-    ping.preload = true;
-    ping.addEventListener('loadeddata', function () {
-        pendingsounds.push(ping);
-    });
-};
 socket.on('message', (msg) => {
-    playSound();
     appendLog(msg);
+    sounds.shortDing();
 });
 socket.on('programError', (err) => {
-    playSound();
     appendLog(`<strong>[REMOTE]</strong> An error occured:${err}`, 'red');
+    sounds.longDing();
 });
 
 // manual driving
@@ -333,6 +312,7 @@ function setColors(colors) {
         sliders[i].value = colors[i];
         updateSlider(parseInt(i));
     }
+    sounds.shortDing();
 };
 {
     let k = 0;
