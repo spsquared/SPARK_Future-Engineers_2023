@@ -3,6 +3,7 @@ from Util import server
 from Controller import driver
 import time
 import sys
+import traceback
 
 running = True
 def main():
@@ -63,8 +64,10 @@ def main():
         io.close()
         server.close()
     except Exception as err:
-        print(err)
+        print('---------------------- AN ERROR OCCURED ----------------------')
+        traceback.print_exc()
         io.error()
+        server.emit('programError', str(err))
 
 if __name__ == '__main__':
     main()

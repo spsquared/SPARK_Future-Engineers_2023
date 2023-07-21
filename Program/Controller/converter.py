@@ -7,29 +7,31 @@ import math
 
 # converts images into data usable for SLAM and driving
 
-# WALL HEIGHTS ARE FROM EDGES INCLUSIVEs
-
-# constants
-X = 0
-Y = 1
-DISTANCE = 2
-ANGLE = 3
-LEFT = 0
-RIGHT = 1
-
 # colors
 rm = redMin = (0, 80, 75)
 rM = redMax = (55, 255, 255)
 gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
-# other constants
+# camera constants
 imageWidth = 544
 imageHeight = 308
 focalLength = 170 # 100 for zoomed out image
 wallHeight = 10
 cameraOffsetX = 3
 cameraOffsetY = 10
+
+# distortion constants
+K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
+D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
+
+# code constants
+X = 0
+Y = 1
+DISTANCE = 2
+ANGLE = 3
+LEFT = 0
+RIGHT = 1
 
 # create blob detectors
 __params = cv2.SimpleBlobDetector_Params()
@@ -80,14 +82,6 @@ def filter(imgIn: numpy.ndarray):
         io.error()
         server.emit('programError', str(err))
 
-# remapping for distortion correction
-K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
-D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
-new_K = K.copy()
-new_K[0][0] *= 0.5
-new_K[1][1] *= 0.5
-remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), new_K, (imageWidth, imageHeight), cv2.CV_16SC2)
-
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
@@ -95,39 +89,46 @@ undistortedWallStartLeft = 159
 undistortedWallStartRight = 154
 wallEnd = imageHeight
 wallStartBuffer = 5
-halfWidth = round(imageWidth / 2)
 distanceTable = [[], []]
-for imgx in range(imageWidth):
-    distanceTable[LEFT].append([])
-    distanceTable[RIGHT].append([])
-    distanceTable[LEFT][imgx].append((-1, -1, -1, -1))
-    for height in range(1, wallEnd - wallStartLeft + 1):
-        # REMAP FOR WALL HEIGHT IS INCORRECT
-        # cv2.undistortPoints?
-        undistortedPoints = cv2.undistortPoints(numpy.array([[[imgx, wallStartLeft], [imgx, wallStartLeft + height]]], numpy.float32), K, D, P=K)
-        newTopX, newTopY = undistortedPoints[0][0]
-        newBottomX, newBottomY = undistortedPoints[1][0]
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((newTopX - halfWidth) ** 2)) / (newBottomY - undistortedWallStartLeft + 3)
-        angle = math.atan2(halfWidth - newBottomX, focalLength) + (math.pi * 2 / 3)
-        x = -cameraOffsetX + math.cos(angle) * dist
-        y = cameraOffsetY + math.sin(angle) * dist
-        cDist = math.sqrt((x ** 2) + (y ** 2))
-        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-        distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
-    distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
-    for height in range(1, wallEnd - wallStartRight + 1):
-        undistortedPoints = cv2.undistortPoints(numpy.array([[[imgx, wallStartRight], [imgx, wallStartRight + height]]], numpy.float32), K, D, P=K)
-        newTopX, newTopY = undistortedPoints[0][0]
-        newBottomX, newBottomY = undistortedPoints[1][0]
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((newTopX - halfWidth) ** 2)) / (newBottomY - undistortedWallStartRight + 3)
-        angle = math.atan2(halfWidth - newBottomX, focalLength) + (math.pi / 3)
-        x = cameraOffsetX + math.sin(angle) * dist
-        y = cameraOffsetY + math.cos(angle) * dist
-        cDist = math.sqrt((x ** 2) + (y ** 2))
-        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-        distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
-distanceTable[0] = numpy.array(distanceTable[0])
-distanceTable[1] = numpy.array(distanceTable[1])
+def generateDistanceTable():
+    halfWidth = round(imageWidth / 2)
+    # generate the mesh of undistorted points using an ungodly long line of numpy
+    leftHeightRange = wallEnd - wallStartLeft + 1
+    rightHeightRange = wallEnd - wallStartRight + 1
+    leftPoints = []
+    rightPoints = []
+    for imgx in range(imageWidth):
+        for height in range(0, leftHeightRange):
+            leftPoints.append((imgx, wallStartLeft + height))
+        for height in range(0, rightHeightRange):
+            rightPoints.append((imgx, wallStartRight + height))
+    leftPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(leftPoints, dtype=numpy.float32), K, D)))
+    rightPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(rightPoints, dtype=numpy.float32), K, D)))
+    # pre-calculate locations for x and height of walls
+    for imgx in range(imageWidth):
+        distanceTable[LEFT].append([])
+        distanceTable[RIGHT].append([])
+        distanceTable[LEFT][imgx].append((-1, -1, -1, -1))
+        for height in range(1, leftHeightRange):
+            dist = wallHeight * math.sqrt((focalLength ** 2) + ((leftPoints[imgx * leftHeightRange][X] - halfWidth) ** 2)) / (leftPoints[imgx * leftHeightRange + height][Y] - undistortedWallStartLeft)
+            angle = math.atan2(halfWidth - leftPoints[imgx * leftHeightRange][X], focalLength) + (math.pi * 2 / 3)
+            x = -cameraOffsetX + math.cos(angle) * dist
+            y = cameraOffsetY + math.sin(angle) * dist
+            cDist = math.sqrt((x ** 2) + (y ** 2))
+            cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+            distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
+        distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
+        for height in range(1, rightHeightRange):
+            dist = wallHeight * math.sqrt((focalLength ** 2) + ((rightPoints[imgx * rightHeightRange][X] - halfWidth) ** 2)) / (rightPoints[imgx * rightHeightRange + height][Y] - undistortedWallStartRight)
+            angle = math.atan2(halfWidth - rightPoints[imgx * rightHeightRange][X], focalLength) + (math.pi / 3)
+            x = cameraOffsetX + math.sin(angle) * dist
+            y = cameraOffsetY + math.cos(angle) * dist
+            cDist = math.sqrt((x ** 2) + (y ** 2))
+            cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+            distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
+    distanceTable[LEFT] = numpy.array(distanceTable[0])
+    distanceTable[RIGHT] = numpy.array(distanceTable[1])
+generateDistanceTable()
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
