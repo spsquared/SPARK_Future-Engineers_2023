@@ -13,6 +13,9 @@ INNER_WALL = 1
 RED_PILLAR = 2
 GREEN_PILLAR = 3
 
+CLOCKWISE = 1
+COUNTER_CLOCKWISE = -1
+
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer
@@ -28,22 +31,42 @@ def drive():
 
 def getSteering():
 
-    landmarks = slam.storedLandmarks[slam.storedLandmarks[FOUND]].sort(landmarkSort)
+    landmarks = slam.storedLandmarks[slam.storedLandmarks[FOUND]]
+    landmarks.sort(landmarkSort)
     waypoints = []
+
+    outer = GREEN_PILLAR
+    inner = RED_PILLAR
+
+    if slam.carDirection == COUNTER_CLOCKWISE:
+        outer = RED_PILLAR
+        inner = GREEN_PILLAR
 
     for landmark in landmarks:
         if landmark[TYPE] == INNER_WALL:
             waypoints.push([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
+        elif landmark[TYPE] == outer:
+            if landmark[X] >= 100 and landmark[X] <= 200:
+                waypoints.push([landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
+            else:
+                waypoints.push([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
+        elif landmark[TYPE] == inner:
+            if landmark[X] >= 100 and landmark[X] <= 200:
+                waypoints.push([landmark[X], (abs(landmark[Y] - 150) / 2 + 50 / 2) * abs(landmark[Y]) / landmark[Y]])
+            else:
+                waypoints.push([(abs(landmark[X] - 150) / 2 + 50 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
+
+    waypoints.sort(landmarkSort)
     
     nextPoint = [slam.carX, slam.carY]
     nextPointDistance = 10
 
-    for landmark in landmarks:
-        if nextPointDistance < getDistance(nextPoint, landmark):
-            nextPointDistance -= getDistance(nextPoint, landmark)
-            nextPoint = [landmark[X], landmark[Y]]
+    for waypoint in waypoints:
+        if nextPointDistance < getDistance(nextPoint, waypoint):
+            nextPointDistance -= getDistance(nextPoint, waypoint)
+            nextPoint = [waypoint[X], waypoint[Y]]
         else:
-            angle = math.atan2(landmark[Y] - nextPoint[Y], landmark[X] - landmark[X])
+            angle = math.atan2(waypoint[Y] - nextPoint[Y], waypoint[X] - waypoint[X])
             magnitude = nextPointDistance
             nextPoint[X] += math.cos(angle) * magnitude
             nextPoint[Y] += math.sin(angle) * magnitude
