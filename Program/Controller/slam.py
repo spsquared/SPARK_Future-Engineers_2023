@@ -1,7 +1,6 @@
-# from IO import io
-# from Util import server
-from Controller import converter
 from IO import io
+from Util import server
+from Controller import converter
 import traceback
 import numpy
 import math
@@ -122,7 +121,7 @@ def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStri
         nearestLandmark = [None]
 
         for j in range(index, index + maxLandmarks):
-            if storedLandmarks[j][2]:
+            if storedLandmarks[j][FOUND]:
                 if nearestLandmark[0] == None:
                     nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
                     newLandmark = False
@@ -140,23 +139,21 @@ def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStri
                         newLandmark = True
                         newLandmarkIndex = k
 
-        nearestLandmark.append(landmark[DISTANCE])
-        if nearestLandmark[DISTANCE] > maxErrorDistance:
+        if getDistance(nearestLandmark, transformedLandmark) > maxErrorDistance:
             continue
+        nearestLandmark.append(landmark[DISTANCE])
         nearestLandmark.append(landmark[ANGLE])
         
         if newLandmark:
-            storedLandmarks[newLandmarkIndex / possibleLandmarkStride + index] = [nearestLandmark[X], nearestLandmark[Y], landmarkType, True, 0]
+            storedLandmarks[round(newLandmarkIndex / possibleLandmarkStride) + index] = [nearestLandmark[X], nearestLandmark[Y], landmarkType, True, 0]
         
         landmarks.append(nearestLandmark)
     return landmarks
 
 def transformLandmark(landmark):
     landmark = list(landmark)
-    distance = landmark[DISTANCE]
-    angle = landmark[ANGLE]
-    landmark[X] = carX + math.cos(angle) * distance
-    landmark[Y] = carY + math.sin(angle) * distance
+    landmark[X] = carX + math.sin(carAngle) * landmark[X] + math.cos(carAngle) * landmark[Y]
+    landmark[Y] = carY + math.cos(carAngle) * landmark[X] + math.sin(carAngle) * landmark[Y]
     return landmark
 
 def slam(walls, redBlobs, greenBlobs):
@@ -188,20 +185,20 @@ def slam(walls, redBlobs, greenBlobs):
                 if getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                     nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
             for j in range(5, 8):
-                if storedLandmarks[j][2]:
+                if storedLandmarks[j][FOUND]:
                     if getDistance(storedLandmarks[j], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                         nearestLandmark = [storedLandmarks[j][X], storedLandmarks[j][Y]]
                         newLandmark = False
                 else:
-                    for k in range((j - 4) * 4, (j - 4) * 4 + 4):
+                    for k in range((j - 5) * 4, (j - 5) * 4 + 4):
                         if getDistance(possibleInnerWallLandmarks[k], transformedLandmark) < getDistance(nearestLandmark, transformedLandmark):
                             nearestLandmark = possibleInnerWallLandmarks[k]
                             newLandmark = True
                             newLandmarkIndex = k
 
-            nearestLandmark.append(landmark[DISTANCE])
-            if nearestLandmark[DISTANCE] > maxErrorDistance:
+            if getDistance(nearestLandmark, transformedLandmark) > maxErrorDistance:
                 continue
+            nearestLandmark.append(landmark[DISTANCE])
             nearestLandmark.append(landmark[ANGLE])
             
             if newLandmark:
@@ -268,7 +265,7 @@ def slam(walls, redBlobs, greenBlobs):
         carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - carX, 2) + math.pow((drCarY + lmCarY) / 2 - carY, 2))
 
         # average!!!!1
-
+        
         carX = (drCarX + lmCarX) / 2
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2
@@ -276,7 +273,7 @@ def slam(walls, redBlobs, greenBlobs):
         print(carX, carY, carAngle)
 
         # update gyro angle to prevent drifting
-        io.imu.setAngle(carAngle)
+        # io.imu.setAngle(carAngle)
     except Exception as err:
         traceback.print_exc()
         io.error()
@@ -323,4 +320,4 @@ def findStartingPosition(leftHeights, rightHeights):
         carAngle = 0
 
 def getDistance(a, b):
-    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+    return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))

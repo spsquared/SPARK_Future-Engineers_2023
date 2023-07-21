@@ -45,7 +45,7 @@ def main():
             print('stopped by 3 laps')
             exit(0)
         server.on('stop', stop)
-        io.drive.throttle(50)
+        io.drive.throttle(80)
         while running:
             steering = controller.drive()
             io.drive.steer(steering)

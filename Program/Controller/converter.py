@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 import traceback
 import numpy
 import cv2
@@ -156,6 +156,7 @@ leftImgSinAngles = numpy.array(leftImgSinAngles)
 leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
+
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
@@ -272,9 +273,9 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             if i >= 0 and i < imageWidth:
                 heights[i] = -1
 
-    sampleSize = 30
+    sampleSize = 20
     
-    slopeChanges = numpy.full(imageWidth - sampleSize, 0)
+    slopeChanges = numpy.full(imageWidth, 0)
 
     for i in range(imageWidth - sampleSize * 2):
         # leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
@@ -307,7 +308,7 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
                 break
             error = (heights[j] - (heights[i] + leftSlope * (j - i)))
 
-            leftDifference += error ** 2
+            leftDifference += error ** 4
         if invalid:
             continue
         for j in range(i + sampleSize, i + sampleSize * 2):
@@ -316,22 +317,29 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
                 break
             error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
 
-            rightDifference += error ** 2
+            rightDifference += error ** 4
         if invalid:
             continue
         if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
-            slopeChanges[i] = 1
+            slopeChanges[i + sampleSize] = 1
             if i != 0:
-                slopeChanges[i - 1] = 1
+                slopeChanges[i + sampleSize - 1] = 1
             if i != imageWidth - 1:
-                slopeChanges[i + 1] = 1
+                slopeChanges[i + sampleSize + 1] = 1
+    
+    
+    for i in range(imageWidth - 1):
+        if heights[i] == -1 or heights[i + 1] == -1:
+            continue
+        if abs(heights[i + 1] - heights[i]) >= 4:
+            slopeChanges[i] = 1
 
     slopeChanging = 0
     landmarks = []
-    for i in range(imageWidth - sampleSize):
+    for i in range(imageWidth):
         # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
         if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize * 2 + 2:
-            landmarks.append([i - math.ceil(slopeChanging / 2) + sampleSize, slopeChanges[i - math.ceil(slopeChanging / 2) + sampleSize]])
+            landmarks.append([i - math.ceil(slopeChanging / 2), slopeChanges[i - math.ceil(slopeChanging / 2)]])
             # landmarks.append([i - 1, slopeChanges[i - 1]])
             slopeChanging = 0
         # if slopeChanges[i] != 0 or slopeChanging > 0:

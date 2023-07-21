@@ -1,7 +1,7 @@
-from Controller import converter
-from Controller import slam
 from IO import io
 from Util import server
+from Controller import converter
+from Controller import slam
 import math
 import numpy
 
@@ -19,6 +19,8 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
+
+
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer
@@ -26,6 +28,7 @@ def setMode(sendServer: bool = None):
 
 def drive():
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    # read = numpy.split(numpy.array(img), 2, axis=1)
     leftEdgesIn, gLeftIn, rLeftIn = converter.filter(converter.undistort(read[0]))
     rightEdgesIn, gRightIn, rRightIn = converter.filter(converter.undistort(read[1]))
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesIn, rightEdgesIn)
@@ -33,8 +36,8 @@ def drive():
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftIn, gLeftIn, rRightIn, gRightIn)
     # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
     # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
-    leftWalls = converter.getWallLandmarks(leftHeights, rLeftBlobs, gLeftBlobs)
-    rightWalls = converter.getWallLandmarks(rightHeights, rRightBlobs, gRightBlobs)
+    leftWalls = converter.getWallLandmarks(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
+    rightWalls = converter.getWallLandmarks(rightHeights.copy(), rRightBlobs, gRightBlobs)
     rBlobs = []
     for blob in rLeftBlobs:
         rBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
@@ -53,9 +56,15 @@ def drive():
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
     slam.slam(walls, rBlobs, gBlobs)
-    steering = getSteering()
+    [steering, waypoints, nextPoint] = getSteering()
     if useServer:
-        server.emit('data', '\'data\'')
+        data = [slam.storedLandmarks, waypoints, nextPoint, leftHeights, rightHeights, walls, rBlobs, gBlobs]
+        server.emit('data', data)
+    # read[0] = converter.undistort(read[0])
+    # for l in leftWalls:
+    #     for i in range(-3, 3):
+    #         for j in range(-3, 3):
+    #             read[0][converter.wallStartLeft][l[0]] = [255, 0, 0]
     return steering
 
 def getSteering():
@@ -73,17 +82,17 @@ def getSteering():
 
     for landmark in landmarks:
         if landmark[TYPE] == INNER_WALL:
-            waypoints.push([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
+            waypoints.append([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
         elif landmark[TYPE] == outer:
             if landmark[X] >= 100 and landmark[X] <= 200:
-                waypoints.push([landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
+                waypoints.append([landmark[X], (abs(landmark[Y] - 150) / 2 + 150 / 2) * abs(landmark[Y]) / landmark[Y]])
             else:
-                waypoints.push([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
+                waypoints.append([(abs(landmark[X] - 150) / 2 + 150 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
         elif landmark[TYPE] == inner:
             if landmark[X] >= 100 and landmark[X] <= 200:
-                waypoints.push([landmark[X], (abs(landmark[Y] - 150) / 2 + 50 / 2) * abs(landmark[Y]) / landmark[Y]])
+                waypoints.append([landmark[X], (abs(landmark[Y] - 150) / 2 + 50 / 2) * abs(landmark[Y]) / landmark[Y]])
             else:
-                waypoints.push([(abs(landmark[X] - 150) / 2 + 50 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
+                waypoints.append([(abs(landmark[X] - 150) / 2 + 50 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
 
     waypoints.sort(key=landmarkSort)
     
@@ -99,11 +108,12 @@ def getSteering():
             magnitude = nextPointDistance
             nextPoint[X] += math.cos(angle) * magnitude
             nextPoint[Y] += math.sin(angle) * magnitude
+            break
 
-    return min(max(((math.atan2(nextPoint[Y] - slam.carY, nextPoint[X] - slam.carX) - slam.carAngle) / math.pi * 180 / 40 * 100), -100), 100)
+    return [min(max(((math.atan2(nextPoint[Y] - slam.carY, nextPoint[X] - slam.carX) - slam.carAngle) / math.pi * 180 / 40 * 100), -100), 100), waypoints, nextPoint]
 
 def landmarkSort(landmark):
     return slam.carDirection * (math.atan2(landmark[Y] - 150, landmark[X] - 150) - math.atan2(slam.carY - 150, slam.carX - 150))
 
 def getDistance(a, b):
-    return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
+    return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))
