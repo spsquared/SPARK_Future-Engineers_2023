@@ -1,7 +1,6 @@
 # from IO import io
 # from Util import server
 from Controller import converter
-from IO import io
 import traceback
 import numpy
 import math

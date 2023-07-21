@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 import traceback
 import numpy
 import cv2
@@ -108,9 +108,9 @@ def generateDistanceTable():
     leftPoints = []
     rightPoints = []
     for imgx in range(imageWidth):
-        for height in range(0, leftHeightRange):
+        for height in range(leftHeightRange):
             leftPoints.append((imgx, wallStartLeft + height))
-        for height in range(0, rightHeightRange):
+        for height in range(rightHeightRange):
             rightPoints.append((imgx, wallStartRight + height))
     leftPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(leftPoints, dtype=numpy.float32), K, D)))
     rightPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(rightPoints, dtype=numpy.float32), K, D)))
@@ -119,9 +119,11 @@ def generateDistanceTable():
         distanceTable[LEFT].append([])
         distanceTable[RIGHT].append([])
         distanceTable[LEFT][imgx].append((-1, -1, -1, -1))
+        leftTopIndex = imgx * leftHeightRange
+        rightTopIndex = imgx * rightHeightRange
         for height in range(1, leftHeightRange):
-            dist = wallHeight * math.sqrt((focalLength ** 2) + ((leftPoints[imgx * leftHeightRange][X] - halfWidth) ** 2)) / (leftPoints[imgx * leftHeightRange + height][Y] - undistortedWallStartLeft)
-            angle = math.atan2(halfWidth - leftPoints[imgx * leftHeightRange][X], focalLength) + (math.pi * 2 / 3)
+            dist = wallHeight * math.sqrt((focalLength ** 2) + ((leftPoints[leftTopIndex][X] - halfWidth) ** 2)) / (leftPoints[leftTopIndex + height][Y] - undistortedWallStartLeft)
+            angle = math.atan2(halfWidth - leftPoints[leftTopIndex][X], focalLength) + (math.pi * 2 / 3)
             x = -cameraOffsetX + math.cos(angle) * dist
             y = cameraOffsetY + math.sin(angle) * dist
             cDist = math.sqrt((x ** 2) + (y ** 2))
@@ -129,15 +131,15 @@ def generateDistanceTable():
             distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
         distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
         for height in range(1, rightHeightRange):
-            dist = wallHeight * math.sqrt((focalLength ** 2) + ((rightPoints[imgx * rightHeightRange][X] - halfWidth) ** 2)) / (rightPoints[imgx * rightHeightRange + height][Y] - undistortedWallStartRight)
-            angle = math.atan2(halfWidth - rightPoints[imgx * rightHeightRange][X], focalLength) + (math.pi / 3)
+            dist = wallHeight * math.sqrt((focalLength ** 2) + ((rightPoints[rightTopIndex][X] - halfWidth) ** 2)) / (rightPoints[rightTopIndex + height][Y] - undistortedWallStartRight)
+            angle = math.atan2(halfWidth - rightPoints[rightTopIndex][X], focalLength) + (math.pi / 3)
             x = cameraOffsetX + math.sin(angle) * dist
             y = cameraOffsetY + math.cos(angle) * dist
             cDist = math.sqrt((x ** 2) + (y ** 2))
             cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
             distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
-    distanceTable[LEFT] = numpy.array(distanceTable[0])
-    distanceTable[RIGHT] = numpy.array(distanceTable[1])
+    distanceTable[LEFT] = numpy.array(distanceTable[LEFT])
+    distanceTable[RIGHT] = numpy.array(distanceTable[RIGHT])
 generateDistanceTable()
 
 leftImgSinAngles = []
