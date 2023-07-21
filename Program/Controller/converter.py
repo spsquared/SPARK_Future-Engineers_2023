@@ -118,11 +118,6 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer + 2
     rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer + 2
 
-    # TODO: OPTImIZE @SAMPLEPROVIDER(SPSPSPSPSPPSPSPSPPSPSS)
-    # for i in range(imageWidth):
-    #     rawHeightsLeft[i] = remap[round(imageHeight - rawHeightsLeft[i] - 1)][i][1] - wallStartLeft
-    #     rawHeightsRight[i] = remap[round(imageHeight - rawHeightsRight[i] - 1)][i][1] - wallStartRight
-
     return [rawHeightsLeft, rawHeightsRight]
 def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsLeft, rawHeightsRight = getRawHeights(leftEdgesIn, rightEdgesIn)
