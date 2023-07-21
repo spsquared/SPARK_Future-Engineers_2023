@@ -1,6 +1,7 @@
 from Controller import converter
 from Controller import slam
 from IO import io
+from IO import sevrer
 import math
 
 X = 0
@@ -13,6 +14,7 @@ INNER_WALL = 1
 RED_PILLAR = 2
 GREEN_PILLAR = 3
 
+NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
@@ -22,12 +24,20 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
-    leftEdgesImg, leftBlurredG, leftBlurredR = converter.filter(io.camera.io.camera.io.camera.io.camera.io.camera.read()[0])
-    rightEdgesImg, rightBlurredG, rightBlurredR = converter.filter(io.camera.io.camera.io.camera.io.camera.io.camera.read()[1])
-    heights = converter.getHeights(leftEdgesImg, rightEdgesImg)
-    # red
-    # help heights are separate aaaaaaaaaaaaa
-    pass
+    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    leftEdgesIn, gLeftIn, rLeftIn = converter.filter(read[0])
+    rightEdgesIn, gRightIn, rRightIn = converter.filter(read[1])
+    leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesIn, rightEdgesIn)
+    rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftIn, gLeftIn, rRightIn, gRightIn)
+    leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
+    rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
+    if slam.carDirection == NO_DIRECTION:
+        slam.findStartingPosition(leftWalls, rightWalls)
+    slam.slam(leftWalls + rightWalls, rLeftBlobs + rRightBlobs, gLeftBlobs + gRightBlobs)
+    steering = getSteering()
+    if useServer:
+        sevrer.emit('data', '\'data\'')
+    return steering
 
 def getSteering():
 

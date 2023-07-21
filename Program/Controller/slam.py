@@ -99,9 +99,10 @@ carY = -1
 carAngle = 0
 carSpeed = 0
 
+NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
-carDirection = CLOCKWISE
+carDirection = NO_DIRECTION
 
 maxErrorDistance = 20
 
@@ -317,7 +318,3 @@ def findStartingPosition(leftHeights, rightHeights):
 
 def getDistance(a, b):
     return math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2)
-
-def sendServer():
-    # send the stuff to the control panel
-    pass

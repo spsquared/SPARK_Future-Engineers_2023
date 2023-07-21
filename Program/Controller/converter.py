@@ -104,7 +104,9 @@ for imgx in range(imageWidth):
     for height in range(1, wallEnd - wallStartLeft + 1):
         # REMAP FOR WALL HEIGHT IS INCORRECT
         # cv2.undistortPoints?
-        newX, newY = cv2.undistortPoints([imgx, wallStartLeft + height], K, D)[0]
+        newX, newY = cv2.undistortPoints(numpy.array([[[imgx, wallStartLeft + height]]], numpy.float32), K, D)[0][0]
+        newX = newX * K[0][0] + K[0][2]
+        newY = newY * K[1][1] + K[1][2]
         dist = wallHeight * math.sqrt((focalLength ** 2) + ((newX - halfWidth) ** 2)) / (newY - undistortedWallStartLeft + 3)
         angle = math.atan2(halfWidth - newX, focalLength) + (math.pi * 2 / 3)
         x = -cameraOffsetX + math.cos(angle) * dist
@@ -114,7 +116,9 @@ for imgx in range(imageWidth):
         distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
     distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartRight + 1):
-        newX, newY = cv2.undistortPoints([imgx, wallStartRight + height], K, D)[0]
+        newX, newY = cv2.undistortPoints(numpy.array([[[imgx, wallStartRight + height]]], numpy.float32), K, D)[0][0]
+        newX = newX * K[0][0] + K[0][2]
+        newY = newY * K[1][1] + K[1][2]
         dist = wallHeight * math.sqrt((focalLength ** 2) + ((newX - halfWidth) ** 2)) / (newY - undistortedWallStartRight + 3)
         angle = math.atan2(halfWidth - newX, focalLength) + (math.pi / 3)
         x = cameraOffsetX + math.sin(angle) * dist
@@ -168,64 +172,33 @@ def getDistance(imgx: int, height: int, dir: int):
     global distanceTable
     return distanceTable[max(dir, 0)][imgx][int(height)]
 
-def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
+def getWallLandmarks(coordinates: numpy.ndarray, rBlobs: list, gBlobs: list):
     for blob in rBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
-                heights[i] = -1
+                coordinates[i][2] = -1
     for blob in gBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
-                heights[i] = -1
+                coordinates[i][2] = -1
 
     sampleSize = 30
     
     slopeChanges = numpy.full(imageWidth - sampleSize, 0)
 
     for i in range(imageWidth - sampleSize * 2):
-        # leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
-        # rightSlope = (distances[i + sampleSize * 2 - 1][Y] - distances[i + sampleSize][Y]) / (distances[i + sampleSize * 2 - 1][X] - distances[i + sampleSize][X])
-        # invalid = False
-        # for j in range(i, i + sampleSize * 2):
-        #     if distances[j][2] == -1:
-        #         invalid = True
-        #         break
-        # if invalid:
-        #     continue
-        # leftAngle = math.atan2(leftSlope, 1)
-        # rightAngle = math.atan2(rightSlope, 1)
-        # if abs(leftAngle - rightAngle) > math.pi / 4:
-        #     slopeChanges[i] = 1
-        #     if i != 0:
-        #         slopeChanges[i - 1] = 1
-        #     if i != imageWidth - 1:
-        #         slopeChanges[i + 1] = 1
-        
-        
-        leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
-        rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
-        leftDifference = 0
-        rightDifference = 0
+        leftSlope = (coordinates[i + sampleSize - 1][Y] - coordinates[i][Y]) / (coordinates[i + sampleSize - 1][X] - coordinates[i][X])
+        rightSlope = (coordinates[i + sampleSize * 2 - 1][Y] - coordinates[i + sampleSize][Y]) / (coordinates[i + sampleSize * 2 - 1][X] - coordinates[i + sampleSize][X])
         invalid = False
-        for j in range(i, i + sampleSize):
-            if heights[j] == -1:
+        for j in range(i, i + sampleSize * 2):
+            if coordinates[j][2] == -1:
                 invalid = True
                 break
-            error = (heights[j] - (heights[i] + leftSlope * (j - i)))
-
-            leftDifference += error ** 2
         if invalid:
             continue
-        for j in range(i + sampleSize, i + sampleSize * 2):
-            if heights[j] == -1:
-                invalid = True
-                break
-            error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
-
-            rightDifference += error ** 2
-        if invalid:
-            continue
-        if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
+        leftAngle = math.atan2(leftSlope, 1)
+        rightAngle = math.atan2(rightSlope, 1)
+        if abs(leftAngle - rightAngle) > math.pi / 4:
             slopeChanges[i] = 1
             if i != 0:
                 slopeChanges[i - 1] = 1
@@ -250,6 +223,87 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     if slopeChanging > 0:
         landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
     return landmarks
+    # for blob in rBlobs:
+    #     for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+    #         if i >= 0 and i < imageWidth:
+    #             heights[i] = -1
+    # for blob in gBlobs:
+    #     for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+    #         if i >= 0 and i < imageWidth:
+    #             heights[i] = -1
+
+    # sampleSize = 30
+    
+    # slopeChanges = numpy.full(imageWidth - sampleSize, 0)
+
+    # for i in range(imageWidth - sampleSize * 2):
+    #     # leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
+    #     # rightSlope = (distances[i + sampleSize * 2 - 1][Y] - distances[i + sampleSize][Y]) / (distances[i + sampleSize * 2 - 1][X] - distances[i + sampleSize][X])
+    #     # invalid = False
+    #     # for j in range(i, i + sampleSize * 2):
+    #     #     if distances[j][2] == -1:
+    #     #         invalid = True
+    #     #         break
+    #     # if invalid:
+    #     #     continue
+    #     # leftAngle = math.atan2(leftSlope, 1)
+    #     # rightAngle = math.atan2(rightSlope, 1)
+    #     # if abs(leftAngle - rightAngle) > math.pi / 4:
+    #     #     slopeChanges[i] = 1
+    #     #     if i != 0:
+    #     #         slopeChanges[i - 1] = 1
+    #     #     if i != imageWidth - 1:
+    #     #         slopeChanges[i + 1] = 1
+        
+        
+    #     leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
+    #     rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
+    #     leftDifference = 0
+    #     rightDifference = 0
+    #     invalid = False
+    #     for j in range(i, i + sampleSize):
+    #         if heights[j] == -1:
+    #             invalid = True
+    #             break
+    #         error = (heights[j] - (heights[i] + leftSlope * (j - i)))
+
+    #         leftDifference += error ** 2
+    #     if invalid:
+    #         continue
+    #     for j in range(i + sampleSize, i + sampleSize * 2):
+    #         if heights[j] == -1:
+    #             invalid = True
+    #             break
+    #         error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
+
+    #         rightDifference += error ** 2
+    #     if invalid:
+    #         continue
+    #     if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
+    #         slopeChanges[i] = 1
+    #         if i != 0:
+    #             slopeChanges[i - 1] = 1
+    #         if i != imageWidth - 1:
+    #             slopeChanges[i + 1] = 1
+
+    # slopeChanging = 0
+    # landmarks = []
+    # for i in range(imageWidth - sampleSize):
+    #     # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
+    #     if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize * 2 + 2:
+    #         landmarks.append([i - math.ceil(slopeChanging / 2) + sampleSize, slopeChanges[i - math.ceil(slopeChanging / 2) + sampleSize]])
+    #         # landmarks.append([i - 1, slopeChanges[i - 1]])
+    #         slopeChanging = 0
+    #     # if slopeChanges[i] != 0 or slopeChanging > 0:
+    #     #     landmarks.append([i, slopeChanges[i]])
+    #     if slopeChanges[i] == 0:
+    #         slopeChanging = 0
+    #     else:
+    #         slopeChanging += 1
+    
+    # if slopeChanging > 0:
+    #     landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
+    # return landmarks
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     global wallStartLeft, wallStartRight, wallEnd
