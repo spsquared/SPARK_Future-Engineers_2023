@@ -56,7 +56,7 @@ def drive():
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
     slam.slam(walls, rBlobs, gBlobs)
-    [steering, waypoints, nextPoint] = getSteering()
+    [steering, waypoints, nextPoint] = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
     if useServer:
         data = [slam.storedLandmarks, waypoints, nextPoint, leftHeights, rightHeights, walls, rBlobs, gBlobs]
         server.emit('data', data)
@@ -67,9 +67,35 @@ def drive():
     #             read[0][converter.wallStartLeft][l[0]] = [255, 0, 0]
     return steering
 
-def getSteering():
-
+def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
+    global blobSizeThreshold
     landmarks = [x for x in slam.storedLandmarks if x[FOUND]]
+
+    if len(landmarks) == 0:
+        steering = 0
+
+        blobSizeThreshold = 20
+        blobSteering = 1
+        for blob in rLeftBlobs + rRightBlobs:
+            if blob[1] > blobSizeThreshold:
+                steering += slam.carDirection * blob[1] * blobSteering
+        for blob in gLeftBlobs + gRightBlobs:
+            if blob[1] > blobSizeThreshold:
+                steering -= slam.carDirection * blob[1] * blobSteering
+        
+        frontWallThreshold = 15
+        sideWallThreshold = 80
+        if leftHeights[56] > sideWallThreshold:
+            steering += 80
+        if leftHeights[380] > frontWallThreshold:
+            steering += -slam.carDirection * 80
+        if rightHeights[converter.imageWidth - 1 - 56] > sideWallThreshold:
+            steering += -80
+        if rightHeights[converter.imageWidth - 1 - 380] > frontWallThreshold:
+            steering += -slam.carDirection * 80
+
+        return [steering, [], []]
+
     landmarks.sort(key=landmarkSort)
     waypoints = []
 

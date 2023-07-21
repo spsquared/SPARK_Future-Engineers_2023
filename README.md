@@ -179,7 +179,7 @@ All the code for image processing can be found in `/Program/AI/converter.py`.
 
 All the code for slam can be found in `/Program/AI/slam.py`.
 
-There are two main functions we have in `/Program/AI/slam.py`. The first one is `slam`, which takes an array of observed landmarks (wall corners, red pillars, and green pillars), and  and outputs the best
+There are two main functions we have in `/Program/AI/slam.py`. The first one is `slam`, which takes an array of observed landmarks (wall corners, red pillars, and green pillars), and outputs the most likely spot the car is at. The `slam` function keeps track of landmarks that have been seen before, to create a map of the field.
 $2^2$
 - $\dfrac{0}{1} \neq \infty$
 - $\dfrac{0}{1} \neq \infty$
