@@ -1,6 +1,5 @@
-from IO import io
-from Util import server
-from Controller import slam
+# from IO import io
+# from Util import server
 import traceback
 import numpy
 import cv2
@@ -102,16 +101,16 @@ for imgx in range(imageWidth):
         x = -cameraOffsetX + math.sin(angle) * dist
         y = cameraOffsetY + math.cos(angle) * dist
         cDist = math.sqrt(x ** 2 + y ** 2)
-        cAngle = math.atan2(y, x)
+        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
         distanceTable[0][imgx].append((x, y, cDist, cAngle))
     distanceTable[1][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartRight + 1):
         dist = wallHeight * math.sqrt((focalLength ** 2) + ((imgx - halfWidth) ** 2)) / height
-        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][0], focalLength) + math.pi / 3
+        angle = math.atan2(halfWidth - remap[wallStartRight + height - 1][imgx][0], focalLength) + math.pi / 3
         x = cameraOffsetX + math.sin(angle) * dist
         y = cameraOffsetY + math.cos(angle) * dist
         cDist = math.sqrt(x ** 2 + y ** 2)
-        cAngle = math.atan2(y, x)
+        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
         distanceTable[1][imgx].append((x, y, cDist, cAngle))
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
@@ -125,11 +124,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer + 2
 
     return [rawHeightsLeft, rawHeightsRight]
-def getHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    rawHeightsLeft, rawHeightsRight = getRawHeights(leftEdgesIn, rightEdgesIn)
-
-
-
+def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
     return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global distanceTable
@@ -145,6 +140,10 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # convert heights to coordinates
     leftCoordinates = numpy.apply_along_axis(lambda a: distanceTable[0][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsLeft, range(imageWidth)), 1))
     rightCoordinates = numpy.apply_along_axis(lambda a: distanceTable[1][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsRight, range(imageWidth)), 1))
+
+    return [leftCoordinates, rightCoordinates]
+def mergeDistances(leftCoordinates: numpy.ndarray, rightCoordinates: numpy.ndarray):
+    # merge
     coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
 
     # sort coordinates by angle
@@ -152,7 +151,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return leftCoordinates
+    return coordinates
 def getDistance(imgx: int, height: int, dir: int):
     global distanceTable
     return distanceTable[max(dir, 0)][imgx][int(height)]
