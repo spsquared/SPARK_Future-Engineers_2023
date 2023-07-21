@@ -14,6 +14,8 @@ X = 0
 Y = 1
 DISTANCE = 2
 ANGLE = 3
+LEFT = 0
+RIGHT = 1
 
 # colors
 rm = redMin = (0, 80, 75)
@@ -24,7 +26,7 @@ gM = greenMax = (110, 255, 255)
 # other constants
 imageWidth = 544
 imageHeight = 308
-focalLength = 105
+focalLength = 170
 wallHeight = 10
 cameraOffsetX = 3
 cameraOffsetY = 10
@@ -86,32 +88,37 @@ remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(
 # distance scanner
 wallStartLeft = 163
 wallStartRight = 154
+undistortedWallStartLeft = 159
+undistortedWallStartRight = 154
 wallEnd = imageHeight
-wallEnd = 249
 wallStartBuffer = 5
 halfWidth = round(imageWidth / 2)
 distanceTable = [[], []]
 for imgx in range(imageWidth):
-    distanceTable[0].append([])
-    distanceTable[1].append([])
-    distanceTable[0][imgx].append((-1, -1, -1, -1))
+    distanceTable[LEFT].append([])
+    distanceTable[RIGHT].append([])
+    distanceTable[LEFT][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartLeft + 1):
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((imgx - halfWidth) ** 2)) / height
-        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][0], focalLength) + math.pi * 2 / 3
-        x = -cameraOffsetX + math.sin(angle) * dist
-        y = cameraOffsetY + math.cos(angle) * dist
-        cDist = math.sqrt(x ** 2 + y ** 2)
+        # REMAP FOR WALL HEIGHT IS INCORRECT
+        # cv2.undistortPoints?
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((remap[wallStartLeft][imgx][X] - halfWidth) ** 2)) / (remap[wallStartLeft + height - 1][imgx][Y] - undistortedWallStartLeft + 3)
+        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][X], focalLength) + (math.pi * 2 / 3)
+        x = -cameraOffsetX + math.cos(angle) * dist
+        y = cameraOffsetY + math.sin(angle) * dist
+        cDist = math.sqrt((x ** 2) + (y ** 2))
         cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-        distanceTable[0][imgx].append((x, y, cDist, cAngle))
-    distanceTable[1][imgx].append((-1, -1, -1, -1))
+        distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
+    distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartRight + 1):
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((imgx - halfWidth) ** 2)) / height
-        angle = math.atan2(halfWidth - remap[wallStartRight + height - 1][imgx][0], focalLength) + math.pi / 3
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((remap[wallStartRight][imgx][X] - halfWidth) ** 2)) / (remap[wallStartRight + height - 1][imgx][Y] - undistortedWallStartRight + 3)
+        angle = math.atan2(halfWidth - remap[wallStartRight + height - 1][imgx][X], focalLength) + (math.pi / 3)
         x = cameraOffsetX + math.sin(angle) * dist
         y = cameraOffsetY + math.cos(angle) * dist
-        cDist = math.sqrt(x ** 2 + y ** 2)
+        cDist = math.sqrt((x ** 2) + (y ** 2))
         cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-        distanceTable[1][imgx].append((x, y, cDist, cAngle))
+        distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
+distanceTable[0] = numpy.array(distanceTable[0])
+distanceTable[1] = numpy.array(distanceTable[1])
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
