@@ -104,8 +104,9 @@ for imgx in range(imageWidth):
     for height in range(1, wallEnd - wallStartLeft + 1):
         # REMAP FOR WALL HEIGHT IS INCORRECT
         # cv2.undistortPoints?
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((remap[wallStartLeft][imgx][X] - halfWidth) ** 2)) / (remap[wallStartLeft + height - 1][imgx][Y] - undistortedWallStartLeft + 3)
-        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][X], focalLength) + (math.pi * 2 / 3)
+        newX, newY = cv2.undistortPoints([imgx, wallStartLeft + height], K, D)[0]
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((newX - halfWidth) ** 2)) / (newY - undistortedWallStartLeft + 3)
+        angle = math.atan2(halfWidth - newX, focalLength) + (math.pi * 2 / 3)
         x = -cameraOffsetX + math.cos(angle) * dist
         y = cameraOffsetY + math.sin(angle) * dist
         cDist = math.sqrt((x ** 2) + (y ** 2))
@@ -113,8 +114,9 @@ for imgx in range(imageWidth):
         distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
     distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartRight + 1):
-        dist = wallHeight * math.sqrt((focalLength ** 2) + ((remap[wallStartRight][imgx][X] - halfWidth) ** 2)) / (remap[wallStartRight + height - 1][imgx][Y] - undistortedWallStartRight + 3)
-        angle = math.atan2(halfWidth - remap[wallStartRight + height - 1][imgx][X], focalLength) + (math.pi / 3)
+        newX, newY = cv2.undistortPoints([imgx, wallStartRight + height], K, D)[0]
+        dist = wallHeight * math.sqrt((focalLength ** 2) + ((newX - halfWidth) ** 2)) / (newY - undistortedWallStartRight + 3)
+        angle = math.atan2(halfWidth - newX, focalLength) + (math.pi / 3)
         x = cameraOffsetX + math.sin(angle) * dist
         y = cameraOffsetY + math.cos(angle) * dist
         cDist = math.sqrt((x ** 2) + (y ** 2))
