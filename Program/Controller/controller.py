@@ -1,4 +1,3 @@
-# calculates the path the car should follow
 from Controller import converter
 from Controller import slam
 from IO import io
