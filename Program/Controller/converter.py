@@ -17,11 +17,8 @@ gm = greenMin = (30, 20, 30)
 gM = greenMax = (110, 255, 255)
 
 # other constants
-horizontalFov = 155
-verticalFov = 115
 imageWidth = 544
 imageHeight = 308
-focalLength = ((imageWidth / 2) / math.tan(math.pi * (horizontalFov / 2) / 180))
 focalLength = 105
 wallHeight = 10
 cameraOffsetX = 3
@@ -95,20 +92,20 @@ for imgx in range(imageWidth):
     distanceTable[0][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartLeft + 1):
         dist = wallHeight * math.sqrt((focalLength ** 2) + ((imgx - halfWidth) ** 2)) / height
-        vAngle = math.atan2(remap[wallStartLeft + height - 1][imgx][0], remap[wallStartLeft + height - 1][imgx][1])
-        x = -cameraOffsetX + math.cos(vAngle) * dist
-        y = cameraOffsetY + math.sin(vAngle) * dist
+        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][0], focalLength) + math.pi * 2 / 3
+        x = -cameraOffsetX + math.sin(angle) * dist
+        y = cameraOffsetY + math.cos(angle) * dist
         cDist = math.sqrt(x ** 2 + y ** 2)
-        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+        cAngle = math.atan2(y, x)
         distanceTable[0][imgx].append((x, y, cDist, cAngle))
     distanceTable[1][imgx].append((-1, -1, -1, -1))
     for height in range(1, wallEnd - wallStartRight + 1):
         dist = wallHeight * math.sqrt((focalLength ** 2) + ((imgx - halfWidth) ** 2)) / height
-        vAngle = math.atan2(remap[wallStartRight + height - 1][imgx][0], remap[wallStartRight + height - 1][imgx][1])
-        x = cameraOffsetX + math.cos(vAngle) * dist
-        y = cameraOffsetY + math.sin(vAngle) * dist
+        angle = math.atan2(halfWidth - remap[wallStartLeft + height - 1][imgx][0], focalLength) + math.pi / 3
+        x = cameraOffsetX + math.sin(angle) * dist
+        y = cameraOffsetY + math.cos(angle) * dist
         cDist = math.sqrt(x ** 2 + y ** 2)
-        cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
+        cAngle = math.atan2(y, x)
         distanceTable[1][imgx].append((x, y, cDist, cAngle))
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
@@ -140,12 +137,12 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global distanceTable
     
     # crop and then flip
-    croppedLeft = numpy.flip(numpy.swapaxes(leftEdgesIn[wallStartLeft:wallEnd], 0, 1), axis=1)
-    croppedRight = numpy.flip(numpy.swapaxes(rightEdgesIn[wallStartRight:wallEnd], 0, 1), axis=1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft + wallStartBuffer:wallEnd], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
 
     # find the bottom edge of the wall
-    rawHeightsLeft = wallEnd - wallStartLeft - numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float")
-    rawHeightsRight = wallEnd - wallStartRight - numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer + 2
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer + 2
 
     # convert heights to coordinates
     leftCoordinates = numpy.apply_along_axis(lambda a: distanceTable[0][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsLeft, range(imageWidth)), 1))
@@ -157,7 +154,7 @@ def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     ref = coordinates.ravel().view(dtype)
     ref.sort(order=['theta', 'dist', 'x', 'y'])
 
-    return coordinates
+    return leftCoordinates
 def getDistance(imgx: int, height: int, dir: int):
     global distanceTable
     return distanceTable[max(dir, 0)][imgx][int(height)]
