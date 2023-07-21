@@ -9,6 +9,12 @@ import math
 
 # WALL HEIGHTS ARE FROM EDGES INCLUSIVEs
 
+# constants
+X = 0
+Y = 1
+DISTANCE = 2
+ANGLE = 3
+
 # colors
 rm = redMin = (0, 80, 75)
 rM = redMax = (55, 255, 255)
@@ -150,65 +156,38 @@ def getDistance(imgx: int, height: int, dir: int):
     global distanceTable
     return distanceTable[max(dir, 0)][imgx][int(height)]
 
-def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
-    # for blob in rBlobs:
-    #     for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
-    #         if i >= 0 and i < imageWidth:
-    #             heights[i] = -1
-    # for blob in gBlobs:
-    #     for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
-    #         if i >= 0 and i < imageWidth:
-    #             heights[i] = -1
-
-    heights = numpy.array(heights, dtype="float")
+def getWallLandmarks(distances: numpy.ndarray, rBlobs: list, gBlobs: list):
+    for blob in rBlobs:
+        for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+            if i >= 0 and i < imageWidth:
+                distances[i][2] = -1
+    for blob in gBlobs:
+        for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+            if i >= 0 and i < imageWidth:
+                distances[i][2] = -1
 
     sampleSize = 30
     
     slopeChanges = numpy.full(imageWidth - sampleSize, 0)
 
     for i in range(imageWidth - sampleSize * 2):
-        leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
-        rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
-        leftDifference = 0
-        rightDifference = 0
+        leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
+        rightSlope = (distances[i + sampleSize * 2 - 1][Y] - distances[i + sampleSize][Y]) / (distances[i + sampleSize * 2 - 1][X] - distances[i + sampleSize][X])
         invalid = False
-        for j in range(i, i + sampleSize):
-            if heights[j] == -1:
+        for j in range(i, i + sampleSize * 2):
+            if distances[j][2] == -1:
                 invalid = True
                 break
-            error = (heights[j] - (heights[i] + leftSlope * (j - i)))
-
-            leftDifference += error ** 2
-            # leftDifference += (error * 3) ** 3 / 3
         if invalid:
             continue
-        for j in range(i + sampleSize, i + sampleSize * 2):
-            if heights[j] == -1:
-                invalid = True
-                break
-            error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
-
-            rightDifference += error ** 2
-            # rightDifference += (error * 3) ** 3 / 3
-        if invalid:
-            continue
-        # angle = math.atan(leftSlope) - math.atan(rightSlope)
-        # if i == 286 - sampleSize:
-        #     print(leftSlope, rightSlope, leftDifference, rightDifference)
-        #     print(angle)
-        #     print(abs(leftSlope - rightSlope) > 0.1, leftDifference < sampleSize * 2, rightDifference < sampleSize * 2)
-        if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
+        leftAngle = math.atan2(leftSlope, 1)
+        rightAngle = math.atan2(rightSlope, 1)
+        if abs(leftAngle - rightAngle) > math.pi / 4:
             slopeChanges[i] = 1
             if i != 0:
                 slopeChanges[i - 1] = 1
             if i != imageWidth - 1:
                 slopeChanges[i + 1] = 1
-            print(i, leftSlope, rightSlope, leftDifference, rightDifference)
-        # if abs(angle) > math.pi / 12 * leftDifference / sampleSize * rightDifference / sampleSize:
-
-        # if abs(leftDifference) < sampleSize / 2 
-        # if abs(difference) > sampleSize:
-        #     slopeChanges[i] = difference
 
     slopeChanging = 0
     landmarks = []
