@@ -4,6 +4,7 @@ from Controller import converter
 from Controller import slam
 import math
 import numpy
+import cv2
 
 X = 0
 Y = 1
@@ -29,11 +30,11 @@ def setMode(sendServer: bool = None):
 def drive():
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
     # read = numpy.split(numpy.array(img), 2, axis=1)
-    leftEdgesIn, gLeftIn, rLeftIn = converter.filter(converter.undistort(read[0]))
-    rightEdgesIn, gRightIn, rRightIn = converter.filter(converter.undistort(read[1]))
-    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesIn, rightEdgesIn)
-    leftHeights, rightHeights = converter.getRawHeights(leftEdgesIn, rightEdgesIn)
-    rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftIn, gLeftIn, rRightIn, gRightIn)
+    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
+    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
+    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
+    leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
+    rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
     # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
     # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
     leftWalls = converter.getWallLandmarks(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
@@ -58,13 +59,18 @@ def drive():
     slam.slam(walls, rBlobs, gBlobs)
     [steering, waypoints, nextPoint] = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
     if useServer:
-        data = [slam.storedLandmarks, waypoints, nextPoint, leftHeights, rightHeights, walls, rBlobs, gBlobs]
+        data = {
+            'images': [cv2.merge(rLeftImg, gLeftImg, leftEdgesImg), cv2.merge(rRightImg, gRightImg, rightEdgesImg)],
+            'distances': [],
+            'heights': [leftHeights, rightHeights],
+            'pos': [slam.carX, slam.carY, slam.carAngle],
+            'landmarks': slam.storedLandmarks,
+            'rawLandmarks': [rBlobs, gBlobs, walls],
+            'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
+            'steering': steering,
+            'waypoints': [waypoints, nextPoint],
+        }
         server.emit('data', data)
-    # read[0] = converter.undistort(read[0])
-    # for l in leftWalls:
-    #     for i in range(-3, 3):
-    #         for j in range(-3, 3):
-    #             read[0][converter.wallStartLeft][l[0]] = [255, 0, 0]
     return steering
 
 def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
