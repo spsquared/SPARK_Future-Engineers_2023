@@ -1,8 +1,9 @@
 from Controller import converter
 from Controller import slam
 from IO import io
-from IO import sevrer
+from Util import server
 import math
+import numpy
 
 X = 0
 Y = 1
@@ -25,24 +26,42 @@ def setMode(sendServer: bool = None):
 
 def drive():
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    leftEdgesIn, gLeftIn, rLeftIn = converter.filter(read[0])
-    rightEdgesIn, gRightIn, rRightIn = converter.filter(read[1])
-    leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesIn, rightEdgesIn)
+    leftEdgesIn, gLeftIn, rLeftIn = converter.filter(converter.undistort(read[0]))
+    rightEdgesIn, gRightIn, rRightIn = converter.filter(converter.undistort(read[1]))
+    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesIn, rightEdgesIn)
+    leftHeights, rightHeights = converter.getRawHeights(leftEdgesIn, rightEdgesIn)
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftIn, gLeftIn, rRightIn, gRightIn)
-    leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
-    rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
+    # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
+    # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
+    leftWalls = converter.getWallLandmarks(leftHeights, rLeftBlobs, gLeftBlobs)
+    rightWalls = converter.getWallLandmarks(rightHeights, rRightBlobs, gRightBlobs)
+    rBlobs = []
+    for blob in rLeftBlobs:
+        rBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
+    for blob in rRightBlobs:
+        rBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
+    gBlobs = []
+    for blob in gLeftBlobs:
+        gBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
+    for blob in gRightBlobs:
+        gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
+    walls = []
+    for wall in leftWalls:
+        walls.append(converter.getRawDistance(wall[0], leftHeights[wall[0]], -1))
+    for wall in rightWalls:
+        walls.append(converter.getRawDistance(wall[0], rightHeights[wall[0]], 1))
     if slam.carDirection == NO_DIRECTION:
-        slam.findStartingPosition(leftWalls, rightWalls)
-    slam.slam(leftWalls + rightWalls, rLeftBlobs + rRightBlobs, gLeftBlobs + gRightBlobs)
+        slam.findStartingPosition(leftHeights, rightHeights)
+    slam.slam(walls, rBlobs, gBlobs)
     steering = getSteering()
     if useServer:
-        sevrer.emit('data', '\'data\'')
+        server.emit('data', '\'data\'')
     return steering
 
 def getSteering():
 
-    landmarks = slam.storedLandmarks[slam.storedLandmarks[FOUND]]
-    landmarks.sort(landmarkSort)
+    landmarks = [x for x in slam.storedLandmarks if x[FOUND]]
+    landmarks.sort(key=landmarkSort)
     waypoints = []
 
     outer = GREEN_PILLAR
@@ -66,7 +85,7 @@ def getSteering():
             else:
                 waypoints.push([(abs(landmark[X] - 150) / 2 + 50 / 2) * abs(landmark[X]) / landmark[X], landmark[Y]])
 
-    waypoints.sort(landmarkSort)
+    waypoints.sort(key=landmarkSort)
     
     nextPoint = [slam.carX, slam.carY]
     nextPointDistance = 10
@@ -81,7 +100,7 @@ def getSteering():
             nextPoint[X] += math.cos(angle) * magnitude
             nextPoint[Y] += math.sin(angle) * magnitude
 
-    return math.atan2(nextPoint[Y] - slam.carY, nextPoint[X] - slam.carX) - slam.carAngle
+    return min(max(((math.atan2(nextPoint[Y] - slam.carY, nextPoint[X] - slam.carX) - slam.carAngle) / math.pi * 180 / 40 * 100), -100), 100)
 
 def landmarkSort(landmark):
     return slam.carDirection * (math.atan2(landmark[Y] - 150, landmark[X] - 150) - math.atan2(slam.carY - 150, slam.carX - 150))

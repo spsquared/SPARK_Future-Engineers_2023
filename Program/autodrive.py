@@ -1,8 +1,9 @@
 from IO import io
 from Util import server
-from Controller import driver
+from Controller import controller
 import time
 import sys
+import traceback
 
 running = True
 def main():
@@ -43,10 +44,12 @@ def main():
             io.close()
             print('stopped by 3 laps')
             exit(0)
-        server.addListener('stop', stop)
+        server.on('stop', stop)
         io.drive.throttle(50)
         while running:
-            image = io.camera.read()
+            steering = controller.drive()
+            io.drive.steer(steering)
+            # image = io.camera.read()
             # prediction = driver.predict(image, sendServer, infinite)
             # if prediction == "stop":
             #     # drive.throttle(-20)
@@ -58,13 +61,12 @@ def main():
             #     break
             # io.drive.steer(prediction)
             # print("Current Prediction: " + str(prediction))
-        #code here
     except KeyboardInterrupt:
-        io.close()
-        server.close()
+        print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
-        print(err)
+        print('---------------------- AN ERROR OCCURED ----------------------')
+        traceback.print_exc()
         io.error()
-
+        server.emit('programError', str(err))
 if __name__ == '__main__':
     main()

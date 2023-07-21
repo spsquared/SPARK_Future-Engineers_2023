@@ -1,6 +1,7 @@
 # from IO import io
 # from Util import server
 from Controller import converter
+from IO import io
 import traceback
 import numpy
 import math
@@ -103,6 +104,10 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 carDirection = NO_DIRECTION
+carDirection = CLOCKWISE
+carX = 50
+carY = 125
+carAngle = math.pi / 2
 
 maxErrorDistance = 20
 
@@ -158,6 +163,7 @@ def slam(walls, redBlobs, greenBlobs):
     global storedLandmarks, possibleInnerWallLandmarks, possiblePillarLandmarks, carX, carY, carAngle, carDirection, carSpeed, maxErrorDistance
     try:
         # dead reckoning
+        print(walls, redBlobs, greenBlobs)
 
         drCarX = carX + math.cos(carAngle) * carSpeed
         drCarY = carY + math.sin(carAngle) * carSpeed
