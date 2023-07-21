@@ -61,7 +61,7 @@ def main():
             #     break
             # io.drive.steer(prediction)
             # print("Current Prediction: " + str(prediction))
-    except KeyboardInterrupt:eee
+    except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
         print('---------------------- AN ERROR OCCURED ----------------------')
