@@ -68,5 +68,6 @@ def main():
         traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
+
 if __name__ == '__main__':
     main()

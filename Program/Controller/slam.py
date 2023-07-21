@@ -265,7 +265,7 @@ def slam(walls, redBlobs, greenBlobs):
         carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - carX, 2) + math.pow((drCarY + lmCarY) / 2 - carY, 2))
 
         # average!!!!1
-        
+
         carX = (drCarX + lmCarX) / 2
         carY = (drCarY + lmCarY) / 2
         carAngle = (drCarAngle + lmCarAngle) / 2

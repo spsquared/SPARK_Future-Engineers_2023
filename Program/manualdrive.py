@@ -5,8 +5,6 @@ from Controller import converter
 import traceback
 import cv2
 import base64
-import time
-import numpy
 
 running = True
 def main():
