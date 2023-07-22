@@ -201,9 +201,15 @@ setInterval(() => {
 
 // controls 0
 const hcDrawRaw = document.getElementById('hcDrawRaw');
-hcDrawRaw.addEventListener('click', (e) => historyControls.drawRaw = hcDrawRaw.checked);
+hcDrawRaw.addEventListener('click', (e) => {
+    historyControls.drawRaw = hcDrawRaw.checked;
+    window.localStorage.setItem('hc-drawRaw', historyControls.drawRaw);
+});
 const hcDrawDistances = document.getElementById('hcDrawDistances');
-hcDrawDistances.addEventListener('click', (e) => historyControls.drawDistances = hcDrawDistances.checked);
+hcDrawDistances.addEventListener('click', (e) => {
+    historyControls.drawDistances = hcDrawDistances.checked;
+    window.localStorage.setItem('hc-drawDistances', historyControls.drawDistances);
+});
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
 
@@ -247,6 +253,7 @@ function importSession() {
             }
             historyControls.slider.max = history.length;
             historyControls.slider.value = history.length;
+            sounds.ping();
             display();
         };
         reader.readAsText(files[0]);
@@ -287,12 +294,18 @@ historyControls.slider.onkeydown = (e) => {
 };
 let timer = 0;
 setInterval(() => {
-    timer = (timer + 1) % 8;
-    if (historyControls.slowmode && timer % 8 != 0) return;
-    if (!historyControls.quickmode && timer % 4 != 0) return;
-    if (historyControls.back) historyControls.previousButton.onclick();
-    if (historyControls.forwards) historyControls.nextButton.onclick();
-}, 25);
+    timer = (timer + 1) % 20;
+    if (historyControls.slowmode && timer % 20 != 0) return;
+    if (!historyControls.quickmode && timer % 10 != 0) return;
+    if (historyControls.back && historyControls.forwards) return;
+    if (historyControls.back) {
+        historyControls.previousButton.onclick();
+        sounds.tick();
+    } else if (historyControls.forwards) {
+        historyControls.nextButton.onclick();
+        sounds.tick();
+    }
+}, 10);
 socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', addData);
 
