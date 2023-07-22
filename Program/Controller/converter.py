@@ -168,11 +168,11 @@ rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
 
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    global wallHeight, wallStartLeft, wallStartRight, wallEnd
+    global wallHeight, undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int") + wallStartBuffer
@@ -231,11 +231,15 @@ def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             if i >= 0 and i < imageWidth:
                 heights[i] = 0
     
-    img = numpy.uint8(numpy.zeros((wallEnd - wallStartLeft + 1, imageWidth)))
+    img = numpy.uint8(numpy.zeros((wallEnd - undistortCrop, imageWidth)))
     
     indices = numpy.dstack((heights, range(imageWidth)))
+    try:
+        img[tuple(numpy.transpose(indices))] = 255
+    except Exception as err:
+        print(heights)
 
-    img[tuple(numpy.transpose(indices))] = 255
+
     # Apply HoughLinesP method to 
     # to directly obtain line end points
     lines = list(cv2.HoughLinesP(

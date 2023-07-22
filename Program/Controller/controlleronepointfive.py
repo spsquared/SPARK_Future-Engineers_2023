@@ -59,14 +59,18 @@ def drive():
         transformedCorner1 = slam.transformLandmark(wall[0])
         transformedCorner2 = slam.transformLandmark(wall[1])
 
-        if transformedCorner1[X] - transformedCorner2[X] == 0:
+        if transformedCorner1[X] - transformedCorner2[X] != 0 and transformedCorner1[Y] - transformedCorner2[Y] != 0:
             slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
+            horizontal = abs(slope) < 1
+            yIntercept = transformedCorner1[Y] - slope * transformedCorner1[X]
+            
+            distance = abs(slope * slam.carX + slam.carY + yIntercept) / math.sqrt(slope**2 + 1)
+        elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
+            horizontal = False
+            distance = abs(slam.carX - transformedCorner1[X])
         else:
-            slope = 93021930
-        horizontal = abs(slope) < 1
-        yIntercept = transformedCorner1[Y] = slope * transformedCorner1[X]
-        
-        distance = abs(slope * slam.carX + slam.carY + yIntercept) / math.sqrt(slope**2 + 1)
+            horizontal = True
+            distance = abs(slam.carY - transformedCorner1[Y])
 
         nearestCorner = [slam.storedLandmarks[0][X], slam.storedLandmarks[0][Y]]
         snappingCorner = transformedCorner1
@@ -108,28 +112,47 @@ def drive():
         if blob[1] > blobSizeThreshold:
             steering -= slam.carDirection * blob[1] * blobSteering
 
-    num = 0
     for wall in walls:
         transformedCorner1 = wall[0]
         transformedCorner2 = wall[1]
-        
-        if transformedCorner1[X] - transformedCorner2[X] == 0:
-            slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
-        else:
-            slope = 93021930
-        horizontal = abs(slope) < 1
-        yIntercept = transformedCorner1[Y] = slope * transformedCorner1[X]
-        
-        distance = abs(slope * slam.carX + slam.carY + yIntercept) / math.sqrt(slope**2 + 1)
-        if distance < 20:
-            if num == 0:
-                steering += 50
-            elif num == 1:
-                steering += -50 * slam.carDirection
-            elif num == 2:
-                steering += -50
 
-        num += 1
+        LEFT = 0
+        CENTER = 1
+        RIGHT = 2
+        wallType = 0
+        
+        if transformedCorner1[X] - transformedCorner2[X] != 0 and transformedCorner1[Y] - transformedCorner2[Y] != 0:
+            slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
+            yIntercept = transformedCorner1[Y] - slope * transformedCorner1[X]
+            
+            distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
+
+            if abs(slope) < 1:
+                wallType = CENTER
+            else:
+                if transformedCorner1[X] > 0:
+                    wallType = RIGHT
+                else:
+                    wallType = LEFT
+        elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
+            distance = abs(transformedCorner1[X])
+            if transformedCorner1[X] > 0:
+                wallType = RIGHT
+            else:
+                wallType = LEFT
+        else:
+            distance = abs(transformedCorner1[Y])
+            wallType = CENTER
+        
+        if wallType == CENTER:
+            if distance < 80:
+                steering += 50 * slam.carDirection
+        elif wallType == LEFT:
+            if distance < 40:
+                steering += 50
+        else:
+            if distance < 40:
+                steering += -50
     # if slam.carX < 100 and slam.carY < 100:
     #     steering += 100
 
@@ -154,4 +177,7 @@ def drive():
     io.drive.steer(steering)
 
 def getDistance(a, b):
-    return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))
+    try:
+        return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))
+    except Exception as e:
+        print(e, a, b)
