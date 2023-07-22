@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Controller import controller
+from Controller import controlleronepointfive as controller
 import time
 import sys
 import traceback
@@ -49,8 +49,7 @@ def main():
         server.on('stop', stop)
         io.drive.throttle(70)
         while running:
-            steering = controller.drive()
-            io.drive.steer(steering)
+            controller.drive()
             # image = io.camera.read()
             # prediction = driver.predict(image, sendServer, infinite)
             # if prediction == "stop":

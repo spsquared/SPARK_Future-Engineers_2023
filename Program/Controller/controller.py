@@ -2,7 +2,6 @@ from IO import io
 from Util import server
 from Controller import converter
 from Controller import slam
-from Controller import controlleronepointfive
 import math
 import cv2
 import base64
@@ -30,13 +29,11 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
-    return controlleronepointfive.drive()
 # def drive(img):
-    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    # read = numpy.split(numpy.array(img), 2, axis=1)
-    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
-    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
-    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
+    imgs = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(imgs[0]))
+    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(imgs[1]))
+    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg) # OOOOOOOOOOOOOOOF BORKEN
     leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
     # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
@@ -80,7 +77,7 @@ def drive():
     # for l in leftWalls:
     #     cv2.line(read[0], (l[0], l[1] + 14), (l[2], l[3] + 14), (255, 0, 0), 1)
     # return read[0]
-    return steering
+    io.drive.steer(steering)
 
 def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
     global blobSizeThreshold

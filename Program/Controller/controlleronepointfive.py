@@ -29,11 +29,9 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
-# def drive(img):
-    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    # read = numpy.split(numpy.array(img), 2, axis=1)
-    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
-    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
+    img = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(img[0]))
+    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(img[1]))
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
     leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
@@ -153,7 +151,7 @@ def drive():
             'waypoints': [[], []],
         }
         server.emit('data', data)
-    return steering
+    io.drive.steer(steering)
 
 def getDistance(a, b):
     return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))
