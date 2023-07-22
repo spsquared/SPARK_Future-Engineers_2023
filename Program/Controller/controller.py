@@ -2,6 +2,7 @@ from IO import io
 from Util import server
 from Controller import converter
 from Controller import slam
+from Controller import controlleronepointfive
 import math
 import cv2
 import base64
@@ -28,9 +29,11 @@ def setMode(sendServer: bool = None):
     global useServer
     if sendServer != None: useServer = sendServer
 
-def drive(img):
-    # read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    read = numpy.split(numpy.array(img), 2, axis=1)
+def drive():
+    return controlleronepointfive.drive()
+# def drive(img):
+    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    # read = numpy.split(numpy.array(img), 2, axis=1)
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
@@ -38,8 +41,8 @@ def drive(img):
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
     # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
     # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
-    leftWalls = converter.getWallLandmarks(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
-    rightWalls = converter.getWallLandmarks(rightHeights.copy(), rRightBlobs, gRightBlobs)
+    leftWalls = converter.getWalls(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
+    rightWalls = converter.getWalls(rightHeights.copy(), rRightBlobs, gRightBlobs)
     rBlobs = []
     for blob in rLeftBlobs:
         rBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
@@ -50,14 +53,10 @@ def drive(img):
         gBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
     for blob in gRightBlobs:
         gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
-    walls = []
-    for wall in leftWalls:
-        walls.append(converter.getRawDistance(wall[0], leftHeights[wall[0]], -1))
-    for wall in rightWalls:
-        walls.append(converter.getRawDistance(wall[0], rightHeights[wall[0]], 1))
+    corners, walls = converter.mergeWalls(leftWalls, rightWalls)
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
-    slam.slam(walls, rBlobs, gBlobs)
+    slam.slam(corners, walls, rBlobs, gBlobs)
     steering, waypoints, nextPoint = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
     if useServer:
         data = {
@@ -76,13 +75,12 @@ def drive(img):
             'steering': steering,
             'waypoints': [waypoints, nextPoint],
         }
-        # server.emit('data', data)
-    read[0] = converter.undistort(read[0])
-    for l in leftWalls:
-        for i in range(-3, 3):
-            for j in range(-3, 3):
-                read[0][converter.wallStartLeft][l[0]] = [255, 0, 0]
-    return read[0]
+        server.emit('data', data)
+    # read[0] = converter.undistort(read[0])
+    # for l in leftWalls:
+    #     cv2.line(read[0], (l[0], l[1] + 14), (l[2], l[3] + 14), (255, 0, 0), 1)
+    # return read[0]
+    return steering
 
 def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
     global blobSizeThreshold

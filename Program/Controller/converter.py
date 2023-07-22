@@ -103,7 +103,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 159
 undistortedWallStartRight = 154
 wallEnd = imageHeight
-wallStartBuffer = 5
+wallStartBuffer = 6
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -171,8 +171,8 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft - undistortCrop + wallStartBuffer:wallEnd], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight - undistortCrop + wallStartBuffer:wallEnd], 0, 1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int") + wallStartBuffer
@@ -214,7 +214,7 @@ def getDistance(imgx: int, height: int, dir: int):
     return distanceTable[max(dir, 0)][imgx][int(height)]
 def getRawDistance(imgx: int, height: int, dir: int):
     if height == 0:
-        return (-1.0, -1.0, -1.0, -1.0)
+        return [-1.0, -1.0, -1.0, -1.0]
     else:
         dist = wallHeight * math.sqrt(focalLength**2 + (imgx - imageWidth / 2)**2) / height
         if dir == -1:
@@ -223,59 +223,80 @@ def getRawDistance(imgx: int, height: int, dir: int):
         else:
             x = cameraOffsetX + rightImgCosAngles[imgx] * dist
             y = cameraOffsetY + rightImgSinAngles[imgx] * dist
-        return (x, y, math.sqrt(x**2 + y**2), math.atan2(y, x))
+        return [x, y, math.sqrt(x**2 + y**2), math.atan2(y, x)]
 
-def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list, dir: int):
+def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     for blob in rBlobs + gBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
                 heights[i] = 0
     
-    img = numpy.uint8(numpy.zeros((wallEnd - wallStartLeft, imageWidth)))
+    img = numpy.uint8(numpy.zeros((wallEnd - wallStartLeft + 1, imageWidth)))
     
     indices = numpy.dstack((heights, range(imageWidth)))
 
     img[tuple(numpy.transpose(indices))] = 255
-  
     # Apply HoughLinesP method to 
     # to directly obtain line end points
-    lines = cv2.HoughLinesP(
+    lines = list(cv2.HoughLinesP(
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
                 threshold=20, # Min number of votes for valid line
                 minLineLength=5, # Min allowed length of line
-                maxLineGap=50 # Max allowed gap between line for joining them
-                )
+                maxLineGap=30 # Max allowed gap between line for joining them
+                ))
     def lineSort(line):
         return line[0][0]
     lines.sort(key=lineSort)
-    return lines
-
-def mergeWalls(lines):
-    mapLines = []
-    lastPoint = [None]
-    points = []
+    newLines = []
+    lastLine = [None]
     for line in lines:
         x1, y1, x2, y2 = line[0]
         if y1 == 0 or y2 == 0:
             continue
-        if lastPoint[0] != None:
-            mapLines.append(getRawDistance(x1, y1, dir).append(True), getRawDistance(x2, y2, dir).append(True))
-            if abs(lastPoint[X] - x1) <= 2:
-                if abs(lastPoint[Y] - y1) <= 2:
-                    points.append(getRawDistance(lastPoint[X], lastPoint[Y], dir))
+        if lastLine[0] != None:
+            lastSlope = (lastLine[3] - lastLine[1]) / (lastLine[2] - lastLine[0])
+            slope = (y2 - y1) / (x2 - x1)
+            newY = lastLine[3] + (x1 - lastLine[2]) * lastSlope
+            if abs(y1 - newY) < 5 and abs(math.atan2(slope, 1) - math.atan2(lastSlope, 1)) < math.pi / 30:
+                newLines[len(newLines) - 1] = [newLines[len(newLines) - 1][0], newLines[len(newLines) - 1][1], x2, y2]
+                lastLine = line[0]
+                continue
+            # else:
+            #     lastslope x+b=y
+            #     b = newLines[len(newLines) - 1][3]
+        lastLine = line[0]
+        newLines.append(line[0])
+    return newLines
+
+def processWalls(lines, dir):
+    walls = []
+    corners = []
+    lastCorner = [None]
+    for line in lines:
+        x1, y1, x2, y2 = line
+        walls.append([getRawDistance(x1, y1, dir), getRawDistance(x2, y2, dir)])
+        walls[len(walls) - 1][0].append(True)
+        walls[len(walls) - 1][1].append(True)
+        if lastCorner[0] != None:
+            if abs(lastCorner[X] - x1) <= 2:
+                if abs(lastCorner[Y] - y1) <= 2:
+                    corners.append(getRawDistance(lastCorner[X], lastCorner[Y], dir))
                 else:
-                    if lastPoint[Y] > y1:
-                        points.append(getRawDistance(lastPoint[X], lastPoint[Y], dir))
+                    if lastCorner[Y] > y1:
+                        corners.append(getRawDistance(lastCorner[X], lastCorner[Y], dir))
                     else:
-                        points.append(getRawDistance(x1, y1, dir))
-        else:
-            mapLines.append(getRawDistance(x1, y1, dir).append(False), getRawDistance(x2, y2, dir).append(True))
-        lastPoint = [x2, y2]
-    if len(mapLines) > 0:
-        mapLines[len(mapLines) - 1][1][4] = False
-    return [points, mapLines]
+                        corners.append(getRawDistance(x1, y1, dir))
+        lastCorner = [x2, y2]
+    if len(walls) > 0:
+        walls[0][0][4] = False
+        walls[len(walls) - 1][1][4] = False
+    return [corners, walls]
+def mergeWalls(leftLines, rightLines):
+    leftCorners, leftWalls = processWalls(leftLines, -1)
+    rightCorners, rightWalls = processWalls(rightLines, 1)
+    return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     global wallStartLeft, wallStartRight, wallEnd
