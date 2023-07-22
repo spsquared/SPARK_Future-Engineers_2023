@@ -70,6 +70,9 @@ def main():
         traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
+    running = False
+    io.close()
+    server.close()
 
 if __name__ == '__main__':
     main()
