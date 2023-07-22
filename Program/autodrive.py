@@ -44,6 +44,8 @@ def main():
             io.close()
             print('stopped by 3 laps')
             exit(0)
+        if sendServer:
+            server.open()
         server.on('stop', stop)
         io.drive.throttle(80)
         while running:
