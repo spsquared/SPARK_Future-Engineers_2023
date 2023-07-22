@@ -156,7 +156,7 @@ def transformLandmark(landmark):
     landmark[Y] = carY + math.cos(carAngle) * landmark[X] + math.sin(carAngle) * landmark[Y]
     return landmark
 
-def slam(walls, redBlobs, greenBlobs):
+def slam(corners, walls, redBlobs, greenBlobs):
     global storedLandmarks, possibleInnerWallLandmarks, possiblePillarLandmarks, carX, carY, carAngle, carDirection, carSpeed, maxErrorDistance
     try:
         # dead reckoning
@@ -164,7 +164,7 @@ def slam(walls, redBlobs, greenBlobs):
 
         drCarX = carX + math.cos(carAngle) * carSpeed
         drCarY = carY + math.sin(carAngle) * carSpeed
-        # drCarAngle = io.imu.gyro.angle
+        # drCarAngle = io.imu.angle
         drCarAngle = 0
 
         # get position from landmarks
@@ -175,7 +175,7 @@ def slam(walls, redBlobs, greenBlobs):
         lmCarY = 0
         lmCarAngle = 0
 
-        for landmark in walls:
+        for landmark in corners:
             # find nearest landmark
             transformedLandmark = transformLandmark(landmark)
 
@@ -205,6 +205,40 @@ def slam(walls, redBlobs, greenBlobs):
                 storedLandmarks[math.floor(newLandmarkIndex / 4) + 4] = [nearestLandmark[X], nearestLandmark[Y], INNER_WALL, True, 0]
 
             landmarks.append(nearestLandmark)
+
+        xWalls = []
+        yWalls = []
+        
+        for wall in walls:
+            transformedCorner1 = transformLandmark(wall[0])
+            transformedCorner2 = transformLandmark(wall[1])
+            
+            slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
+            horizontal = abs(slope) < 1
+            yIntercept = transformedCorner1[Y] = slope * transformedCorner1[X]
+            
+            distance = abs(slope * carX + carY + yIntercept) / math.sqrt(slope**2 + 1)
+
+            nearestCorner = [storedLandmarks[0][X], storedLandmarks[0][Y]]
+            snappingCorner = transformedCorner1
+            if transformedCorner1[4] == False:
+                snappingCorner = transformedCorner2
+            for j in range(0, 8):
+                if storedLandmarks[j][FOUND]:
+                    if getDistance(storedLandmarks[j], snappingCorner) < getDistance(nearestCorner, snappingCorner):
+                        nearestCorner = [storedLandmarks[j][X], storedLandmarks[j][Y]]
+            
+            if horizontal:
+                if snappingCorner[Y] == 0 or snappingCorner[Y] == 200 or snappingCorner[Y] == 240:
+                    yWalls.append(snappingCorner[Y] + distance)
+                else:
+                    yWalls.append(snappingCorner[Y] - distance)
+            else:
+                if snappingCorner[X] == 0 or snappingCorner[X] == 200 or snappingCorner[X] == 240:
+                    xWalls.append(snappingCorner[X] + distance)
+                else:
+                    xWalls.append(snappingCorner[X] - distance)
+
         
         # unknown landmarks
         
@@ -225,6 +259,11 @@ def slam(walls, redBlobs, greenBlobs):
 
             for landmark in landmarks:
                 array.append(math.pow(x - landmark[X], 2) + math.pow(y - landmark[Y], 2) - math.pow(landmark[DISTANCE], 2))
+            
+            for wall in xWalls:
+                array.append(math.pow(x - wall, 2))
+            for wall in yWalls:
+                array.append(math.pow(y - wall, 2))
             
             return tuple(array)
 
