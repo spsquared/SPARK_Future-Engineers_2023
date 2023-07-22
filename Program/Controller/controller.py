@@ -3,8 +3,9 @@ from Util import server
 from Controller import converter
 from Controller import slam
 import math
-import numpy
 import cv2
+import base64
+import numpy
 
 X = 0
 Y = 1
@@ -27,9 +28,9 @@ def setMode(sendServer: bool = None):
     global useServer
     if sendServer != None: useServer = sendServer
 
-def drive():
-    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    # read = numpy.split(numpy.array(img), 2, axis=1)
+def drive(img):
+    # read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    read = numpy.split(numpy.array(img), 2, axis=1)
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
@@ -60,9 +61,14 @@ def drive():
     [steering, waypoints, nextPoint] = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
     if useServer:
         data = {
-            'images': [cv2.merge(rLeftImg, gLeftImg, leftEdgesImg), cv2.merge(rRightImg, gRightImg, rightEdgesImg)],
+            'images': [
+                base64.b64encode(cv2.imencode('.png', cv2.merge((leftEdgesImg, gLeftImg, rLeftImg)))[1]).decode(),
+                base64.b64encode(cv2.imencode('.png', cv2.merge((rightEdgesImg, gRightImg, rRightImg)))[1]).decode(),
+                1,
+                1
+            ],
             'distances': [],
-            'heights': [leftHeights, rightHeights],
+            'heights': [leftHeights.tolist(), rightHeights.tolist()],
             'pos': [slam.carX, slam.carY, slam.carAngle],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rBlobs, gBlobs, walls],
@@ -70,8 +76,13 @@ def drive():
             'steering': steering,
             'waypoints': [waypoints, nextPoint],
         }
-        server.emit('data', data)
-    return steering
+        # server.emit('data', data)
+    read[0] = converter.undistort(read[0])
+    for l in leftWalls:
+        for i in range(-3, 3):
+            for j in range(-3, 3):
+                read[0][converter.wallStartLeft][l[0]] = [255, 0, 0]
+    return read[0]
 
 def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
     global blobSizeThreshold
