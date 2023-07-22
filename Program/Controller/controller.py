@@ -88,7 +88,7 @@ def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, 
     global blobSizeThreshold
     landmarks = [x for x in slam.storedLandmarks if x[FOUND]]
 
-    if len(landmarks) == 0:
+    if len(landmarks) == 4:
         steering = 0
 
         blobSizeThreshold = 20
