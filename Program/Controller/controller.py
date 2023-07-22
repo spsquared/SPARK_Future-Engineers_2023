@@ -58,7 +58,7 @@ def drive(img):
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
     slam.slam(walls, rBlobs, gBlobs)
-    [steering, waypoints, nextPoint] = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
+    steering, waypoints, nextPoint = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
     if useServer:
         data = {
             'images': [

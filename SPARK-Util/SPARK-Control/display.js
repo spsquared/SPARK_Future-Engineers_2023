@@ -11,7 +11,8 @@ const historyControls = {
     slowmode: false,
     quickmode: false,
     maxSize: 5000,
-    drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true
+    drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
+    drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true
 };
 const fpsTimes = [];
 let fps = 0;
@@ -61,7 +62,7 @@ function addData(data) {
             encoding + data.images[0],
             encoding + data.images[1]
         ],
-        distances: [],
+        distances: data.distances,
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, e]) => [x, 300 - y, e])),
@@ -95,8 +96,10 @@ function display() {
         mctx.clearRect(0, 0, 620, 620);
         mctx.translate(10, 10);
         mctx.scale(2, 2);
+        mctx.globalAlpha = 1;
         drawLandmarks(data.landmarks);
         if (historyControls.drawRaw) drawRawLandmarks();
+        drawDistances(data.distances, data.pos);
         drawCar(data.pos);
     }
 };
@@ -163,19 +166,32 @@ function drawLandmarks(landmarks) {
     }
 };
 function drawRawLandmarks(rawLandmarks) {
-    mctx.opacity = 0.5;
+    mctx.globalAlpha = 0.5;
     drawLandmarks(rawLandmarks);
 };
-function drawCar(pos) {
+function drawCar(pos, steering) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[3]);
     mctx.fillStyle = 'rgb(50, 50, 50)';
-    mctx.fillRect(-6.65, -12, 13.3, 24);
+    mctx.fillRect(-12, -6.65, 24, 13.3);
     mctx.restore();
 };
-function drawDistances(distances) {
-
+function drawDistances(distances, pos) {
+    mctx.save();
+    mctx.translate(pos[0], pos[1]);
+    mctx.rotate(pos[3]);
+    mctx.globalAlpha = 1;
+    mctx.fillStyle = 'rgb(255, 255, 255)';
+    mctx.beginPath();
+    for (let dist of distances) {
+        mctx.fillRect(Math.round(dist[0] - 1), Math.round(dist[1] - 1), 3, 3);
+        mctx.moveTo(dist[0], dist[1]);
+        mctx.lineTo(0, 0);
+    }
+    mctx.globalAlpha = 0.2;
+    mctx.setLineDash([2, 2]);
+    mctx.restore();
 };
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
@@ -186,7 +202,10 @@ setInterval(() => {
 // controls 0
 const hcDrawRaw = document.getElementById('hcDrawRaw');
 hcDrawRaw.addEventListener('click', (e) => historyControls.drawRaw = hcDrawRaw.checked);
+const hcDrawDistances = document.getElementById('hcDrawDistances');
+hcDrawDistances.addEventListener('click', (e) => historyControls.drawDistances = hcDrawDistances.checked);
 hcDrawRaw.checked = historyControls.drawRaw;
+hcDrawDistances.checked = historyControls.drawDistances;
 
 // controls
 historyControls.slider.oninput = (e) => {
