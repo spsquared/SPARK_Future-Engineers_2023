@@ -87,12 +87,15 @@ def filter(imgIn: numpy.ndarray):
         server.emit('programError', str(err))
 
 # remapping for distortion correction
-new_K = K.copy()
+undistortCrop = 150
+K2 = K.copy()
+K2[1][2] -= undistortCrop
+new_K = K2.copy()
 new_K[0][0] *= 0.5
 new_K[1][1] *= 0.5
-remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K, D, numpy.eye(3), new_K, (imageWidth, imageHeight), cv2.CV_16SC2)
+remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K2, D, numpy.eye(3), new_K, (imageWidth, imageHeight), cv2.CV_16SC2)
 def undistort(imgIn: numpy.ndarray):
-    return cv2.remap(imgIn, remap, remapInterpolation, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+    return cv2.remap(imgIn[undistortCrop:], remap, remapInterpolation, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
 # distance scanner
 wallStartLeft = 164
@@ -168,8 +171,8 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, wallStartLeft, wallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft + wallStartBuffer:wallEnd], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft - undistortCrop + wallStartBuffer:wallEnd], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight - undistortCrop + wallStartBuffer:wallEnd], 0, 1)
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int") + wallStartBuffer
