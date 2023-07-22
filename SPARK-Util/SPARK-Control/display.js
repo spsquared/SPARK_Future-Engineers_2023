@@ -10,17 +10,29 @@ const historyControls = {
     forwards: false,
     slowmode: false,
     quickmode: false,
-    maxSize: 5000
+    maxSize: 5000,
+    drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true
 };
 const fpsTimes = [];
 let fps = 0;
 const fpsDisplay = document.getElementById('fps');
 const display0Img = document.getElementById('display0Img');
 const display1Img = document.getElementById('display1Img');
+const overlay0 = document.getElementById('display0Overlay');
+const overlay1 = document.getElementById('display1Overlay');
+const ctx0 = overlay0.getContext('2d');
+const ctx1 = overlay1.getContext('2d');
 const map = document.getElementById('map');
-const ctx = map.getContext('2d');
-map.width = 620;
-map.height = 620;
+const mctx = map.getContext('2d');
+window.onresize = () => {
+    map.width = 620;
+    map.height = 620;
+    overlay0.width = 544;
+    overlay0.height = 308;
+    overlay1.width = 544;
+    overlay1.height = 308;
+};
+window.onresize();
 function addCapture(images) {
     let encoding = images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
     history.unshift({
@@ -69,70 +81,112 @@ function addData(data) {
     }
     fpsTimes.push(performance.now());
 };
+const carConstants = {
+    wallStarts: [164, 154]
+};
 function display() {
     const data = history[historyControls.index];
     if (data === undefined) return;
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {
-        ctx.resetTransform();
-        ctx.translate(10, 10);
-        ctx.scale(2, 2);
+        drawOverlays(data);
+        mctx.resetTransform();
+        mctx.clearRect(0, 0, 620, 620);
+        mctx.translate(10, 10);
+        mctx.scale(2, 2);
         drawLandmarks(data.landmarks);
+        if (historyControls.drawRaw) drawRawLandmarks();
         drawCar(data.pos);
     }
 };
+function drawOverlays(data) {
+    function draw(camera, ctx) {
+        let wallStart = carConstants.wallStarts[camera] + 1;
+        ctx.clearRect(0, 0, 544, 308);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        for (let i in data.heights[camera]) {
+            ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
+        }
+        ctx.fillStyle = 'rgb(255, 0, 0)';
+        for (let i in data.blobs[camera][0]) {
+            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][i])
+        }
+        ctx.fillStyle = 'rgb(0, 255, 0)';
+        for (let i in data.blobs[camera][1]) {
+            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][i])
+        }
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = 'rgb(255, 0, 0)';
+        for (let i in data.blobs[camera][0]) {
+            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][i]);
+        }
+        ctx.fillStyle = 'rgb(0, 255, 0)';
+        for (let i in data.blobs[camera][1]) {
+            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][i]);
+        }
+    };
+    draw(0, ctx0);
+    draw(1, ctx1);
+};
 function drawLandmarks(landmarks) {
     // draw outer walls
-    ctx.setLineDash([]);
-    ctx.strokeStyle = 'rgb(80, 80, 80)';
-    ctx.lineWidth = 10;
-    ctx.strokeRect(-5, -5, 310, 310);
+    mctx.setLineDash([]);
+    mctx.strokeStyle = 'rgb(80, 80, 80)';
+    mctx.lineWidth = 10;
+    mctx.strokeRect(-5, -5, 310, 310);
     // draw inner walls
-    ctx.beginPath();
-    ctx.lineCap = 'square';
-    ctx.moveTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
-    if (landmarks[4][2]) ctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
-    if (landmarks[5][2]) ctx.lineTo(landmarks[5][0] - 5, landmarks[5][1] + 5);
-    if (landmarks[6][2]) ctx.lineTo(landmarks[6][0] - 5, landmarks[6][1] - 5);
-    if (landmarks[7][2]) ctx.lineTo(landmarks[7][0] + 5, landmarks[7][1] - 5);
-    if (landmarks[4][2]) ctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
-    ctx.stroke();
+    mctx.beginPath();
+    mctx.lineCap = 'square';
+    mctx.moveTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    if (landmarks[4][2]) mctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    if (landmarks[5][2]) mctx.lineTo(landmarks[5][0] - 5, landmarks[5][1] + 5);
+    if (landmarks[6][2]) mctx.lineTo(landmarks[6][0] - 5, landmarks[6][1] - 5);
+    if (landmarks[7][2]) mctx.lineTo(landmarks[7][0] + 5, landmarks[7][1] - 5);
+    if (landmarks[4][2]) mctx.lineTo(landmarks[4][0] + 5, landmarks[4][1] + 5);
+    mctx.stroke();
     // draw red pillars
-    ctx.fillStyle = 'rgb(238, 39, 55)';
+    mctx.fillStyle = 'rgb(238, 39, 55)';
     for (let i = 8; i < 16; i++) {
-        ctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
+        mctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
     }
     // draw green pillars
-    ctx.fillStyle = 'rgb(68, 214, 44)';
+    mctx.fillStyle = 'rgb(68, 214, 44)';
     for (let i = 16; i < 24; i++) {
-        ctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
+        mctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
     }
     // draw landmark POI "dots"
-    ctx.fillStyle = 'rgb(255, 255, 255)';
+    mctx.fillStyle = 'rgb(255, 255, 255)';
     for (let landmark of landmarks) {
-        if (landmark[2]) ctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
+        if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
 };
 function drawRawLandmarks(rawLandmarks) {
-    // probably change some other stuff, maybe dont fill pillars and make walls dashed
-    ctx.opacity = 0.5;
+    mctx.opacity = 0.5;
     drawLandmarks(rawLandmarks);
 };
 function drawCar(pos) {
-    ctx.save();
-    ctx.translate(pos[0], pos[1]);
-    ctx.rotate(pos[3]);
-    ctx.fillStyle = 'rgb(50, 50, 50)';
-    ctx.fillRect(-6.65, -12, 13.3, 24);
-    ctx.restore();
-};
-function drawBlobs(blobs) {
-
+    mctx.save();
+    mctx.translate(pos[0], pos[1]);
+    mctx.rotate(pos[3]);
+    mctx.fillStyle = 'rgb(50, 50, 50)';
+    mctx.fillRect(-6.65, -12, 13.3, 24);
+    mctx.restore();
 };
 function drawDistances(distances) {
 
 };
+setInterval(() => {
+    while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
+    fps = fpsTimes.length;
+    fpsDisplay.innerText = 'FPS: ' + fps;
+}, 50);
+
+// controls 0
+const hcDrawRaw = document.getElementById('hcDrawRaw');
+hcDrawRaw.addEventListener('click', (e) => historyControls.drawRaw = hcDrawRaw.checked);
+hcDrawRaw.checked = historyControls.drawRaw;
 
 // controls
 historyControls.slider.oninput = (e) => {
@@ -179,11 +233,6 @@ function importSession() {
         reader.readAsText(files[0]);
     };
 };
-setInterval(() => {
-    while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
-    fps = fpsTimes.length;
-    fpsDisplay.innerText = 'FPS: ' + fps;
-}, 50);
 document.getElementById('importSession').onclick = importSession;
 document.getElementById('exportSession').onclick = exportSession;
 document.addEventListener('keydown', (e) => {
@@ -270,35 +319,3 @@ rawcapture.onclick = () => {
 stream.disabled = true;
 capture.disabled = true;
 rawcapture.disabled = true;
-
-addData({
-    images: ['', ''],
-    landmarks: [
-        [0, 0, true],
-        [300, 0, true],
-        [0, 300, true],
-        [300, 300, true],
-        [60, 100, true],
-        [60, 200, true],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, true],
-        [0, 0, true],
-        [0, 0, true],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, true],
-        [0, 0, true],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-        [0, 0, false],
-    ],
-    rawLandmarks: [],
-    pos: [260, 160, 0]
-});

@@ -14,6 +14,27 @@ window.addEventListener('error', (e) => {
     sounds.ping();
 });
 
+// autogenerating toggles
+let toggleGens = document.querySelectorAll('.generateToggle');
+for (const div of toggleGens) {
+    if (div.hasAttribute('toggleLabel')) {
+        const label = document.createElement('label');
+        label.innerHTML = div.getAttribute('toggleLabel');
+        div.appendChild(label);
+    }
+    const toggleLabel = document.createElement('label');
+    toggleLabel.classList.add('toggle');
+    const toggleInput = document.createElement('input');
+    toggleInput.type = 'checkbox';
+    toggleInput.id = div.getAttribute('toggleID');
+    toggleInput.classList.add('toggleInput');
+    toggleLabel.appendChild(toggleInput);
+    const toggleSlider = document.createElement('span');
+    toggleSlider.classList.add('toggleSlider');
+    toggleLabel.appendChild(toggleSlider);
+    div.appendChild(toggleLabel);
+}
+
 const initcolors = [
     [
         [25, 255, 255],
@@ -337,27 +358,6 @@ socket.on('colors', setColors);
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey) socket.emit('stop');
 });
-
-// autogenerating toggles
-let toggleGens = document.querySelectorAll('.generateToggle');
-for (const div of toggleGens) {
-    if (div.hasAttribute('toggleLabel')) {
-        const label = document.createElement('label');
-        label.innerHTML = div.getAttribute('toggleLabel');
-        div.appendChild(label);
-    }
-    const toggleLabel = document.createElement('label');
-    toggleLabel.classList.add('toggle');
-    const toggleInput = document.createElement('input');
-    toggleInput.type = 'checkbox';
-    toggleInput.id = div.getAttribute('toggleID');
-    toggleInput.classList.add('toggleInput');
-    toggleLabel.appendChild(toggleInput);
-    const toggleSlider = document.createElement('span');
-    toggleSlider.classList.add('toggleSlider');
-    toggleLabel.appendChild(toggleSlider);
-    div.appendChild(toggleLabel);
-}
 
 let rickrolled = false;
 document.getElementById('disconnect').onclick = async () => {

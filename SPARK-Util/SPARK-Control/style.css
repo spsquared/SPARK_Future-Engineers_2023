@@ -242,6 +242,12 @@ img {
     border-color: limegreen;
 }
 
+#mapControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 #sessionFileControls {
     text-align: center;
 }
