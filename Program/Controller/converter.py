@@ -24,8 +24,9 @@ cameraOffsetX = 3
 cameraOffsetY = 10
 
 # distortion constants
-K=numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
-D=numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
+K = numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
+D = numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
+D2 = D * -1
 
 # code constants
 X = 0
@@ -103,6 +104,7 @@ distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
     # generate the mesh of undistorted points using an ungodly long line of numpy
+    newMatrixEstimation = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, (imageWidth, imageHeight), numpy.eye(3), K, balance=1)
     leftHeightRange = wallEnd - wallStartLeft + 1
     rightHeightRange = wallEnd - wallStartRight + 1
     leftPoints = []
@@ -112,8 +114,9 @@ def generateDistanceTable():
             leftPoints.append((imgx, wallStartLeft + height))
         for height in range(rightHeightRange):
             rightPoints.append((imgx, wallStartRight + height))
-    leftPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(leftPoints, dtype=numpy.float32), K, D)))
-    rightPoints = numpy.apply_along_axis(lambda p: p[0], 1, numpy.apply_along_axis(lambda p: (p[X] * K[0][0] + K[0][2], p[Y] * K[1][1] + K[1][2]), 2, cv2.undistortPoints(numpy.array(rightPoints, dtype=numpy.float32), K, D)))
+    leftPoints = numpy.apply_along_axis(lambda p: p[0], 1, cv2.fisheye.undistortPoints(numpy.array([leftPoints], dtype=numpy.float32), K, D, None, newMatrixEstimation, K, criteria=(cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 500, 1e-6)))
+    rightPoints = numpy.apply_along_axis(lambda p: p[0], 1, cv2.fisheye.undistortPoints(numpy.array([rightPoints], dtype=numpy.float32), K, D, None, newMatrixEstimation, K, criteria=(cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 500, 1e-6)))
+    print(leftPoints)
     # pre-calculate locations for x and height of walls
     for imgx in range(imageWidth):
         distanceTable[LEFT].append([])
@@ -140,7 +143,7 @@ def generateDistanceTable():
             distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
     distanceTable[LEFT] = numpy.array(distanceTable[LEFT])
     distanceTable[RIGHT] = numpy.array(distanceTable[RIGHT])
-generateDistanceTable()
+# generateDistanceTable()
 
 leftImgSinAngles = []
 leftImgCosAngles = []
@@ -175,6 +178,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
     return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
+    raise NotImplementedError()
     global distanceTable
     
     # crop and then flip
@@ -201,6 +205,7 @@ def mergeDistances(leftCoordinates: numpy.ndarray, rightCoordinates: numpy.ndarr
 
     return coordinates
 def getDistance(imgx: int, height: int, dir: int):
+    raise NotImplementedError()
     global distanceTable
     return distanceTable[max(dir, 0)][imgx][int(height)]
 def getRawDistance(imgx: int, height: int, dir: int):
