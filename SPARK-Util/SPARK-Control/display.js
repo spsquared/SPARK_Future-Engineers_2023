@@ -50,11 +50,14 @@ function addData(data) {
             encoding + data.images[1]
         ],
         distances: [],
+        heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, e]) => [x, 300 - y, e])),
         rawLandmarks: data.rawLandmarks.map((([x, y, e]) => [x, 300 - y, e])),
         blobs: data.blobs,
-        fps: fps
+        steering: data.steering,
+        waypoints: data.waypoints,
+        fps: fps,
     });
     if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
@@ -268,34 +271,34 @@ stream.disabled = true;
 capture.disabled = true;
 rawcapture.disabled = true;
 
-// addData({
-//     images: ['', ''],
-//     landmarks: [
-//         [0, 0, true],
-//         [300, 0, true],
-//         [0, 300, true],
-//         [300, 300, true],
-//         [60, 100, true],
-//         [60, 200, true],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, true],
-//         [0, 0, true],
-//         [0, 0, true],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, true],
-//         [0, 0, true],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//         [0, 0, false],
-//     ],
-//     rawLandmarks: [],
-//     pos: [260, 160, 0]
-// });
+addData({
+    images: ['', ''],
+    landmarks: [
+        [0, 0, true],
+        [300, 0, true],
+        [0, 300, true],
+        [300, 300, true],
+        [60, 100, true],
+        [60, 200, true],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, true],
+        [0, 0, true],
+        [0, 0, true],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, true],
+        [0, 0, true],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+        [0, 0, false],
+    ],
+    rawLandmarks: [],
+    pos: [260, 160, 0]
+});
