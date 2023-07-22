@@ -325,10 +325,10 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
             continue
         if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
             slopeChanges[i + sampleSize] = 1
-            if i != 0:
-                slopeChanges[i + sampleSize - 1] = 1
-            if i != imageWidth - 1:
-                slopeChanges[i + sampleSize + 1] = 1
+            # if i != 0:
+            #     slopeChanges[i + sampleSize - 1] = 1
+            # if i != imageWidth - 1:
+            #     slopeChanges[i + sampleSize + 1] = 1
     
     
     for i in range(imageWidth - 1):
@@ -341,11 +341,11 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     landmarks = []
     for i in range(imageWidth):
         # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
-        if (slopeChanging > 0 and slopeChanges[i] == 0) or slopeChanging >= sampleSize * 2 + 2:
+        if slopeChanging > 0 and slopeChanging < round(sampleSize / 5) and slopeChanges[i] == 0:
             landmarks.append([i - math.ceil(slopeChanging / 2), slopeChanges[i - math.ceil(slopeChanging / 2)]])
             # landmarks.append([i - 1, slopeChanges[i - 1]])
-            slopeChanging = 0
-        # if slopeChanges[i] != 0 or slopeChanging > 0:
+            # slopeChanging = 0
+        # if slopeChanges[i] != 0:
         #     landmarks.append([i, slopeChanges[i]])
         if slopeChanges[i] == 0:
             slopeChanging = 0
