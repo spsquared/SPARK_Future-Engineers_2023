@@ -47,7 +47,7 @@ def main():
         if sendServer:
             server.open()
         server.on('stop', stop)
-        io.drive.throttle(80)
+        io.drive.throttle(70)
         while running:
             steering = controller.drive()
             io.drive.steer(steering)

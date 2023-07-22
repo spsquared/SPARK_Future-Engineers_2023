@@ -4,13 +4,14 @@ import traceback
 import numpy
 import cv2
 import math
+import time
 
 # converts images into data usable for SLAM and driving
 
 # colors
 rm = redMin = (0, 80, 75)
 rM = redMax = (55, 255, 255)
-gm = greenMin = (30, 20, 30)
+gm = greenMin = (30, 80, 30)
 gM = greenMax = (110, 255, 255)
 
 # camera constants
@@ -171,8 +172,8 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
 
     # find the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int") + wallStartBuffer
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="int") + wallStartBuffer
 
     return [rawHeightsLeft, rawHeightsRight]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
@@ -272,94 +273,134 @@ def getWallLandmarks(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
     # if slopeChanging > 0:
     #     landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
     # return landmarks
+    start = time.perf_counter()
+
     for blob in rBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
-                heights[i] = -1
+                heights[i] = 0
     for blob in gBlobs:
         for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
             if i >= 0 and i < imageWidth:
-                heights[i] = -1
-
-    sampleSize = 20
+                heights[i] = 0
     
-    slopeChanges = numpy.full(imageWidth, 0)
+    img = numpy.uint8(numpy.zeros((wallEnd - wallStartLeft, imageWidth)))
+    
+    indices = numpy.dstack((heights, range(imageWidth)))
 
-    for i in range(imageWidth - sampleSize * 2):
-        # leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
-        # rightSlope = (distances[i + sampleSize * 2 - 1][Y] - distances[i + sampleSize][Y]) / (distances[i + sampleSize * 2 - 1][X] - distances[i + sampleSize][X])
-        # invalid = False
-        # for j in range(i, i + sampleSize * 2):
-        #     if distances[j][2] == -1:
-        #         invalid = True
-        #         break
-        # if invalid:
-        #     continue
-        # leftAngle = math.atan2(leftSlope, 1)
-        # rightAngle = math.atan2(rightSlope, 1)
-        # if abs(leftAngle - rightAngle) > math.pi / 4:
-        #     slopeChanges[i] = 1
-        #     if i != 0:
-        #         slopeChanges[i - 1] = 1
-        #     if i != imageWidth - 1:
-        #         slopeChanges[i + 1] = 1
+    img[tuple(numpy.transpose(indices))] = 255
+    
+    # edges = cv2.Canny(img,50,150,apertureSize=3)
+    edges = img
+  
+    # Apply HoughLinesP method to 
+    # to directly obtain line end points
+    lines_list =[]
+    lines = cv2.HoughLinesP(
+                edges, # Input edge image
+                1, # Distance resolution in pixels
+                numpy.pi/180, # Angle resolution in radians
+                threshold=20, # Min number of votes for valid line
+                minLineLength=5, # Min allowed length of line
+                maxLineGap=50 # Max allowed gap between line for joining them
+                )
+
+    print(time.perf_counter() - start)
+    # print(lines)
+    # Iterate over points
+    for points in lines:
+        # Extracted points nested in the list
+        x1,y1,x2,y2=points[0]
+        # Draw the lines joing the points
+        # On the original image
+        cv2.line(img,(x1,y1),(x2,y2),125,2)
+        # Maintain a simples lookup list for points
+        lines_list.append([(x1,y1),(x2,y2)])
+        
+    # Save the result image
+    # cv2.imwrite('detectedLines.png',img)
+    # differences = numpy.diff(heights, n=10)
+    # differences = differences[abs(differences) > 100]
+
+    # sampleSize = 20
+    
+    # slopeChanges = numpy.full(imageWidth, 0)
+
+    # for i in range(imageWidth - sampleSize * 2):
+    #     # leftSlope = (distances[i + sampleSize - 1][Y] - distances[i][Y]) / (distances[i + sampleSize - 1][X] - distances[i][X])
+    #     # rightSlope = (distances[i + sampleSize * 2 - 1][Y] - distances[i + sampleSize][Y]) / (distances[i + sampleSize * 2 - 1][X] - distances[i + sampleSize][X])
+    #     # invalid = False
+    #     # for j in range(i, i + sampleSize * 2):
+    #     #     if distances[j][2] == -1:
+    #     #         invalid = True
+    #     #         break
+    #     # if invalid:
+    #     #     continue
+    #     # leftAngle = math.atan2(leftSlope, 1)
+    #     # rightAngle = math.atan2(rightSlope, 1)
+    #     # if abs(leftAngle - rightAngle) > math.pi / 4:
+    #     #     slopeChanges[i] = 1
+    #     #     if i != 0:
+    #     #         slopeChanges[i - 1] = 1
+    #     #     if i != imageWidth - 1:
+    #     #         slopeChanges[i + 1] = 1
         
         
-        leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
-        rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
-        leftDifference = 0
-        rightDifference = 0
-        invalid = False
-        for j in range(i, i + sampleSize):
-            if heights[j] == -1:
-                invalid = True
-                break
-            error = (heights[j] - (heights[i] + leftSlope * (j - i)))
+    #     leftSlope = (heights[i + sampleSize - 1] - heights[i]) / sampleSize
+    #     rightSlope = (heights[i + sampleSize * 2 - 1] - heights[i + sampleSize]) / sampleSize
+    #     leftDifference = 0
+    #     rightDifference = 0
+    #     invalid = False
+    #     for j in range(i, i + sampleSize):
+    #         if heights[j] == -1:
+    #             invalid = True
+    #             break
+    #         error = (heights[j] - (heights[i] + leftSlope * (j - i)))
 
-            leftDifference += error ** 4
-        if invalid:
-            continue
-        for j in range(i + sampleSize, i + sampleSize * 2):
-            if heights[j] == -1:
-                invalid = True
-                break
-            error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
+    #         leftDifference += error ** 4
+    #     if invalid:
+    #         continue
+    #     for j in range(i + sampleSize, i + sampleSize * 2):
+    #         if heights[j] == -1:
+    #             invalid = True
+    #             break
+    #         error = (heights[j] - (heights[i + sampleSize] + rightSlope * (j - i - sampleSize)))
 
-            rightDifference += error ** 4
-        if invalid:
-            continue
-        if abs(leftSlope - rightSlope) > 0.075 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
-            slopeChanges[i + sampleSize] = 1
-            # if i != 0:
-            #     slopeChanges[i + sampleSize - 1] = 1
-            # if i != imageWidth - 1:
-            #     slopeChanges[i + sampleSize + 1] = 1
+    #         rightDifference += error ** 4
+    #     if invalid:
+    #         continue
+    #     if abs(leftSlope - rightSlope) > 0.1 and leftDifference < sampleSize * 2 and rightDifference < sampleSize * 2:
+    #         slopeChanges[i + sampleSize] = 1
+    #         # if i != 0:
+    #         #     slopeChanges[i + sampleSize - 1] = 1
+    #         # if i != imageWidth - 1:
+    #         #     slopeChanges[i + sampleSize + 1] = 1
     
     
-    for i in range(imageWidth - 1):
-        if heights[i] == -1 or heights[i + 1] == -1:
-            continue
-        if abs(heights[i + 1] - heights[i]) >= 4:
-            slopeChanges[i] = 1
+    # for i in range(imageWidth - 1):
+    #     if heights[i] == -1 or heights[i + 1] == -1:
+    #         continue
+    #     if abs(heights[i + 1] - heights[i]) >= 4:
+    #         slopeChanges[i] = 1
 
-    slopeChanging = 0
-    landmarks = []
-    for i in range(imageWidth):
-        # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
-        if slopeChanging > 0 and slopeChanging < round(sampleSize / 5) and slopeChanges[i] == 0:
-            landmarks.append([i - math.ceil(slopeChanging / 2), slopeChanges[i - math.ceil(slopeChanging / 2)]])
-            # landmarks.append([i - 1, slopeChanges[i - 1]])
-            # slopeChanging = 0
-        # if slopeChanges[i] != 0:
-        #     landmarks.append([i, slopeChanges[i]])
-        if slopeChanges[i] == 0:
-            slopeChanging = 0
-        else:
-            slopeChanging += 1
+    # slopeChanging = 0
+    # landmarks = []
+    # for i in range(imageWidth):
+    #     # # if slopeChanges[i] == 0 and slopeChanging >= sampleSize / 4:
+    #     if slopeChanging > 0 and slopeChanging < round(sampleSize / 5) and slopeChanges[i] == 0:
+    #         landmarks.append([i - math.ceil(slopeChanging / 2), slopeChanges[i - math.ceil(slopeChanging / 2)]])
+    #         # landmarks.append([i - 1, slopeChanges[i - 1]])
+    #         # slopeChanging = 0
+    #     # if slopeChanges[i] != 0:
+    #     #     landmarks.append([i, slopeChanges[i]])
+    #     if slopeChanges[i] == 0:
+    #         slopeChanging = 0
+    #     else:
+    #         slopeChanging += 1
     
-    if slopeChanging > 0:
-        landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
-    return landmarks
+    # if slopeChanging > 0:
+    #     landmarks.append([imageWidth - math.ceil(slopeChanging / 2), slopeChanges[imageWidth - math.ceil(slopeChanging / 2)]])
+    return []
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
     global wallStartLeft, wallStartRight, wallEnd
