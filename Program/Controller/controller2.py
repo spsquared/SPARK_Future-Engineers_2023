@@ -32,58 +32,46 @@ def setMode(sendServer: bool = None, infiniteMode: bool = None, debugMode: bool 
     if infiniteMode != None: infinite = infiniteMode
     if debugMode != None: debug = debugMode
 
+# create blob detector
+params = cv2.SimpleBlobDetector_Params()
+params.filterByArea = True
+params.minArea = 65
+params.filterByCircularity = True
+params.minCircularity = 0.3
+params.filterByConvexity = True
+params.minConvexity = 0.7
+params.filterByInertia = True
+params.minInertiaRatio = 0
+blobs = cv2.SimpleBlobDetector_create(params)
+
 def getSteering():
     global lastSend, rightOnRed, counterClockwise, turnsMade, turnCooldown, passedPillar, debug
+    
     try:
+        # lol config stuff
+        blobStart = 79
+        blobEnd = 100
 
-        # create blob detector
-        params = cv2.SimpleBlobDetector_Params()
-        params.filterByArea = True
-        params.minArea = 65
-        params.filterByCircularity = True
-        params.minCircularity = 0.3
-        params.filterByConvexity = True
-        params.minConvexity = 0.7
-        params.filterByInertia = True
-        params.minInertiaRatio = 0
-        blobs = cv2.SimpleBlobDetector_create(params)
+        leftImg, rightImg = io.camera.read()
 
         # filter to colors and split
-        blurredImg = filter(imgIn,True)
-        edgesImage, gImg, rImg, bImg = cv2.split(blurredImg)
+        edgesImgLeft, gImgLeft, rImgLeft = converter.filter(leftImg)
+        edgesImgRight, gImgRight, rImgRight = converter.filter(rightImg)
 
-        # send images to SPARK Control
-        if blurredImg.all() != None:
-            lastSend += 1
-            if (lastSend > 2):
-                lastSend = 0
-                encoded = base64.b64encode(cv2.imencode('.png', cv2.merge((edgesImage, gImg, rImg)))[1]).decode()
-                server.broadcast('capture', encoded)
-
-        # steering reason
         steeringReason = ""
 
         ################# PILLAR STEERING #################
 
-
-        # pillar steering
         pillarSteering = 0
 
-        # crop for blob detection
-        blobStart = 79
-        blobEnd = 100
-
-        # initial variables
         rKps = []
         gKps = []
         brKps = 0
         bgKps = 0
-
         if doPillars == True:
             # add borders to fix blob detection
             rImg = cv2.copyMakeBorder(rImg[blobStart:blobEnd],1,1,1,1, cv2.BORDER_CONSTANT, value=[0,0,0])
             gImg = cv2.copyMakeBorder(gImg[blobStart:blobEnd],1,1,1,1, cv2.BORDER_CONSTANT, value=[0,0,0])
-
             # detect blobs
             if rightOnRed == True:
                 blobs.empty()
@@ -95,7 +83,6 @@ def getSteering():
                 rKps = blobs.detect(255 - gImg)
                 blobs.empty()
                 gKps = blobs.detect(255 - rImg)
-
             # pillar calculations
             blobSizeRequirement = 0
             dangerSize = 50
