@@ -158,12 +158,14 @@ leftImgCosAngles = numpy.array(leftImgCosAngles)
 rightImgSinAngles = numpy.array(rightImgSinAngles)
 rightImgCosAngles = numpy.array(rightImgCosAngles)
 
+cropEndArray = numpy.empty((imageWidth, 1))
+cropEndArray[:] = 255
 def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1)
+    croppedLeft = numpy.hstack((numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
+    croppedRight = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:4] = 0
