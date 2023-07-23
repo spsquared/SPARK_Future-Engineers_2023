@@ -60,69 +60,68 @@ def drive():
     corners, walls = converter.mergeWalls(leftWalls, rightWalls)
     print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
-    xWalls = 0
-    xWallsCount = 0
-    yWalls = 0
-    yWallsCount = 0
-    
-    for wall in walls:
-        transformedCorner1 = slam.transformLandmark(wall[0])
-        transformedCorner2 = slam.transformLandmark(wall[1])
 
-        if transformedCorner1[X] - transformedCorner2[X] != 0 and transformedCorner1[Y] - transformedCorner2[Y] != 0:
-            slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
-            horizontal = abs(slope) < 1
-            yIntercept = transformedCorner1[Y] - slope * transformedCorner1[X]
+    slam.carAngle = io.imu.angle()
+    # xWalls = 0
+    # xWallsCount = 0
+    # yWalls = 0
+    # yWallsCount = 0
+    
+    # for wall in walls:
+    #     transformedCorner1 = slam.transformLandmark(wall[0])
+    #     transformedCorner2 = slam.transformLandmark(wall[1])
+
+    #     if transformedCorner1[X] - transformedCorner2[X] != 0 and transformedCorner1[Y] - transformedCorner2[Y] != 0:
+    #         slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
+    #         horizontal = abs(slope) < 1
+    #         yIntercept = transformedCorner1[Y] - slope * transformedCorner1[X]
             
-            distance = abs(slope * slam.carX + slam.carY + yIntercept) / math.sqrt(slope**2 + 1)
-        elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
-            horizontal = False
-            distance = abs(slam.carX - transformedCorner1[X])
-        else:
-            horizontal = True
-            distance = abs(slam.carY - transformedCorner1[Y])
+    #         distance = abs(slope * slam.carX + slam.carY + yIntercept) / math.sqrt(slope**2 + 1)
+    #     elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
+    #         horizontal = False
+    #         distance = abs(slam.carX - transformedCorner1[X])
+    #     else:
+    #         horizontal = True
+    #         distance = abs(slam.carY - transformedCorner1[Y])
 
-        nearestCorner = [slam.storedLandmarks[0][X], slam.storedLandmarks[0][Y]]
-        snappingCorner = transformedCorner1
-        if transformedCorner1[4] == False:
-            snappingCorner = transformedCorner2
-        for j in range(0, 4):
-            if getDistance(slam.storedLandmarks[j], snappingCorner) < getDistance(nearestCorner, snappingCorner):
-                nearestCorner = [slam.storedLandmarks[j][X], slam.storedLandmarks[j][Y]]
+    #     nearestCorner = [slam.storedLandmarks[0][X], slam.storedLandmarks[0][Y]]
+    #     snappingCorner = transformedCorner1
+    #     if transformedCorner1[4] == False:
+    #         snappingCorner = transformedCorner2
+    #     for j in range(0, 4):
+    #         if getDistance(slam.storedLandmarks[j], snappingCorner) < getDistance(nearestCorner, snappingCorner):
+    #             nearestCorner = [slam.storedLandmarks[j][X], slam.storedLandmarks[j][Y]]
         
-        if horizontal:
-            if snappingCorner[Y] == 0 or snappingCorner[Y] == 200 or snappingCorner[Y] == 240:
-                yWalls += snappingCorner[Y] + distance
-            else:
-                yWalls += snappingCorner[Y] - distance
-            yWallsCount += 1
-        else:
-            if snappingCorner[X] == 0 or snappingCorner[X] == 200 or snappingCorner[X] == 240:
-                xWalls += snappingCorner[X] + distance
-            else:
-                xWalls += snappingCorner[X] - distance
-            xWallsCount += 1
+    #     if horizontal:
+    #         if snappingCorner[Y] == 0 or snappingCorner[Y] == 200 or snappingCorner[Y] == 240:
+    #             yWalls += snappingCorner[Y] + distance
+    #         else:
+    #             yWalls += snappingCorner[Y] - distance
+    #         yWallsCount += 1
+    #     else:
+    #         if snappingCorner[X] == 0 or snappingCorner[X] == 200 or snappingCorner[X] == 240:
+    #             xWalls += snappingCorner[X] + distance
+    #         else:
+    #             xWalls += snappingCorner[X] - distance
+    #         xWallsCount += 1
     
-    if xWallsCount > 0:
-        slam.carX = xWalls / xWallsCount
-    if yWallsCount > 0:
-        slam.carY = yWalls / yWallsCount
+    # if xWallsCount > 0:
+    #     slam.carX = xWalls / xWallsCount
+    # if yWallsCount > 0:
+    #     slam.carY = yWalls / yWallsCount
     
+    # if abs(slam.carX - 150) > 50 and abs(slam.carY - 150) > 50:
+    #     print(slam.carx, slam.carY)
+    #     print("CORNER !!!! WARNNIG: CORNER DETECTED!!!1!!!!!11!!")
+
     # print(slam.carX, slam.carY)
 
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
+    
+    processedWalls = []
 
-    steering = 0
-
-    blobDistanceThreshold = 80
-    blobSteering = 10
-    for blob in rBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] > -15:
-            steering += slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
-    for blob in gBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] < 15:
-            steering += -slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
+    cornerSection = False
 
     for wall in walls:
         transformedCorner1 = wall[0]
@@ -156,9 +155,39 @@ def drive():
             distance = abs(transformedCorner1[Y])
             wallType = CENTER
         
+        processedWalls.append([wallType, distance])
         if wallType == CENTER:
-            if distance < 120:
-                steering += (120 - distance) * 2 * slam.carDirection
+            if distance < 100:
+                cornerSection = True
+    
+    steering = 0
+
+    blobDistanceThreshold = 80
+    blobSteering = 10
+
+    turnDistance = 70
+
+    for blob in rBlobs:
+        if blob[2] < blobDistanceThreshold and blob[0] > -15 and blob[1] > 0:
+            steering += slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
+            turnDistance = 70 + 30 * slam.carDirection
+    for blob in gBlobs:
+        if blob[2] < blobDistanceThreshold and blob[0] < 15 and blob[1] > 0:
+            steering += -slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
+            turnDistance = 70 - 30 * slam.carDirection
+
+    for wall in processedWalls:
+
+        LEFT = 0
+        CENTER = 1
+        RIGHT = 2
+
+        wallType = wall[0]
+        distance = wall[1]
+        
+        if wallType == CENTER:
+            if distance < turnDistance:
+                steering += 100 * slam.carDirection
         elif wallType == LEFT:
             if distance < 40:
                 steering += (80 - distance)
@@ -184,6 +213,7 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rBlobs, gBlobs, walls],
             'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
+            'corners': corners,
             'steering': steering,
             'waypoints': [[], []],
         }

@@ -70,6 +70,7 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rBlobs, gBlobs, walls],
             'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
+            'corners': corners,
             'steering': steering,
             'waypoints': [waypoints, nextPoint],
         }
