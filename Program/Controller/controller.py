@@ -50,7 +50,7 @@ def drive():
         gBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
     for blob in gRightBlobs:
         gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
-    corners, walls = converter.mergeWalls(leftWalls, rightWalls)
+    corners, walls = converter.processWalls(leftWalls, rightWalls)
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
     slam.slam(corners, walls, rBlobs, gBlobs)

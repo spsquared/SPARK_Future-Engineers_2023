@@ -278,7 +278,7 @@ def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
         newLines.append(line[0])
     return newLines
 
-def processWalls(lines, dir):
+def processWall(lines, dir):
     walls = []
     corners = []
     lastCorner = [None]
@@ -301,9 +301,9 @@ def processWalls(lines, dir):
         walls[0][0][4] = False
         walls[len(walls) - 1][1][4] = False
     return [corners, walls]
-def mergeWalls(leftLines, rightLines):
-    leftCorners, leftWalls = processWalls(leftLines, -1)
-    rightCorners, rightWalls = processWalls(rightLines, 1)
+def processWalls(leftLines, rightLines):
+    leftCorners, leftWalls = processWall(leftLines, -1)
+    rightCorners, rightWalls = processWall(rightLines, 1)
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
