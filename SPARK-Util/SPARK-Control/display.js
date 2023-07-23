@@ -68,7 +68,7 @@ function addData(data) {
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
         rawLandmarks: data.rawLandmarks.map(arr => arr.map(([l, h, c]) => [l[0], -l[1]])),
-        blobs: data.blobs,
+        contours: data.contours,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]])],
         steering: data.steering,
         waypoints: data.waypoints,
@@ -123,21 +123,21 @@ function drawOverlays(data) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
         }
         ctx.fillStyle = 'rgb(255, 0, 0)';
-        for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][0][i][0], wallStart, 1, data.heights[camera][data.blobs[camera][0][i][0]])
+        for (let i in data.contours[camera][0]) {
+            ctx.fillRect(data.contours[camera][0][i][0], wallStart, 1, data.heights[camera][data.contours[camera][0][i][0]])
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
-        for (let i in data.blobs[camera][1]) {
-            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][data.blobs[camera][1][i][0]])
+        for (let i in data.contours[camera][1]) {
+            ctx.fillRect(data.contours[camera][1][i][0], wallStart, 1, data.heights[camera][data.contours[camera][1][i][0]])
         }
         ctx.globalAlpha = 0.4;
         ctx.fillStyle = 'rgb(255, 0, 0)';
-        for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][0][i][0] - data.blobs[camera][0][i][1], wallStart, data.blobs[camera][0][i][1] * 2 + 1, data.heights[camera][data.blobs[camera][0][i][0]]);
+        for (let i in data.contours[camera][0]) {
+            ctx.fillRect(data.contours[camera][0][i][0] - data.contours[camera][0][i][1], wallStart, data.contours[camera][0][i][1] * 2 + 1, data.heights[camera][data.contours[camera][0][i][0]]);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
-        for (let i in data.blobs[camera][1]) {
-            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][data.blobs[camera][1][i][0]]);
+        for (let i in data.contours[camera][1]) {
+            ctx.fillRect(data.contours[camera][1][i][0] - data.contours[camera][1][i][1], wallStart, data.contours[camera][1][i][1] * 2 + 1, data.heights[camera][data.contours[camera][1][i][0]]);
         }
     };
     draw(0, ctx0);
