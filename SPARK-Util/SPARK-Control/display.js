@@ -67,7 +67,7 @@ function addData(data) {
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
-        rawLandmarks: data.rawLandmarks.map((([l, h, c]) => [l[0], -l[1]])),
+        rawLandmarks: data.rawLandmarks.map(arr => arr.map(([l, h, c]) => [l[0], -l[1]])),
         blobs: data.blobs,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]])],
         steering: data.steering,
