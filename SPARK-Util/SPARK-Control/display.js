@@ -117,11 +117,12 @@ function drawOverlays(data) {
     function draw(camera, ctx) {
         let wallStart = carConstants.wallStarts[camera] + 1;
         ctx.clearRect(0, 0, 544, 308);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 0.5;
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
         }
+        ctx.globalAlpha = 1;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.contours[camera][0]) {
             ctx.fillRect(data.contours[camera][0][i][0], wallStart, 1, data.heights[camera][data.contours[camera][0][i][0]])
@@ -216,14 +217,14 @@ function drawWalls(walls, pos) {
     mctx.rotate(pos[3]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
-    mctx.lineWidth = 2;
-    ctx.beginPath();
+    mctx.lineWidth = 1;
+    mctx.beginPath();
     mctx.strokeStyle = 'rgb(255, 180, 0)';
     for (let wall of walls[1]) {
         mctx.moveTo(wall[0], wall[1]);
         mctx.lineTo(wall[2], wall[3]);
     }
-    ctx.stroke();
+    mctx.stroke();
     mctx.fillStyle = 'rgb(255, 255, 0)';
     for (let corner of walls[0]) {
         mctx.fillRect(corner[0] - 1, corner[1] - 1, 2, 2);
