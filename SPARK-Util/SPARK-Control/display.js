@@ -113,7 +113,7 @@ function drawOverlays(data) {
     function draw(camera, ctx) {
         let wallStart = carConstants.wallStarts[camera] + 1;
         ctx.clearRect(0, 0, 544, 308);
-        ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.75;
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
@@ -129,7 +129,7 @@ function drawOverlays(data) {
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][i]);
+            ctx.fillRect(data.blobs[camera][0][i][0] - data.blobs[camera][0][i][1], wallStart, data.blobs[camera][0][i][1] * 2 + 1, data.heights[camera][i]);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.blobs[camera][1]) {
@@ -175,7 +175,7 @@ function drawRawLandmarks(rawLandmarks) {
     mctx.globalAlpha = 0.5;
     // draw wall things
     mctx.strokeStyle = 'rgb(180, 180, 180)';
-    for (let landmark of rawLandmarks[0]) {
+    for (let landmark of rawLandmarks[2]) {
         if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
