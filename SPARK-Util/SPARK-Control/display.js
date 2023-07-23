@@ -102,6 +102,11 @@ function display() {
         if (historyControls.drawRaw) drawRawLandmarks();
         drawDistances(data.distances, data.pos);
         drawCar(data.pos);
+    } else {
+        ctx0.clearRect(0, 0, 544, 308);
+        ctx1.clearRect(0, 0, 544, 308);
+        mctx.resetTransform();
+        mctx.clearRect(0, 0, 620, 620);
     }
 };
 function drawOverlays(data) {
@@ -251,6 +256,21 @@ historyControls.previousButton.onclick = (e) => {
     historyControls.slider.value = history.length - historyControls.index;
     display();
 };
+function downloadFrame() {
+    const render = document.createElement('canvas');
+    render.width = 1088;
+    render.height = 308;
+    const rctx = render.getContext('2d');
+    rctx.drawImage(display0Img, 0, 0);
+    rctx.drawImage(display1Img, 544, 0);
+    rctx.drawImage(overlay0, 0, 0);
+    rctx.drawImage(overlay1, 544, 0);
+    const a = document.createElement('a');
+    a.href = render.toDataURL('image/png');
+    let current = new Date();
+    a.download = `SPARK-img_${current.getHours()}-${current.getMinutes()}_${current.getMonth()}-${current.getDay()}-${current.getFullYear()}.png`;
+    a.click();
+};
 function exportSession() {
     const data = 'data:text/json;charset=UTF-8,' + encodeURIComponent(JSON.stringify(history));
     const a = document.createElement('a');
@@ -282,6 +302,7 @@ function importSession() {
         reader.readAsText(files[0]);
     };
 };
+document.getElementById('downloadFrame').onclick = downloadFrame;
 document.getElementById('importSession').onclick = importSession;
 document.getElementById('exportSession').onclick = exportSession;
 document.addEventListener('keydown', (e) => {
