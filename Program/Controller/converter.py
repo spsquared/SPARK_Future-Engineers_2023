@@ -304,8 +304,8 @@ def getContours(imgIn: numpy.ndarray):
         if size > minContourSize:
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
-            y = int(moment["m01"] / moment["m00"])
-            processedContours.append([x, y, math.ceil(math.sqrt(size) * contourSizeConstant)])
+            # y = int(moment["m01"] / moment["m00"])
+            processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):
