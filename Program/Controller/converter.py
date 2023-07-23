@@ -100,8 +100,8 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = 159
-undistortedWallStartRight = 154
+undistortedWallStartLeft = 165
+undistortedWallStartRight = 165
 wallEnd = imageHeight
 wallStartBuffer = 6
 distanceTable = [[], []]
@@ -171,12 +171,16 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop + wallStartBuffer:wallEnd - undistortCrop], 0, 1)
+    croppedLeftTop = numpy.flip(numpy.swapaxes(leftEdgesIn[0:undistortedWallStartLeft - undistortCrop], 0, 1), axis=1)
+    croppedRightTop = numpy.flip(numpy.swapaxes(rightEdgesIn[0:undistortedWallStartRight - undistortCrop], 0, 1), axis=1)
+    
+    # crop and then flip
+    croppedLeftBottom = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1)
+    croppedRightBottom = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1)
 
     # find the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int") + wallStartBuffer
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="int") + wallStartBuffer
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeftTop, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftBottom, axis=1), dtype="int")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRightTop, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightBottom, axis=1), dtype="int")
 
     return [rawHeightsLeft, rawHeightsRight]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):

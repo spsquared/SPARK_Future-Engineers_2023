@@ -3,6 +3,7 @@ from Util import server
 from Controller import converter
 from Controller import slam
 from Controller import controlleronepointfive
+from Controller import controller2
 import math
 import cv2
 import base64
