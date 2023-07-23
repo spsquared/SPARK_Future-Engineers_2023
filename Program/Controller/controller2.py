@@ -44,7 +44,12 @@ params.filterByInertia = True
 params.minInertiaRatio = 0
 blobs = cv2.SimpleBlobDetector_create(params)
 
-def getSteering():
+def drive():
+    # lol program architecture lol
+    leftImg, rightImg = io.camera.read()
+    io.drive.steer(getSteering(leftImg, rightImg))
+
+def getSteering(leftImg: numpy.ndarray, rightImg: numpy.ndarray):
     global lastSend, rightOnRed, counterClockwise, turnsMade, turnCooldown, passedPillar, debug
     
     try:
@@ -59,8 +64,6 @@ def getSteering():
         pillarGain = 0.045
         wallStart = 79
         wallEnd = 125
-
-        leftImg, rightImg = io.camera.read()
 
         # filter to colors and split
         edgesImgLeft, gImgLeft, rImgLeft = converter.filter(leftImg)

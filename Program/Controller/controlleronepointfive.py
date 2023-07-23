@@ -190,7 +190,8 @@ def drive():
     print("sendserver: ", time.perf_counter() - start)
 
     print("total: ", time.perf_counter() - totalStart)
-    return steering
+    
+    io.drive.steer(steering)
 
 def getDistance(a, b):
     try:
