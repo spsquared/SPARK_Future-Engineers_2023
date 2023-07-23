@@ -273,7 +273,11 @@ def processWall(lines, dir):
     lastCorner = [None]
     for line in lines:
         x1, y1, x2, y2 = line
-        walls.append([getRawDistance(x1, y1, dir), getRawDistance(x2, y2, dir)])
+        corner1 = getRawDistance(x1, y1, dir)
+        corner2 = getRawDistance(x2, y2, dir)
+        if math.sqrt((corner1[0] - corner2[0])**2 + (corner1[1] - corner2[1])**2) < 10:
+            continue
+        walls.append([corner1, corner2])
         walls[len(walls) - 1][0].append(True)
         walls[len(walls) - 1][1].append(True)
         if lastCorner[0] != None:
@@ -284,7 +288,7 @@ def processWall(lines, dir):
                     if lastCorner[Y] > y1:
                         corners.append(getRawDistance(lastCorner[X], lastCorner[Y], dir))
                     else:
-                        corners.append(getRawDistance(x1, y1, dir))
+                        corners.append(corner1)
         lastCorner = [x2, y2]
     if len(walls) > 0:
         walls[0][0][4] = False
