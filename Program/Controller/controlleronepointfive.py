@@ -167,16 +167,18 @@ def drive():
     contourDistanceThreshold = 80
     contourSteering = 10
 
-    turnDistance = 70
+    turnDistance = 60
 
     for contour in rContours:
         if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 10:
             steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
-            turnDistance = 70 + 30 * slam.carDirection
+            if contour[1] * slam.carDirection > 0:
+                turnDistance = 60 + 30 * slam.carDirection
     for contour in gContours:
         if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 10:
             steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
-            turnDistance = 70 - 30 * slam.carDirection
+            if contour[1] * slam.carDirection > 0:
+                turnDistance = 60 - 30 * slam.carDirection
 
     for wall in processedWalls:
 
