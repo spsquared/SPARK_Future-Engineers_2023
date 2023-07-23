@@ -173,12 +173,12 @@ def drive():
         if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 10:
             steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
             if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 + 30 * slam.carDirection
+                turnDistance = 60 + 20 * slam.carDirection
     for contour in gContours:
         if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 10:
             steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
             if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 - 30 * slam.carDirection
+                turnDistance = 60 - 20 * slam.carDirection
 
     for wall in processedWalls:
 
@@ -193,10 +193,10 @@ def drive():
             if cornerSection and distance < turnDistance:
                 steering += 200 * slam.carDirection
         elif wallType == LEFT:
-            if distance < 40:
+            if distance < 20:
                 steering += (100 - distance)
         else:
-            if distance < 40:
+            if distance < 20:
                 steering += -(100 - distance)
 
     print("driving: ", time.perf_counter() - start)
