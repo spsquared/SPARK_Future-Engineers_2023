@@ -6,6 +6,7 @@ import math
 import cv2
 import base64
 import numpy
+import time
 
 X = 0
 Y = 1
@@ -29,9 +30,16 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
-    img = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(img[0]))
-    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(img[1]))
+    totalStart = time.perf_counter()
+    start = time.perf_counter()
+    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    print("camera: ", time.perf_counter() - start)
+    start = time.perf_counter()
+    # read = numpy.split(numpy.array(img), 2, axis=1)
+    leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
+    rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
+    print("filter + undistort: ", time.perf_counter() - start)
+    start = time.perf_counter()
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
     leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
     rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
@@ -50,6 +58,8 @@ def drive():
     for blob in gRightBlobs:
         gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
     corners, walls = converter.mergeWalls(leftWalls, rightWalls)
+    print("image processing: ", time.perf_counter() - start)
+    start = time.perf_counter()
     xWalls = 0
     xWallsCount = 0
     yWalls = 0
@@ -97,20 +107,22 @@ def drive():
         slam.carX = xWalls / xWallsCount
     if yWallsCount > 0:
         slam.carY = yWalls / yWallsCount
+    
+    # print(slam.carX, slam.carY)
 
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
 
     steering = 0
 
-    blobSizeThreshold = 20
+    blobDistanceThreshold = 30
     blobSteering = 1
     for blob in rBlobs:
-        if blob[1] > blobSizeThreshold:
-            steering += slam.carDirection * blob[1] * blobSteering
+        if blob[2] < blobDistanceThreshold and blob[0] < 15:
+            steering += slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
     for blob in gBlobs:
-        if blob[1] > blobSizeThreshold:
-            steering -= slam.carDirection * blob[1] * blobSteering
+        if blob[2] < blobDistanceThreshold and blob[0] > -15:
+            steering += -slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
 
     for wall in walls:
         transformedCorner1 = wall[0]
@@ -146,15 +158,16 @@ def drive():
         
         if wallType == CENTER:
             if distance < 80:
-                steering += 50 * slam.carDirection
+                steering += (80 - distance) * slam.carDirection
         elif wallType == LEFT:
             if distance < 40:
-                steering += 50
+                steering += (80 - distance)
         else:
             if distance < 40:
-                steering += -50
-    # if slam.carX < 100 and slam.carY < 100:
-    #     steering += 100
+                steering += -(80 - distance)
+
+    print("driving: ", time.perf_counter() - start)
+    start = time.perf_counter()
 
     if useServer:
         data = {
@@ -174,6 +187,10 @@ def drive():
             'waypoints': [[], []],
         }
         server.emit('data', data)
+    print("sendserver: ", time.perf_counter() - start)
+
+    print("total: ", time.perf_counter() - totalStart)
+    
     io.drive.steer(steering)
 
 def getDistance(a, b):

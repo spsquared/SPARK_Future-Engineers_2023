@@ -47,7 +47,7 @@ def main():
         if sendServer:
             server.open()
         server.on('stop', stop)
-        io.drive.throttle(70)
+        io.drive.throttle(75)
         while running:
             controller.drive()
             # image = io.camera.read()
