@@ -27,7 +27,6 @@ cameraOffsetY = 10
 # distortion constants
 K = numpy.array([[181.20784053368962, 0.0, 269.26274741570063], [0.0, 180.34861809531762, 164.95661764906816], [0.0, 0.0, 1.0]])
 D = numpy.array([[0.08869574884019396], [-0.06559255628891703], [0.07411420387674333], [-0.03169574352239552]])
-D2 = D * -1
 
 # code constants
 X = 0
@@ -83,9 +82,9 @@ K2[1][2] -= undistortCrop
 new_K = K2.copy()
 new_K[0][0] *= 0.5
 new_K[1][1] *= 0.5
-remap, remapInterpolation = cv2.fisheye.initUndistortRectifyMap(K2, D, numpy.eye(3), new_K, (imageWidth, imageHeight), cv2.CV_16SC2)
+remapX, remapY = cv2.fisheye.initUndistortRectifyMap(K2, D, numpy.eye(3), new_K, (imageWidth, imageHeight), cv2.CV_16SC2)
 def undistort(imgIn: numpy.ndarray):
-    return cv2.remap(imgIn[undistortCrop:], remap, remapInterpolation, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+    return cv2.remap(imgIn[undistortCrop:], remapX, remapY, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
 # distance scanner
 wallStartLeft = 164
@@ -137,6 +136,9 @@ def generateDistanceTable():
     distanceTable[LEFT] = numpy.array(distanceTable[LEFT])
     distanceTable[RIGHT] = numpy.array(distanceTable[RIGHT])
 # generateDistanceTable()
+# ADFDSAFSAFSADF DSAFSA FSAD FSAF SAF DSAF cv2.undistortPoints IS BROKEN !1!!! !! !! ! BUG BORK BUH FIXXXXXX NOWWWWWWWWWWWWW!!!!!!!!!!!!!!!!!!!
+# and cv2.fisheye.undistortPoints just crashes and returns [[[-1000000, -1000000]]]
+# and the remap is unusable
 
 leftImgSinAngles = []
 leftImgCosAngles = []

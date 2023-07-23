@@ -81,21 +81,27 @@ Located below is the documentation, and a link to the build instructions.
 * Differential lubrication
 
 You will need (at least) the following tools:
+* 3D printer or access to 3D printing service
 * Hex Allen drivers (key or bits)
 * Phillips head drivers
-* Rotary tool with grinding bit
+* Rotary tool with grinding bit (depending on which version of motor)
 * Crimper tool
 * Soldering iron
 
 *There may be items not listed that are used in the build guide, we apologize if that happens.*
 
-*link to CAD files used + Onshape link*
-
 ## Assembly
 
-*designed by us! very unconventional, rewrite this section.*
+Shortened assembly instructions:
+1. Print 3D models
+2. Assemble rear axle
+3. Solder electronics
+4. Assemble steering mechanism
+5. Attach main platform
+6. Attach electronics
+7. Attach upper platform
 
-#### **For a detailed build guide, go to [ASSEMBLY.md](./ASSEMBLY.md)**
+#### **For an actual build guide, go to [ASSEMBLY.md](./ASSEMBLY.md)**
 
 Here is a simple electromechanical schematic for how the electronics are wired:
 

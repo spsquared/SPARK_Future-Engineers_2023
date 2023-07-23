@@ -21,8 +21,6 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
-
-
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer
@@ -70,7 +68,7 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rBlobs, gBlobs, walls],
             'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
-            'corners': corners,
+            'walls': [corners, walls],
             'steering': steering,
             'waypoints': [waypoints, nextPoint],
         }

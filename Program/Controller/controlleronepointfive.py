@@ -215,7 +215,7 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
-            'corners': corners,
+            'walls': [corners, walls],
             'steering': steering,
             'waypoints': [[], []],
         }
