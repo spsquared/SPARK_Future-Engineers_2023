@@ -34,24 +34,6 @@ def main():
                             0,
                             0
                         ]
-                        start = time.perf_counter()
-
-                        # a = 1
-                        read = io.camera.read()
-                        leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
-                        rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
-                        leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
-                        rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
-                        leftWalls = converter.getWallLandmarks(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
-                        # for i in range(converter.imageWidth):
-                        #     for j in range(30):
-                        #         a += read[j][i]
-                        # # new_K = converter.K.copy()
-                        # # new_K[0][0] *= 0.5
-                        # # new_K[1][1] *= 0.5
-                        # # map1, map2 = cv2.fisheye.initUndistortRectifyMap(converter.K, converter.D, numpy.eye(3), new_K, (converter.imageWidth, converter.imageHeight), cv2.CV_16SC2)
-                        # # undistortedLeftImg = cv2.remap(io.camera.read()[0], map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-                        print(time.perf_counter() - start)
                         server.emit('capture', encoded)
                     else:
                         encoded = [
