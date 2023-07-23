@@ -11,7 +11,7 @@ import time
 # colors
 rm = redMin = (0, 80, 75)
 rM = redMax = (55, 255, 255)
-gm = greenMin = (30, 80, 30)
+gm = greenMin = (30, 80, 45)
 gM = greenMax = (110, 255, 255)
 
 # camera constants
@@ -40,7 +40,7 @@ RIGHT = 1
 # create blob detectors
 __params = cv2.SimpleBlobDetector_Params()
 __params.filterByArea = True
-__params.minArea = 65
+__params.minArea = 100
 __params.maxArea = 128941274721
 __params.filterByCircularity = True
 __params.minCircularity = 0.3
@@ -87,7 +87,7 @@ def filter(imgIn: numpy.ndarray):
         server.emit('programError', str(err))
 
 # remapping for distortion correction
-undistortCrop = 150
+undistortCrop = 140
 K2 = K.copy()
 K2[1][2] -= undistortCrop
 new_K = K2.copy()
@@ -100,10 +100,9 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = 165
-undistortedWallStartRight = 165
+undistortedWallStartLeft = 166
+undistortedWallStartRight = 160
 wallEnd = imageHeight
-wallStartBuffer = 6
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -171,16 +170,16 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeftTop = numpy.flip(numpy.swapaxes(leftEdgesIn[0:undistortedWallStartLeft - undistortCrop], 0, 1), axis=1)
-    croppedRightTop = numpy.flip(numpy.swapaxes(rightEdgesIn[0:undistortedWallStartRight - undistortCrop], 0, 1), axis=1)
-    
-    # crop and then flip
-    croppedLeftBottom = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1)
-    croppedRightBottom = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1)
+    croppedLeft = numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1)
+    croppedRight = numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1)
+
+    # adjust for camera tilt
+    croppedLeft[:halfWidth,:4] = 0
+    croppedLeft[:int(halfWidth / 2),:6] = 0
 
     # find the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeftTop, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftBottom, axis=1), dtype="int")
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRightTop, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightBottom, axis=1), dtype="int")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="int")
 
     return [rawHeightsLeft, rawHeightsRight]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
@@ -307,15 +306,13 @@ def mergeWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
-    global wallStartLeft, wallStartRight, wallEnd
+    global undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     try:
         # add borders to fix blob detection
-        # blobStart = 79
-        # blobEnd = 100 # fix???
-        rLeft = cv2.copyMakeBorder(rLeftIn[wallStartLeft:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gLeft = cv2.copyMakeBorder(gLeftIn[wallStartLeft:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        rRight = cv2.copyMakeBorder(rRightIn[wallStartRight:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gRight = cv2.copyMakeBorder(gRightIn[wallStartRight:wallEnd], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        rLeft = cv2.copyMakeBorder(rLeftIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gLeft = cv2.copyMakeBorder(gLeftIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        rRight = cv2.copyMakeBorder(rRightIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
+        gRight = cv2.copyMakeBorder(gRightIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
 
         blobDetector.empty()
         rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
