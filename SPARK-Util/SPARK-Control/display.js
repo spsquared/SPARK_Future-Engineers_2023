@@ -102,13 +102,18 @@ function display() {
         if (historyControls.drawRaw) drawRawLandmarks();
         drawDistances(data.distances, data.pos);
         drawCar(data.pos);
+    } else {
+        ctx0.clearRect(0, 0, 544, 308);
+        ctx1.clearRect(0, 0, 544, 308);
+        mctx.resetTransform();
+        mctx.clearRect(0, 0, 620, 620);
     }
 };
 function drawOverlays(data) {
     function draw(camera, ctx) {
         let wallStart = carConstants.wallStarts[camera] + 1;
         ctx.clearRect(0, 0, 544, 308);
-        ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.75;
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
@@ -124,7 +129,7 @@ function drawOverlays(data) {
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][i]);
+            ctx.fillRect(data.blobs[camera][0][i][0] - data.blobs[camera][0][i][1], wallStart, data.blobs[camera][0][i][1] * 2 + 1, data.heights[camera][i]);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.blobs[camera][1]) {
@@ -170,7 +175,7 @@ function drawRawLandmarks(rawLandmarks) {
     mctx.globalAlpha = 0.5;
     // draw wall things
     mctx.strokeStyle = 'rgb(180, 180, 180)';
-    for (let landmark of rawLandmarks[0]) {
+    for (let landmark of rawLandmarks[2]) {
         if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
@@ -251,6 +256,21 @@ historyControls.previousButton.onclick = (e) => {
     historyControls.slider.value = history.length - historyControls.index;
     display();
 };
+function downloadFrame() {
+    const render = document.createElement('canvas');
+    render.width = 1088;
+    render.height = 308;
+    const rctx = render.getContext('2d');
+    rctx.drawImage(display0Img, 0, 0);
+    rctx.drawImage(display1Img, 544, 0);
+    rctx.drawImage(overlay0, 0, 0);
+    rctx.drawImage(overlay1, 544, 0);
+    const a = document.createElement('a');
+    a.href = render.toDataURL('image/png');
+    let current = new Date();
+    a.download = `SPARK-img_${current.getHours()}-${current.getMinutes()}_${current.getMonth()}-${current.getDay()}-${current.getFullYear()}.png`;
+    a.click();
+};
 function exportSession() {
     const data = 'data:text/json;charset=UTF-8,' + encodeURIComponent(JSON.stringify(history));
     const a = document.createElement('a');
@@ -282,6 +302,7 @@ function importSession() {
         reader.readAsText(files[0]);
     };
 };
+document.getElementById('downloadFrame').onclick = downloadFrame;
 document.getElementById('importSession').onclick = importSession;
 document.getElementById('exportSession').onclick = exportSession;
 document.addEventListener('keydown', (e) => {

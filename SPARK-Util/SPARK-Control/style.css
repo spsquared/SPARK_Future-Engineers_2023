@@ -251,7 +251,7 @@ img {
 #sessionFileControls {
     text-align: center;
 }
-#importSession, #exportSession {
+#downloadFrame, #importSession, #exportSession {
     width: min(60px, calc(50% - 8px));
     height: unset;
     margin: 4px 4px;
@@ -259,6 +259,10 @@ img {
     background-position: center;
     background-repeat: no-repeat;
     background-size: 80% 80%;
+}
+#downloadFrame {
+    background-size: 100% 100%;
+    background-image: url(./assets/image.svg);
 }
 #importSession {
     background-image: url(./assets/import.svg);
