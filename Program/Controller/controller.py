@@ -33,26 +33,26 @@ def drive():
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(imgs[1]))
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg) # OOOOOOOOOOOOOOOF BORKEN
     leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
-    rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
-    # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
-    # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
-    leftWalls = converter.getWalls(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
-    rightWalls = converter.getWalls(rightHeights.copy(), rRightBlobs, gRightBlobs)
-    rBlobs = []
-    for blob in rLeftBlobs:
-        rBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
-    for blob in rRightBlobs:
-        rBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
-    gBlobs = []
-    for blob in gLeftBlobs:
-        gBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
-    for blob in gRightBlobs:
-        gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
+    rLeftContours, gLeftContours, rRightContours, gRightContours = converter.getContours(rLeftImg, gLeftImg, rRightImg, gRightImg)
+    # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftContours, gLeftContours)
+    # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightContours, gRightContours)
+    leftWalls = converter.getWalls(leftHeights.copy(), rLeftContours, gLeftContours)
+    rightWalls = converter.getWalls(rightHeights.copy(), rRightContours, gRightContours)
+    rContours = []
+    for contour in rLeftContours:
+        rContours.append(converter.getRawDistance(contour[0], leftHeights[contour[0]], -1))
+    for contour in rRightContours:
+        rContours.append(converter.getRawDistance(contour[0], rightHeights[contour[0]], 1))
+    gContours = []
+    for contour in gLeftContours:
+        gContours.append(converter.getRawDistance(contour[0], leftHeights[contour[0]], -1))
+    for contour in gRightContours:
+        gContours.append(converter.getRawDistance(contour[0], rightHeights[contour[0]], 1))
     corners, walls = converter.processWalls(leftWalls, rightWalls)
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
-    slam.slam(corners, walls, rBlobs, gBlobs)
-    steering, waypoints, nextPoint = getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs)
+    slam.slam(corners, walls, rContours, gContours)
+    steering, waypoints, nextPoint = getSteering(leftHeights, rightHeights, rLeftContours, gLeftContours, rRightContours, gRightContours)
     if useServer:
         data = {
             'images': [
@@ -66,8 +66,8 @@ def drive():
             'heights': [leftHeights.tolist(), rightHeights.tolist()],
             'pos': [slam.carX, slam.carY, slam.carAngle],
             'landmarks': slam.storedLandmarks,
-            'rawLandmarks': [rBlobs, gBlobs, walls],
-            'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
+            'rawLandmarks': [rContours, gContours, walls],
+            'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
             'walls': [corners, walls],
             'steering': steering,
             'waypoints': [waypoints, nextPoint],
@@ -79,21 +79,21 @@ def drive():
     # return read[0]
     io.drive.steer(steering)
 
-def getSteering(leftHeights, rightHeights, rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs):
-    global blobSizeThreshold
+def getSteering(leftHeights, rightHeights, rLeftContours, gLeftContours, rRightContours, gRightContours):
+    global contourSizeThreshold
     landmarks = [x for x in slam.storedLandmarks if x[FOUND]]
 
     if len(landmarks) == 4:
         steering = 0
 
-        blobSizeThreshold = 20
-        blobSteering = 1
-        for blob in rLeftBlobs + rRightBlobs:
-            if blob[1] > blobSizeThreshold:
-                steering += slam.carDirection * blob[1] * blobSteering
-        for blob in gLeftBlobs + gRightBlobs:
-            if blob[1] > blobSizeThreshold:
-                steering -= slam.carDirection * blob[1] * blobSteering
+        contourSizeThreshold = 20
+        contourSteering = 1
+        for contour in rLeftContours + rRightContours:
+            if contour[1] > contourSizeThreshold:
+                steering += slam.carDirection * contour[1] * contourSteering
+        for contour in gLeftContours + gRightContours:
+            if contour[1] > contourSizeThreshold:
+                steering -= slam.carDirection * contour[1] * contourSteering
         
         frontWallThreshold = 15
         sideWallThreshold = 80
