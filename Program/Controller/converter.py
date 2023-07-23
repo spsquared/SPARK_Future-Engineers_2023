@@ -37,20 +37,10 @@ ANGLE = 3
 LEFT = 0
 RIGHT = 1
 
-# create blob detectors
-__params = cv2.SimpleBlobDetector_Params()
-__params.filterByArea = True
-__params.minArea = 100
-__params.maxArea = 128941274721
-__params.filterByCircularity = True
-__params.minCircularity = 0.3
-__params.filterByConvexity = True
-__params.minConvexity = 0.7
-# __params.filterByInertia = True
-# __params.minInertiaRatio = 0
-# __params.maxInertiaRatio = 1
-blobDetector = cv2.SimpleBlobDetector_create(__params)
-blobSizeConstant = 0.6
+# contour constants
+contourSizeConstant = 0.6
+
+minContourSize = 100
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -102,7 +92,7 @@ wallStartLeft = 164
 wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 160
-wallEnd = imageHeight
+wallEnd = int(imageHeight * 5 / 6)
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -228,20 +218,16 @@ def getRawDistance(imgx: int, height: int, dir: int):
             y = cameraOffsetY + rightImgSinAngles[imgx] * dist
         return [x, y, math.sqrt(x**2 + y**2), math.atan2(y, x)]
 
-def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
-    for blob in rBlobs + gBlobs:
-        for i in range(blob[0] - blob[1], blob[0] + blob[1] + 1):
+def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
+    for contour in rContours + gContours:
+        for i in range(contour[0] - contour[1], contour[0] + contour[1] + 1):
             if i >= 0 and i < imageWidth:
                 heights[i] = 0
     
-    img = numpy.uint8(numpy.zeros((wallEnd - undistortCrop, imageWidth)))
+    img = numpy.zeros((wallEnd - undistortCrop, imageWidth), dtype="uint8")
     
-    indices = numpy.dstack((heights, range(imageWidth)))
-    try:
-        img[tuple(numpy.transpose(indices))] = 255
-    except Exception as err:
-        print(heights)
-
+    indices = numpy.dstack((heights, numpy.arange(imageWidth)))
+    img[tuple(numpy.transpose(indices))] = 255
 
     # Apply HoughLinesP method to 
     # to directly obtain line end points
@@ -249,8 +235,8 @@ def getWalls(heights: numpy.ndarray, rBlobs: list, gBlobs: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=20, # Min number of votes for valid line
-                minLineLength=5, # Min allowed length of line
+                threshold=30, # Min number of votes for valid line
+                minLineLength=30, # Min allowed length of line
                 maxLineGap=30 # Max allowed gap between line for joining them
                 ))
     def lineSort(line):
@@ -305,41 +291,29 @@ def processWalls(leftLines, rightLines):
     rightCorners, rightWalls = processWall(rightLines, 1)
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
-def getBlobs(rLeftIn: numpy.ndarray, gLeftIn: numpy.ndarray, rRightIn: numpy.ndarray, gRightIn: numpy.ndarray):
-    global undistortedWallStartLeft, undistortedWallStartRight, wallEnd
-    try:
-        # add borders to fix blob detection
-        rLeft = cv2.copyMakeBorder(rLeftIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gLeft = cv2.copyMakeBorder(gLeftIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        rRight = cv2.copyMakeBorder(rRightIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-        gRight = cv2.copyMakeBorder(gRightIn, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0])
-
-        blobDetector.empty()
-        rLeftBlobs = processBlobs(blobDetector.detect(255 - rLeft))
-        blobDetector.empty()
-        gLeftBlobs = processBlobs(blobDetector.detect(255 - gLeft))
-        blobDetector.empty()
-        rRightBlobs = processBlobs(blobDetector.detect(255 - rRight))
-        blobDetector.empty()
-        gRightBlobs = processBlobs(blobDetector.detect(255 - gRight))
-
-        return [rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs]
-
-    except Exception as err:
-        traceback.print_exc()
-        io.error()
-        server.emit('programError', str(err))
-
-def processBlobs(blobs: list):
-    newBlobs = []
-    for blob in blobs:
-        newBlobs.append([math.floor(blob.pt[0]), math.ceil(blob.size * blobSizeConstant)])
+def getContours(imgIn: numpy.ndarray):
+    edges = cv2.Canny(imgIn, 30, 200)
+    contours, hierarchy = cv2.findContours(edges, 
+        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
-    return newBlobs
+    processedContours = []
+    for contour in contours:
+        size = cv2.contourArea(contour)
+        if size > minContourSize:
+            moment = cv2.moments(contour)
+            x = int(moment["m10"] / moment["m00"])
+            y = int(moment["m01"] / moment["m00"])
+            processedContours.append([x, y, math.ceil(math.sqrt(size) * contourSizeConstant)])
+    return processedContours
 
-def mergeBlobs(leftBlobs: list, rightBlobs: list):
+def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):
+    contours = []
+    for contour in leftContours:
+        contours.append(getRawDistance(contour[0], leftHeights[contour[0]], -1))
+    for contour in rightContours:
+        contours.append(getRawDistance(contour[0], rightHeights[contour[0]], 1))
     # keep angle and distance instead of x and size
-    return []
+    return contours
 
 def setColors(data: list, sendServer: bool):
     global redMax, redMin, greenMax, greenMin

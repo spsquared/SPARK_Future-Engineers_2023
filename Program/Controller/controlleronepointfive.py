@@ -30,6 +30,7 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
+# def drive(img):
     totalStart = time.perf_counter()
     start = time.perf_counter()
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
@@ -41,27 +42,24 @@ def drive():
     print("filter + undistort: ", time.perf_counter() - start)
     start = time.perf_counter()
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
+
     leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
-    rLeftBlobs, gLeftBlobs, rRightBlobs, gRightBlobs = converter.getBlobs(rLeftImg, gLeftImg, rRightImg, gRightImg)
-    # leftWalls = converter.getWallLandmarks(leftCoordinates, rLeftBlobs, gLeftBlobs)
-    # rightWalls = converter.getWallLandmarks(rightCoordinates, rRightBlobs, gRightBlobs)
-    leftWalls = converter.getWalls(leftHeights.copy(), rLeftBlobs, gLeftBlobs)
-    rightWalls = converter.getWalls(rightHeights.copy(), rRightBlobs, gRightBlobs)
-    rBlobs = []
-    for blob in rLeftBlobs:
-        rBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
-    for blob in rRightBlobs:
-        rBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
-    gBlobs = []
-    for blob in gLeftBlobs:
-        gBlobs.append(converter.getRawDistance(blob[0], leftHeights[blob[0]], -1))
-    for blob in gRightBlobs:
-        gBlobs.append(converter.getRawDistance(blob[0], rightHeights[blob[0]], 1))
+    rLeftContours = converter.getContours(rLeftImg)
+    gLeftContours = converter.getContours(gLeftImg)
+    rRightContours = converter.getContours(rRightImg)
+    gRightContours = converter.getContours(gRightImg)
+
+    leftWalls = converter.getWalls(leftHeights.copy(), rLeftContours, gLeftContours)
+    rightWalls = converter.getWalls(rightHeights.copy(), rRightContours, gRightContours)
+
+    rContours = converter.mergeContours(rLeftContours, rRightContours, leftHeights, rightHeights)
+    gContours = converter.mergeContours(gLeftContours, gRightContours, leftHeights, rightHeights)
+
     corners, walls = converter.processWalls(leftWalls, rightWalls)
     print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
 
-    slam.carAngle = io.imu.angle()
+    # slam.carAngle = io.imu.angle()
     # xWalls = 0
     # xWallsCount = 0
     # yWalls = 0
@@ -157,23 +155,27 @@ def drive():
         
         processedWalls.append([wallType, distance])
         if wallType == CENTER:
+            print(distance)
             if distance < 100:
                 cornerSection = True
     
+    if cornerSection:
+        print("a")
+
     steering = 0
 
-    blobDistanceThreshold = 80
-    blobSteering = 10
+    contourDistanceThreshold = 80
+    contourSteering = 10
 
     turnDistance = 70
 
-    for blob in rBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] > -15 and blob[1] > 0:
-            steering += slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
+    for contour in rContours:
+        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 10:
+            steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
             turnDistance = 70 + 30 * slam.carDirection
-    for blob in gBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] < 15 and blob[1] > 0:
-            steering += -slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
+    for contour in gContours:
+        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 10:
+            steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
             turnDistance = 70 - 30 * slam.carDirection
 
     for wall in processedWalls:
@@ -186,14 +188,14 @@ def drive():
         distance = wall[1]
         
         if wallType == CENTER:
-            if distance < turnDistance:
-                steering += 100 * slam.carDirection
+            if cornerSection and distance < turnDistance:
+                steering += 200 * slam.carDirection
         elif wallType == LEFT:
             if distance < 40:
-                steering += (80 - distance)
+                steering += (100 - distance)
         else:
             if distance < 40:
-                steering += -(80 - distance)
+                steering += -(100 - distance)
 
     print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
@@ -211,18 +213,25 @@ def drive():
             'heights': [leftHeights.tolist(), rightHeights.tolist()],
             'pos': [slam.carX, slam.carY, slam.carAngle],
             'landmarks': slam.storedLandmarks,
-            'rawLandmarks': [rBlobs, gBlobs, walls],
-            'blobs': [[rLeftBlobs, gLeftBlobs], [rRightBlobs, gRightBlobs]],
+            'rawLandmarks': [rContours, gContours, walls],
+            'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
             'corners': corners,
             'steering': steering,
             'waypoints': [[], []],
         }
         server.emit('data', data)
     print("sendserver: ", time.perf_counter() - start)
-
-    print("total: ", time.perf_counter() - totalStart)
     
     io.drive.steer(steering)
+
+    print("total: ", time.perf_counter() - totalStart)
+    # for points in leftWalls:
+    #     x1,y1,x2,y2=points
+    #     cv2.line(leftEdgesImg,(x1,y1),(x2,y2),125,2)
+    
+    # print(leftWalls)
+
+    # return leftEdgesImg
 
 def getDistance(a, b):
     try:
