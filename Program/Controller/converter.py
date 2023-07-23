@@ -147,6 +147,8 @@ def generateDistanceTable():
     distanceTable[LEFT] = numpy.array(distanceTable[LEFT])
     distanceTable[RIGHT] = numpy.array(distanceTable[RIGHT])
 # generateDistanceTable()
+# ADFDSAFSAFSADF DSAFSA FSAD FSAF SAF DSAF cv2.undistortPoints IS BROKEN !1!!! !! !! ! BUG BORK BUH FIXXXXXX NOWWWWWWWWWWWWW!!!!!!!!!!!!!!!!!!!
+# and cv2.fisheye.undistortPoints just crashes and returns [[[-1000000, -1000000]]]
 
 leftImgSinAngles = []
 leftImgCosAngles = []

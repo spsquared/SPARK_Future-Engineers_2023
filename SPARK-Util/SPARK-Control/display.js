@@ -67,8 +67,9 @@ function addData(data) {
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
-        rawLandmarks: data.rawLandmarks.map((([l, h, c]) => [l[0], l[1]])),
+        rawLandmarks: data.rawLandmarks.map((([l, h, c]) => [l[0], -l[1]])),
         blobs: data.blobs,
+        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]])],
         steering: data.steering,
         waypoints: data.waypoints,
         fps: fps,
@@ -99,8 +100,9 @@ function display() {
         mctx.scale(2, 2);
         mctx.globalAlpha = 1;
         drawLandmarks(data.landmarks);
-        if (historyControls.drawRaw) drawRawLandmarks();
+        if (historyControls.drawRaw) drawRawLandmarks(data.rawLandmarks, data.pos);
         drawDistances(data.distances, data.pos);
+        drawWalls(data.walls, data.pos);
         drawCar(data.pos);
     } else {
         ctx0.clearRect(0, 0, 544, 308);
@@ -109,38 +111,42 @@ function display() {
         mctx.clearRect(0, 0, 620, 620);
     }
 };
+// debug displays
+// screen-space overlays
 function drawOverlays(data) {
     function draw(camera, ctx) {
         let wallStart = carConstants.wallStarts[camera] + 1;
         ctx.clearRect(0, 0, 544, 308);
-        ctx.globalAlpha = 0.75;
+        ctx.globalAlpha = 1;
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
         }
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][i])
+            ctx.fillRect(data.blobs[camera][0][i][0], wallStart, 1, data.heights[camera][data.blobs[camera][0][i][0]])
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.blobs[camera][1]) {
-            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][i])
+            ctx.fillRect(data.blobs[camera][1][i][0], wallStart, 1, data.heights[camera][data.blobs[camera][1][i][0]])
         }
-        ctx.globalAlpha = 0.2;
+        ctx.globalAlpha = 0.4;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.blobs[camera][0]) {
-            ctx.fillRect(data.blobs[camera][0][i][0] - data.blobs[camera][0][i][1], wallStart, data.blobs[camera][0][i][1] * 2 + 1, data.heights[camera][i]);
+            ctx.fillRect(data.blobs[camera][0][i][0] - data.blobs[camera][0][i][1], wallStart, data.blobs[camera][0][i][1] * 2 + 1, data.heights[camera][data.blobs[camera][0][i][0]]);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.blobs[camera][1]) {
-            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][i]);
+            ctx.fillRect(data.blobs[camera][1][i][0] - data.blobs[camera][1][i][1], wallStart, data.blobs[camera][1][i][1] * 2 + 1, data.heights[camera][data.blobs[camera][1][i][0]]);
         }
     };
     draw(0, ctx0);
     draw(1, ctx1);
 };
+// SLAM landmarks + car - absolute positioning
 function drawLandmarks(landmarks) {
     // draw outer walls
+    mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(80, 80, 80)';
     mctx.lineWidth = 10;
@@ -171,38 +177,67 @@ function drawLandmarks(landmarks) {
         if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
 };
-function drawRawLandmarks(rawLandmarks) {
-    mctx.globalAlpha = 0.5;
+function drawCar(pos, steering) {
+    mctx.save();
+    mctx.translate(pos[0], pos[1]);
+    mctx.rotate(pos[3]);
+    mctx.globalAlpha = 1;
+    mctx.fillStyle = 'rgb(50, 50, 50)';
+    mctx.fillRect(-6.65, -12, 13.3, 25);
+    // oops i calculated each wheel's steering angle
+    mctx.restore();
+};
+// raw data - relative positioning
+function drawRawLandmarks(rawLandmarks, pos) {
+    mctx.save();
+    mctx.translate(pos[0], pos[1]);
+    mctx.rotate(pos[3]);
+    mctx.globalAlpha = 1;
     // draw wall things
     mctx.strokeStyle = 'rgb(0, 0, 255)';
     for (let landmark of rawLandmarks[2]) {
         mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
-    mctx.fillStyle = 'rgb(238, 39, 55)';
+    mctx.fillStyle = 'rgb(255, 0, 0)';
     for (let landmark of rawLandmarks[0]) {
         mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
     // draw green pillars
-    mctx.fillStyle = 'rgb(68, 214, 44)';
+    mctx.fillStyle = 'rgb(0, 255, 0)';
     for (let landmark of rawLandmarks[1]) {
         mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
+    mctx.restore();
 };
-function drawCar(pos, steering) {
+function drawWalls(walls, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[3]);
-    mctx.fillStyle = 'rgb(50, 50, 50)';
-    mctx.fillRect(-12, -6.65, 24, 13.3);
+    mctx.globalAlpha = 1;
+    mctx.setLineDash([]);
+    mctx.lineWidth = 2;
+    ctx.beginPath();
+    mctx.strokeStyle = 'rgb(255, 180, 0)';
+    for (let wall of walls[1]) {
+        mctx.moveTo(wall[0], wall[1]);
+        mctx.lineTo(wall[2], wall[3]);
+    }
+    ctx.stroke();
+    mctx.fillStyle = 'rgb(255, 255, 0)';
+    for (let corner of walls[0]) {
+        mctx.fillRect(corner[0] - 1, corner[1] - 1, 2, 2);
+    }
     mctx.restore();
 };
 function drawDistances(distances, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[3]);
-    mctx.globalAlpha = 1;
+    mctx.globalAlpha = 0.5;
+    mctx.strokeStyle = 'rgb(255, 255, 255)';
     mctx.fillStyle = 'rgb(255, 255, 255)';
+    mctx.lineWidth = 1;
     mctx.beginPath();
     for (let dist of distances) {
         mctx.fillRect(Math.round(dist[0] - 1), Math.round(dist[1] - 1), 3, 3);
