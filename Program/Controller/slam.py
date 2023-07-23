@@ -20,7 +20,6 @@ INNER_WALL = 1
 RED_PILLAR = 2
 GREEN_PILLAR = 3
 
-# make numpy/cupy matrix so we can poke with GPU for sPEEEEEEEEEEED?
 storedLandmarks = [
     [0, 0, OUTER_WALL, True, 0], # Outer wall corners
     [300, 0, OUTER_WALL, True, 0],

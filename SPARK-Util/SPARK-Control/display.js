@@ -66,8 +66,8 @@ function addData(data) {
         distances: data.distances,
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
-        landmarks: data.landmarks.map((([x, y, e]) => [x, 300 - y, e])),
-        rawLandmarks: data.rawLandmarks.map((([x, y, e]) => [x, 300 - y, e])),
+        landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
+        rawLandmarks: data.rawLandmarks.map((([l, h, c]) => [l[0], l[1]])),
         blobs: data.blobs,
         steering: data.steering,
         waypoints: data.waypoints,
@@ -174,26 +174,19 @@ function drawLandmarks(landmarks) {
 function drawRawLandmarks(rawLandmarks) {
     mctx.globalAlpha = 0.5;
     // draw wall things
-    mctx.strokeStyle = 'rgb(180, 180, 180)';
+    mctx.strokeStyle = 'rgb(0, 0, 255)';
     for (let landmark of rawLandmarks[2]) {
-        if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
+        mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
     mctx.fillStyle = 'rgb(238, 39, 55)';
     for (let landmark of rawLandmarks[0]) {
-        if (landmark[2]) mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
+        mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
     // draw green pillars
     mctx.fillStyle = 'rgb(68, 214, 44)';
     for (let landmark of rawLandmarks[1]) {
-        if (landmark[2]) mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
-    }
-    // draw landmark POI "dots"
-    mctx.fillStyle = 'rgb(255, 255, 255)';
-    for (let i in rawLandmarks) {
-        for (let landmark of rawLandmarks[i]) {
-            if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
-        }
+        mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
 };
 function drawCar(pos, steering) {

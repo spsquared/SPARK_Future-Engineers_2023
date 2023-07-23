@@ -102,6 +102,9 @@ def main():
             global running
             running = False
             print('stopped by emergency stop button')
+            io.close()
+            server.close()
+            exit()
         server.on('stop', stop)
         while running:
             msg = input()
