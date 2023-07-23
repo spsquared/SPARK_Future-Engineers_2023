@@ -115,13 +115,13 @@ def drive():
 
     steering = 0
 
-    blobDistanceThreshold = 30
-    blobSteering = 1
+    blobDistanceThreshold = 80
+    blobSteering = 10
     for blob in rBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] < 15:
+        if blob[2] < blobDistanceThreshold and blob[0] > -15:
             steering += slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
     for blob in gBlobs:
-        if blob[2] < blobDistanceThreshold and blob[0] > -15:
+        if blob[2] < blobDistanceThreshold and blob[0] < 15:
             steering += -slam.carDirection * (blobDistanceThreshold - blob[2]) * blobSteering
 
     for wall in walls:
@@ -139,7 +139,7 @@ def drive():
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
 
-            if abs(slope) < 1:
+            if abs(slope) < 0.2:
                 wallType = CENTER
             else:
                 if transformedCorner1[X] > 0:
@@ -157,8 +157,8 @@ def drive():
             wallType = CENTER
         
         if wallType == CENTER:
-            if distance < 80:
-                steering += (80 - distance) * slam.carDirection
+            if distance < 120:
+                steering += (120 - distance) * 2 * slam.carDirection
         elif wallType == LEFT:
             if distance < 40:
                 steering += (80 - distance)
@@ -174,6 +174,7 @@ def drive():
             'images': [
                 base64.b64encode(cv2.imencode('.png', cv2.merge((leftEdgesImg, gLeftImg, rLeftImg)))[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', cv2.merge((rightEdgesImg, gRightImg, rRightImg)))[1]).decode(),
+                1,
                 1,
                 1
             ],

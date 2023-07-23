@@ -61,7 +61,8 @@ def drive():
                 base64.b64encode(cv2.imencode('.png', cv2.merge((leftEdgesImg, gLeftImg, rLeftImg)))[1]).decode(),
                 base64.b64encode(cv2.imencode('.png', cv2.merge((rightEdgesImg, gRightImg, rRightImg)))[1]).decode(),
                 1,
-                1
+                1,
+                0
             ],
             'distances': [],
             'heights': [leftHeights.tolist(), rightHeights.tolist()],

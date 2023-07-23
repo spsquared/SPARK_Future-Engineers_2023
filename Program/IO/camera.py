@@ -82,6 +82,7 @@ def capture(filter: bool, sendServer: bool):
                     base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                     base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
                     1,
+                    0,
                     0
                 ]
                 server.emit('capture', encoded)
@@ -93,6 +94,7 @@ def capture(filter: bool, sendServer: bool):
                 encoded = [
                     base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
                     base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
+                    0,
                     0,
                     0
                 ]
