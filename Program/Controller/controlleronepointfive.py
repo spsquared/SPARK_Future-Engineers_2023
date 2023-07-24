@@ -22,15 +22,12 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
-turnPillar = 0
-
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer
     if sendServer != None: useServer = sendServer
 
 def drive():
-    global turnPillar
 # def drive(img):
     totalStart = time.perf_counter()
     start = time.perf_counter()
@@ -91,7 +88,7 @@ def drive():
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(-slope, 1)
 
-            if (abs(slope) < 0.75):
+            if abs(slope) < 0.75 and wall[0][Y] - wall[0][X] * slope > 0:
                 wallType = CENTER
             else:
                 if wall[0][X] - wall[0][Y] / slope < 0:
@@ -168,24 +165,21 @@ def drive():
     waypointX = 0
     waypointY = 0
     
-    if centerWalls != 0 and centerWallDistance < 130:
+    if centerWalls != 0 and centerWallDistance < 110:
         print("Corner SECTION")
-        if turnPillar == 0:
-            if pillar[0] != None:
-                turnPillar = pillar[4]
-        if turnPillar == 0:
+        if pillar[0] == None:
             if centerWallDistance < 100:
                 steering = 100
-        elif turnPillar == RED_PILLAR:
-            if centerWallDistance < 130:
+        elif pillar[4] == RED_PILLAR:
+            # if centerWallDistance < 120:
+            if pillar[1] < 50:
                 steering = 100
-        elif turnPillar == GREEN_PILLAR:
-            if centerWallDistance < 80:
+        elif pillar[4] == GREEN_PILLAR:
+            if pillar[1] < 20:
                 steering = 100
         if steering == 0:
             steering = -carAngle * 20
     else:
-        turnPillar = 0
         # if leftWalls != 0 and rightWalls != 0:
         #     total = leftWallDistance + rightWallDistance
         #     if total > 80 / math.cos(carAngle):
