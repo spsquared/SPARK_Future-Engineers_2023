@@ -207,8 +207,7 @@ canvas {
     opacity: 0;
 }
 #slideoutBody {
-    min-height: calc(100% - 16px);
-    max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
+    height: calc(100% - 16px);
     padding: 8px 8px;
     margin-right: -4px;
     border-right: 4px solid black;
@@ -366,6 +365,8 @@ canvas {
         --tabImage: url(./assets/arrow-left.svg);
     }
     #slideoutBody {
+        height: unset;
+        max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
         border-bottom: 4px solid black;
         background-color: lightgray;
     }
