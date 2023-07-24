@@ -169,7 +169,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:4] = 0
-    croppedLeft[:int(halfWidth / 2),:6] = 0
+    croppedLeft[:int(halfWidth / 2),:7] = 0
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
