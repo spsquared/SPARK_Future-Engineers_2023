@@ -78,7 +78,7 @@ function addData(data) {
         contours: data.contours,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: data.steering,
-        waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][2]], data.waypoints[2]],
+        waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
         rawDump: data.raw
     });
     if (data.images[3] == 0) sounds.ding();
