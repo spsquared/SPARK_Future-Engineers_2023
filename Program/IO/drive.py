@@ -1,22 +1,41 @@
+from IO import io
+from Util import server
 from adafruit_servokit import ServoKit
 import busio
 import board
+from threading import Thread
+import time
+import traceback
 
 # drive module that does driving stuff
 
 __pwm = ServoKit(channels = 16, i2c = busio.I2C(board.SCL_1, board.SDA_1))
 
 __currThr = 0
+__targetStr = 0
 __currStr = 0
 __throttleFwd = 0.08
 __throttleRev = -0.15
 __steeringCenter = 90
 __steeringRange = 40
 __steeringTrim = 10
+__smoothFactor = 0.1
+__thread = None
+__running = True
+def __update():
+    global __currStr, __targetStr, __steeringCenter, __steeringRange, __steeringTrim, __pwm, __running, __smoothFactor
+    try:
+        while __running:
+            __currStr = (1 - __smoothFactor) * __currStr + __smoothFactor * __targetStr
+            __pwm.servo[1].angle = (__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim
+            time.sleep(0.05)
+    except Exception as err:
+        traceback.print_exc()
+        io.error()
+        server.emit('programError', str(err))
 def steer(str: int):
-    global __pwm, __currStr, __steeringCenter, __steeringRange, __steeringTrim
-    __currStr = max(-100, min(str, 100))
-    __pwm.servo[1].angle = (__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim
+    global __targetStr
+    __targetStr = max(-100, min(str, 100))
 def throttle(thr: int):
     global __pwm, __currThr, __throttleFwd, __throttleRev
     __currThr = max(-100, min(thr, 100))
@@ -26,10 +45,24 @@ def trim(trim: int):
     global __steeringTrim, __pwm
     __steeringTrim = trim
     steer(__currStr)
+def smoothFactor(smooth: float):
+    global __smoothFactor
+    __smoothFactor = max(0, min(smooth, 1))
+
+def currentSteering():
+    global __currStr
+    return __currStr
+def currentSmoothFactor():
+    global __smoothFactor
+    return __smoothFactor
 
 def stop():
     steer(0)
     throttle(0)
+    __running = False
+    __thread.join()
 
+__thread = Thread(target = __update)
+__thread.start()
 steer(0)
 throttle(0)

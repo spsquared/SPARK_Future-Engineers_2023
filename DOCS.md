@@ -26,7 +26,7 @@ All physical IO for the vehicle is handled by the `io` module, found in `/Progra
 | Function        | Description                                                                                                               | Returns |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `steer(str)`    | Sets the target steering value, where 0 is straight, and positive is right.<br>`str: int [-100, 100]`                     | Nothing |
-| `throttle(thr)` | Sets the target throttle value, where 0 is stopped, and positive is forward.<br>`thr: int [-100, 100]`                    | Nothing |
+| `throttle(thr)` | Sets the throttle value, where 0 is stopped, and positive is forward.<br>`thr: int [-100, 100]`                           | Nothing |
 | `trim(trim)`    | Sets the offset for the steering servo in degrees, where 0 is no offset and positive is right.<br>`trim: int (-inf, inf)` | Nothing |
 | `close()`       | Closes the `drive` module. Sets steering and throttle to 0.                                                               | Nothing |
 
