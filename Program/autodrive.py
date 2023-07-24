@@ -48,6 +48,7 @@ def main():
             server.open()
         server.on('stop', stop)
         io.drive.throttle(80)
+        io.imu.setAngle(0)
         while running:
             controller.drive()
             # image = io.camera.read()

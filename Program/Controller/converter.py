@@ -9,9 +9,9 @@ import time
 # converts images into data usable for SLAM and driving
 
 # colors
-rm = redMin = (0, 80, 75)
+rm = redMin = (0, 80, 70)
 rM = redMax = (55, 255, 255)
-gm = greenMin = (30, 80, 45)
+gm = greenMin = (35, 80, 45)
 gM = greenMax = (110, 255, 255)
 
 # camera constants
@@ -91,7 +91,7 @@ wallStartLeft = 164
 wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 160
-wallEnd = int(imageHeight * 5 / 6)
+wallEnd = imageHeight
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
