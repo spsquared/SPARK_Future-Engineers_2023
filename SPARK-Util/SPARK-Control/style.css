@@ -9,6 +9,9 @@ img {
     -webkit-user-drag: none;
     image-rendering: pixelated;
 }
+canvas {
+    image-rendering: crisp-edges;
+}
 
 *:disabled {
     cursor: not-allowed;
