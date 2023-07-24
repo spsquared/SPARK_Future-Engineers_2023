@@ -69,7 +69,7 @@ function addData(data) {
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
         rawLandmarks: data.rawLandmarks.map(arr => arr.map(([l, h, c]) => [l[0], -l[1]])),
         contours: data.contours,
-        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]])],
+        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: data.steering,
         waypoints: data.waypoints,
         fps: fps,
@@ -101,8 +101,10 @@ function display() {
         mctx.globalAlpha = 1;
         drawLandmarks(data.landmarks);
         if (historyControls.drawRaw) drawRawLandmarks(data.rawLandmarks, data.pos);
-        drawDistances(data.distances, data.pos);
-        drawWalls(data.walls, data.pos);
+        if (historyControls.drawDistances) {
+            drawDistances(data.distances, data.pos);
+            drawWalls(data.walls, data.pos);
+        }
         drawCar(data.pos);
     } else {
         ctx0.clearRect(0, 0, 544, 308);
@@ -220,9 +222,17 @@ function drawWalls(walls, pos) {
     mctx.lineWidth = 1;
     mctx.beginPath();
     mctx.strokeStyle = 'rgb(255, 180, 0)';
-    for (let wall of walls[1]) {
-        mctx.moveTo(wall[0], wall[1]);
-        mctx.lineTo(wall[2], wall[3]);
+    mctx.font = '12px monospace';
+    mctx.fillStyle = 'rgb(255, 255, 255';
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    let labels = ['?', 'L', 'C', 'R'];
+    for (let i in walls[1]) {
+        mctx.moveTo(walls[1][i][0], walls[1][i][1]);
+        mctx.lineTo(walls[1][i][2], walls[1][i][3]);
+        if (walls[2][i] != undefined) {
+            mctx.fillText(labels[walls[2][i] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
+        }
     }
     mctx.stroke();
     mctx.fillStyle = 'rgb(255, 255, 0)';

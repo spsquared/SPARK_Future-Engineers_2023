@@ -38,11 +38,14 @@ def calibrate():
     sum = 0
     for i in anglediffs:
         sum += i
+    newtrim = sum / -200
     print('[!] CALIBRATION COMPLETE - TRIM BELOW [!]')
     print('')
-    print(sum / -200)
+    print(newtrim)
     print('')
     print('Place this number in "/IO/imu.py" in "__trim"')
+    __trim = newtrim
+    return newtrim
 
 # gyro stuff
 def angle():
