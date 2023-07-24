@@ -27,9 +27,10 @@ Below is a detailed step-by-step guide to recreate SPARK g2.
 
 ## Chassis Assembly
 
-guide through 3d printing and assembling (oof), ensure that steering assembly instructions are clear. note that part of the motor mount has to be grinded away and the 3d modeled rear axle assembly cannot be printed. (buy the parts off of schumacher's website!!!) 3d printed parts are in the `/3D Models/` folder and are in the orientation they should be printed in but also include Onshape document
+guide through 3d printing and assembling (oof), ensure that steering assembly instructions are clear. note that part of the motor mount has to be grinded away for some versions of the drive motor and the 3d modeled rear axle assembly cannot be printed. (buy the parts off of schumacher's website!!!) 3d printed parts are in the `/3D Models/` folder and are in the orientation they should be printed in but also include Onshape document
 
-dont forget to rotary tool parts of some of the stock pieces away
+pinout sheet:
+https://docs.google.com/spreadsheets/d/1WAe1DtCbWhLoC4L6yzJYvS99iHG4yAiWakqxsy8os7s/edit?usp=sharing
 
 ## Jetson NANO Setup
 
