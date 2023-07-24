@@ -141,6 +141,7 @@ img {
     width: min(81px, calc(var(--min-sidebar-width) - 20px));
     margin: 8px;
     margin-bottom: 0px;
+    transform: skewY(-3deg);
 }
 #banner {
     display: inline-block;

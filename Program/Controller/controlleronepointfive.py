@@ -59,7 +59,7 @@ def drive():
     print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
 
-    # slam.carAngle = io.imu.angle()
+    slam.carAngle = io.imu.angle()
     # xWalls = 0
     # xWallsCount = 0
     # yWalls = 0
@@ -121,9 +121,11 @@ def drive():
 
     cornerSection = False
 
+    horizontalCenterWall = abs(slam.carAngle % math.pi - math.pi / 2) < math.pi / 4
+
     for wall in walls:
-        transformedCorner1 = wall[0]
-        transformedCorner2 = wall[1]
+        transformedCorner1 = transformCorner(wall[0])
+        transformedCorner2 = transformCorner(wall[1])
 
         LEFT = 0
         CENTER = 1
@@ -136,7 +138,7 @@ def drive():
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
 
-            if abs(slope) < 0.2:
+            if (abs(slope) < 1) == horizontalCenterWall:
                 wallType = CENTER
             else:
                 if transformedCorner1[X] > 0:
@@ -144,16 +146,52 @@ def drive():
                 else:
                     wallType = LEFT
         elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
+            # vertical wall
             distance = abs(transformedCorner1[X])
-            if transformedCorner1[X] > 0:
-                wallType = RIGHT
+            if not horizontalCenterWall:
+                wallType = CENTER
             else:
-                wallType = LEFT
+                if transformedCorner1[X] > 0:
+                    wallType = RIGHT
+                else:
+                    wallType = LEFT
         else:
+            #horizontal wall
             distance = abs(transformedCorner1[Y])
-            wallType = CENTER
+            if horizontalCenterWall:
+                wallType = CENTER
+            else:
+                if transformedCorner1[X] > 0:
+                    wallType = RIGHT
+                else:
+                    wallType = LEFT
         
-        processedWalls.append([wallType, distance])
+        if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
+            relativeAngle = math.atan2((wall[0][Y] - wall[1][Y]) / (wall[0][X] - wall[1][X]), 1)
+        elif wall[0][Y] - wall[1][Y] != 0:
+            # vertical wall
+            relativeAngle = math.pi / 4
+            distance = abs(transformedCorner1[X])
+            if not horizontalCenterWall:
+                wallType = CENTER
+            else:
+                if transformedCorner1[X] > 0:
+                    wallType = RIGHT
+                else:
+                    wallType = LEFT
+        else:
+            #horizontal wall
+            relativeAngle = 0
+            distance = abs(transformedCorner1[Y])
+            if horizontalCenterWall:
+                wallType = CENTER
+            else:
+                if transformedCorner1[X] > 0:
+                    wallType = RIGHT
+                else:
+                    wallType = LEFT
+        
+        processedWalls.append([wallType, distance, relativeAngle])
         if wallType == CENTER:
             print(distance)
             if distance < 100:
@@ -170,13 +208,13 @@ def drive():
     turnDistance = 60
 
     for contour in rContours:
-        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 10:
-            steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
+        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 5:
+            steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] + 10) * contourSteering
             if contour[1] * slam.carDirection > 0:
                 turnDistance = 60 + 20 * slam.carDirection
     for contour in gContours:
-        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 10:
-            steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * contourSteering
+        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 5:
+            steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] - 10) * contourSteering
             if contour[1] * slam.carDirection > 0:
                 turnDistance = 60 - 20 * slam.carDirection
 
@@ -193,11 +231,11 @@ def drive():
             if cornerSection and distance < turnDistance:
                 steering += 200 * slam.carDirection
         elif wallType == LEFT:
-            if distance < 20:
-                steering += (100 - distance)
+            if distance < 40 and relativeAngle > 0:
+                steering += 100 * relativeAngle / 10 * (40 - distance) / 20
         else:
-            if distance < 20:
-                steering += -(100 - distance)
+            if distance < 40 and relativeAngle < 0:
+                steering += 100 * relativeAngle / 10 * (40 - distance) / 20
 
     print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
@@ -240,3 +278,10 @@ def getDistance(a, b):
         return math.sqrt(math.pow(a[X] - b[X], 2) + math.pow(a[Y] - b[Y], 2))
     except Exception as e:
         print(e, a, b)
+
+    
+def transformCorner(corner):
+    corner = list(corner)
+    corner[X] = math.sin(slam.carAngle) * corner[X] + math.cos(slam.carAngle) * corner[Y]
+    corner[Y] = math.cos(slam.carAngle) * corner[X] + math.sin(slam.carAngle) * corner[Y]
+    return corner
