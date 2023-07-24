@@ -22,7 +22,7 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
-
+turnPillar = 0
 
 useServer = True
 def setMode(sendServer: bool = None):
@@ -30,6 +30,7 @@ def setMode(sendServer: bool = None):
     if sendServer != None: useServer = sendServer
 
 def drive():
+    global turnPillar
 # def drive(img):
     totalStart = time.perf_counter()
     start = time.perf_counter()
@@ -76,8 +77,6 @@ def drive():
 
     carAngle = 0
 
-    cornerSection = False
-
     for wall in walls:
         UNKNOWN = -1
         LEFT = 0
@@ -92,15 +91,23 @@ def drive():
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(-slope, 1)
 
-            if (abs(slope) < 0.5):
+            if (abs(slope) < 0.75):
                 wallType = CENTER
             else:
-                if wall[0][X] > 0 and wall[1][X] > 0:
-                    wallType = RIGHT
-                elif wall[0][X] < 0 and wall[1][X] < 0:
+                if wall[0][X] - wall[0][Y] / slope < 0:
                     wallType = LEFT
                 else:
-                    wallType = UNKNOWN
+                    wallType = RIGHT
+                # if slope > 0:
+                #     wallType = LEFT
+                # else:
+                #     wallType = RIGHT
+                # if wall[0][X] > 0 and wall[1][X] > 0:
+                #     wallType = RIGHT
+                # elif wall[0][X] < 0 and wall[1][X] < 0:
+                #     wallType = LEFT
+                # else:
+                    # wallType = UNKNOWN
         elif wall[0][Y] - wall[1][Y] != 0:
             # vertical wall
             distance = abs(wall[0][X])
@@ -125,23 +132,24 @@ def drive():
         elif wallType == LEFT:
             leftWalls += 1
             leftWallDistance += distance
-            carAngle += angle + math.pi / 2
+            # carAngle += angle + math.pi / 2
         elif wallType == RIGHT:
             rightWalls += 1
             rightWallDistance += distance
-            carAngle += angle - math.pi / 2
+            # carAngle += angle - math.pi / 2
         
         processedWalls.append([wallType, distance, angle])
         
     if centerWalls != 0:
         centerWallDistance /= centerWalls
+        carAngle /= centerWalls
     if leftWalls != 0:
         leftWallDistance /= leftWalls
     if rightWalls != 0:
         rightWallDistance /= rightWalls
     
-    if centerWalls + leftWalls + rightWalls != 0:
-        carAngle /= centerWalls + leftWalls + rightWalls
+    # if centerWalls + leftWalls + rightWalls != 0:
+    #     carAngle /= centerWalls + leftWalls + rightWalls
     
     pillar = [None]
     for contour in rContours:
@@ -153,35 +161,46 @@ def drive():
             pillar = contour
             pillar.append(GREEN_PILLAR)
     
-    if centerWalls != 0 and centerWallDistance < 100:
+    steering = 0
+
+    waypointX = 0
+    waypointY = 0
+    
+    if centerWalls != 0 and centerWallDistance < 130:
         print("Corner SECTION")
-        if pillar[0] == None:
-            if centerWallDistance < 70:
-                steering = 50
-        elif pillar[4] == RED_PILLAR:
-            if centerWallDistance < 90:
-                steering = 50
-        elif pillar[4] == GREEN_PILLAR:
-            if centerWallDistance < 50:
-                steering = 50
+        if turnPillar == 0:
+            if pillar[0] != None:
+                turnPillar = pillar[4]
+        if turnPillar == 0:
+            if centerWallDistance < 100:
+                steering = 100
+        elif turnPillar == RED_PILLAR:
+            if centerWallDistance < 130:
+                steering = 100
+        elif turnPillar == GREEN_PILLAR:
+            if centerWallDistance < 80:
+                steering = 100
+        if steering == 0:
+            steering = -carAngle * 20
     else:
-        if leftWalls != 0 and rightWalls != 0:
-            total = leftWallDistance + rightWallDistance
-            if total > 80 / math.cos(carAngle):
-                leftWallDistance += (100 / math.cos(carAngle) - total) / 2
-                rightWallDistance += (100 / math.cos(carAngle) - total) / 2
-            else:
-                leftWallDistance += (60 / math.cos(carAngle) - total) / 2
-                rightWallDistance += (60 / math.cos(carAngle) - total) / 2
+        turnPillar = 0
+        # if leftWalls != 0 and rightWalls != 0:
+        #     total = leftWallDistance + rightWallDistance
+        #     if total > 80 / math.cos(carAngle):
+        #         leftWallDistance += (100 / math.cos(carAngle) - total) / 2
+        #         rightWallDistance += (100 / math.cos(carAngle) - total) / 2
+        #     else:
+        #         leftWallDistance += (60 / math.cos(carAngle) - total) / 2
+        #         rightWallDistance += (60 / math.cos(carAngle) - total) / 2
         if pillar[0] == None:
             if leftWalls != 0 and rightWalls != 0:
-                steering = leftWallDistance - rightWallDistance
+                steering = rightWallDistance - leftWallDistance - carAngle * 20
             elif leftWalls != 0 and leftWallDistance < 30:
-                steering = 50
+                steering = 100
             elif rightWalls != 0 and rightWallDistance < 30:
-                steering = -50
+                steering = -100
             else:
-                steering = -carAngle * 10
+                steering = -carAngle * 20
         else:
             xDistance = 0
             yDistance = pillar[Y] - 15
@@ -200,9 +219,9 @@ def drive():
                     xDistance += 10
                 else:
                     xDistance -= 10
-            steering = (math.atan2(xDistance, yDistance) - carAngle) * 10
-    
-    print(steering)
+            waypointX = xDistance
+            waypointY = yDistance
+            steering = math.atan2(xDistance, yDistance) * 30
 
     # print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
@@ -224,7 +243,8 @@ def drive():
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
             'walls': [corners, walls, processedWalls],
             'steering': steering,
-            'waypoints': [[], []],
+            'waypoints': [[], [waypointX, waypointY], 1],
+            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, carAngle]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
