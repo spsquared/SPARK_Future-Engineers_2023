@@ -12,7 +12,7 @@ import time
 __mpu = adafruit_mpu6050.MPU6050(busio.I2C(board.SCL, board.SDA))
 
 __angle = 0
-__trim = 0.017629823913751886 # change this to calibrated number
+__trim = 0.03414636758096449 # change this to calibrated number
 __thread = None
 __running = True
 def __update():
@@ -31,16 +31,16 @@ def __update():
 def calibrate():
     print('[!] CALIBRATING GYROSCOPE - DO NOT TOUCH [!]')
     anglediffs = []
-    for i in range(200):
+    for i in range(500):
         anglediffs.append(__mpu.gyro[2])
-        if i % 10 == 0: print(str(i / 2) + '%')
-        time.sleep(0.05)
+        if i % 10 == 0: print(str(i / 5) + '%')
+        time.sleep(0.02)
     sum = 0
     for i in anglediffs:
         sum += i
     print('[!] CALIBRATION COMPLETE - TRIM BELOW [!]')
     print('')
-    print(sum / -200)
+    print(sum / -500)
     print('')
     print('Place this number in "/IO/imu.py" in "__trim"')
 

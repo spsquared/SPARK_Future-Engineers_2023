@@ -89,6 +89,7 @@ def main():
             io.close()
             server.close()
             exit()
+        io.imu.setAngle(0)
         server.on('stop', stop)
         while running:
             msg = input()

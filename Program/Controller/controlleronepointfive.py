@@ -34,12 +34,12 @@ def drive():
     totalStart = time.perf_counter()
     start = time.perf_counter()
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
-    print("camera: ", time.perf_counter() - start)
+    # print("camera: ", time.perf_counter() - start)
     start = time.perf_counter()
     # read = numpy.split(numpy.array(img), 2, axis=1)
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
-    print("filter + undistort: ", time.perf_counter() - start)
+    # print("filter + undistort: ", time.perf_counter() - start)
     start = time.perf_counter()
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
 
@@ -56,7 +56,7 @@ def drive():
     gContours = converter.mergeContours(gLeftContours, gRightContours, leftHeights, rightHeights)
 
     corners, walls = converter.processWalls(leftWalls, rightWalls)
-    print("image processing: ", time.perf_counter() - start)
+    # print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
 
     slam.carAngle = io.imu.angle()
@@ -121,7 +121,7 @@ def drive():
 
     cornerSection = False
 
-    verticalCenterWall = abs(slam.carAngle % math.pi - math.pi / 2) < math.pi / 4
+    verticalCenterWall = abs(slam.carAngle % math.pi - math.pi / 2) > math.pi / 4
     print(verticalCenterWall)
 
     for wall in walls:
@@ -135,7 +135,7 @@ def drive():
         
         if transformedCorner1[X] - transformedCorner2[X] != 0 and transformedCorner1[Y] - transformedCorner2[Y] != 0:
             slope = (transformedCorner1[Y] - transformedCorner2[Y]) / (transformedCorner1[X] - transformedCorner2[X])
-            yIntercept = transformedCorner1[Y] - slope * transformedCorner1[X]
+            yIntercept = -transformedCorner1[Y] - slope * transformedCorner1[X]
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
 
@@ -217,24 +217,25 @@ def drive():
         
         if wallType == CENTER:
             if cornerSection and distance < turnDistance:
-                print("center wall")
                 steering += 200 * slam.carDirection
         elif wallType == LEFT:
             if relativeAngle < 0:
-                print("left wall")
                 steering += 50 * (math.pi / 2 + relativeAngle) * (40 - distance) / 40 * wallSteering
-            elif distance < 20:
+            elif distance < 15:
+                steering += 100
+            elif distance < 30:
                 steering += 50
         elif wallType == RIGHT:
             if relativeAngle > 0:
-                print("right wall")
-                steering += -50 * ((math.pi / 2 - relativeAngle) * 4) ** 2 * (40 - distance) / 40 * wallSteering
-            elif distance < 20:
+                steering += -50 * (math.pi / 2 - relativeAngle) * (40 - distance) / 40 * wallSteering
+            elif distance < 15:
+                steering += -100
+            elif distance < 30:
                 steering += -50
     
     print(steering)
 
-    print("driving: ", time.perf_counter() - start)
+    # print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
 
     if useServer:
@@ -252,12 +253,12 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
-            'walls': [corners, walls],
+            'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], []],
         }
         server.emit('data', data)
-    print("sendserver: ", time.perf_counter() - start)
+    # print("sendserver: ", time.perf_counter() - start)
     
     io.drive.steer(steering)
 
@@ -279,6 +280,6 @@ def getDistance(a, b):
     
 def transformCorner(corner):
     corner = list(corner)
-    corner[X] = math.sin(slam.carAngle) * corner[X] + math.cos(slam.carAngle) * corner[Y]
-    corner[Y] = math.cos(slam.carAngle) * corner[X] + math.sin(slam.carAngle) * corner[Y]
+    corner[X] = math.sin(-slam.carAngle) * corner[X] + math.cos(-slam.carAngle) * corner[Y]
+    corner[Y] = math.cos(-slam.carAngle) * corner[X] + math.sin(-slam.carAngle) * corner[Y]
     return corner
