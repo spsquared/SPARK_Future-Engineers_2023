@@ -45,14 +45,14 @@ def trim(trim: int):
     global __steeringTrim, __pwm
     __steeringTrim = trim
     steer(__currStr)
-def smoothFactor(smooth: float):
+def setSmoothFactor(smooth: float):
     global __smoothFactor
     __smoothFactor = max(0, min(smooth, 1))
 
 def currentSteering():
     global __currStr
     return __currStr
-def currentSmoothFactor():
+def getSmoothFactor():
     global __smoothFactor
     return __smoothFactor
 
