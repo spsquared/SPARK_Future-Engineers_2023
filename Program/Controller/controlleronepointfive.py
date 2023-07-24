@@ -128,6 +128,7 @@ def drive():
         transformedCorner1 = transformCorner(wall[0])
         transformedCorner2 = transformCorner(wall[1])
 
+        UNKNOWN = -1
         LEFT = 0
         CENTER = 1
         RIGHT = 2
@@ -142,30 +143,36 @@ def drive():
             if (abs(slope) < 1) != verticalCenterWall:
                 wallType = CENTER
             else:
-                if transformedCorner1[X] > 0:
+                if wall[0][X] > 0 and wall[1][X] > 0:
                     wallType = RIGHT
-                else:
+                elif wall[0][X] < 0 and wall[1][X] < 0:
                     wallType = LEFT
+                else:
+                    wallType = UNKNOWN
         elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
             # vertical wall
             distance = abs(transformedCorner1[X])
             if verticalCenterWall:
                 wallType = CENTER
             else:
-                if transformedCorner1[X] > 0:
+                if wall[0][X] > 0 and wall[1][X] > 0:
                     wallType = RIGHT
-                else:
+                elif wall[0][X] < 0 and wall[1][X] < 0:
                     wallType = LEFT
+                else:
+                    wallType = UNKNOWN
         else:
             #horizontal wall
             distance = abs(transformedCorner1[Y])
             if not verticalCenterWall:
                 wallType = CENTER
             else:
-                if transformedCorner1[X] > 0:
+                if wall[0][X] > 0 and wall[1][X] > 0:
                     wallType = RIGHT
-                else:
+                elif wall[0][X] < 0 and wall[1][X] < 0:
                     wallType = LEFT
+                else:
+                    wallType = UNKNOWN
         
         # relative angle is relative to forwards of car
         if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
