@@ -202,7 +202,7 @@ def drive():
         #         rightWallDistance += (60 / math.cos(carAngle) - total) / 2
         if pillar[0] == None:
             if leftWalls != 0 and rightWalls != 0:
-                steering = rightWallDistance - leftWallDistance - carAngle * 20
+                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 200 - carAngle * 20
             elif leftWalls != 0 and leftWallDistance < 30:
                 steering = 100
             elif rightWalls != 0 and rightWallDistance < 30:

@@ -92,6 +92,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 160
 wallEnd = imageHeight
+contourStart = 160
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -305,7 +306,7 @@ def processWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(imgIn, 30, 200)
+    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0]), 30, 200)
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
