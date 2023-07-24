@@ -121,7 +121,8 @@ def drive():
 
     cornerSection = False
 
-    horizontalCenterWall = abs(slam.carAngle % math.pi - math.pi / 2) < math.pi / 4
+    verticalCenterWall = abs(slam.carAngle % math.pi - math.pi / 2) < math.pi / 4
+    print(verticalCenterWall)
 
     for wall in walls:
         transformedCorner1 = transformCorner(wall[0])
@@ -138,7 +139,7 @@ def drive():
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
 
-            if (abs(slope) < 1) == horizontalCenterWall:
+            if (abs(slope) < 1) != verticalCenterWall:
                 wallType = CENTER
             else:
                 if transformedCorner1[X] > 0:
@@ -148,7 +149,7 @@ def drive():
         elif transformedCorner1[Y] - transformedCorner2[Y] != 0:
             # vertical wall
             distance = abs(transformedCorner1[X])
-            if not horizontalCenterWall:
+            if verticalCenterWall:
                 wallType = CENTER
             else:
                 if transformedCorner1[X] > 0:
@@ -158,7 +159,7 @@ def drive():
         else:
             #horizontal wall
             distance = abs(transformedCorner1[Y])
-            if horizontalCenterWall:
+            if not verticalCenterWall:
                 wallType = CENTER
             else:
                 if transformedCorner1[X] > 0:
@@ -166,30 +167,15 @@ def drive():
                 else:
                     wallType = LEFT
         
+        # relative angle is relative to forwards of car
         if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
-            relativeAngle = math.atan2((wall[0][Y] - wall[1][Y]) / (wall[0][X] - wall[1][X]), 1)
+            relativeAngle = math.atan2(-(wall[0][Y] - wall[1][Y]) / (wall[0][X] - wall[1][X]), 1)
         elif wall[0][Y] - wall[1][Y] != 0:
             # vertical wall
-            relativeAngle = math.pi / 4
-            distance = abs(transformedCorner1[X])
-            if not horizontalCenterWall:
-                wallType = CENTER
-            else:
-                if transformedCorner1[X] > 0:
-                    wallType = RIGHT
-                else:
-                    wallType = LEFT
+            relativeAngle = math.pi / 2
         else:
             #horizontal wall
             relativeAngle = 0
-            distance = abs(transformedCorner1[Y])
-            if horizontalCenterWall:
-                wallType = CENTER
-            else:
-                if transformedCorner1[X] > 0:
-                    wallType = RIGHT
-                else:
-                    wallType = LEFT
         
         processedWalls.append([wallType, distance, relativeAngle])
         if wallType == CENTER:
@@ -203,20 +189,22 @@ def drive():
     steering = 0
 
     contourDistanceThreshold = 80
-    contourSteering = 10
+    contourSteering = 1
 
-    turnDistance = 60
+    turnDistance = 50
 
     for contour in rContours:
-        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 5:
+        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 0:
             steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] + 10) * contourSteering
             if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 + 20 * slam.carDirection
+                turnDistance = 50 + 20 * slam.carDirection
     for contour in gContours:
-        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 5:
+        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 0:
             steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] - 10) * contourSteering
             if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 - 20 * slam.carDirection
+                turnDistance = 50 - 20 * slam.carDirection
+
+    wallSteering = 2
 
     for wall in processedWalls:
 
@@ -229,13 +217,22 @@ def drive():
         
         if wallType == CENTER:
             if cornerSection and distance < turnDistance:
+                print("center wall")
                 steering += 200 * slam.carDirection
         elif wallType == LEFT:
-            if distance < 40 and relativeAngle > 0:
-                steering += 100 * relativeAngle / 10 * (40 - distance) / 20
-        else:
-            if distance < 40 and relativeAngle < 0:
-                steering += 100 * relativeAngle / 10 * (40 - distance) / 20
+            if relativeAngle < 0:
+                print("left wall")
+                steering += 50 * (math.pi / 2 + relativeAngle) * (40 - distance) / 40 * wallSteering
+            elif distance < 20:
+                steering += 50
+        elif wallType == RIGHT:
+            if relativeAngle > 0:
+                print("right wall")
+                steering += -50 * ((math.pi / 2 - relativeAngle) * 4) ** 2 * (40 - distance) / 40 * wallSteering
+            elif distance < 20:
+                steering += -50
+    
+    print(steering)
 
     print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()

@@ -105,7 +105,8 @@ carDirection = NO_DIRECTION
 carDirection = CLOCKWISE
 carX = 150
 carY = 150
-carAngle = math.pi / 2
+carAngle = 0
+# carAngle = math.pi / 2
 
 maxErrorDistance = 20
 
