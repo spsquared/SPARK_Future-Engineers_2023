@@ -19,7 +19,7 @@ __throttleRev = -0.15
 __steeringCenter = 90
 __steeringRange = 40
 __steeringTrim = 10
-__smoothFactor = 0.1
+__smoothFactor = 0.5
 __thread = None
 __running = True
 def __update():
