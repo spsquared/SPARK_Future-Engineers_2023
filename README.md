@@ -1,21 +1,12 @@
 <div align=center>
 
 ![banner](./img/banner.png)
-![banner](./img/blue_banner.png)
-![banner](./img/redBanner.png)
-![banner](./img/YellowBanner.png)
-![banner](./img/GREENbANNER.png)
-![banner](./img/orange-banner.png)
-![banner](./img/cERULEANbANNER.png)
-![banner](./img/Purple%20Banner.png)
 
 </div>
 
 ***
 
-**Official GitHub repository for WRO USA team SPARK Future Engineers 2023. All code, documentation, and files are located here.**
-
-Located below is the documentation, and a link to the build instructions.
+**Official GitHub repository for WRO USA Future Engineers team SPARK 2023. All code, documentation, and files are located here.**
 
 ***
 
@@ -40,7 +31,6 @@ Located below is the documentation, and a link to the build instructions.
 # **Hardware Documentation**
 
 ## Parts List
-***INCOMPLETE***
 
 * Parts from [Schumacher Atom 2 S2 1/12 GT12 Competition Pan Car Kit](https://www.amainhobbies.com/schumacher-atom-2-s2-1-12-gt12-competition-pan-car-kit-schk179/p1055346) (not sponsored)
     * [Drive Pod Parts](https://www.racing-cars.com/gt12/atom-2/atom-2-parts=chassis-parts/s2-pod-parts-atom-2-u7905?returnurl=%2fgt12%2fatom-2%2fatom-2-parts%3dchassis-parts%2f)
@@ -103,34 +93,32 @@ Shortened assembly instructions:
 
 #### **For an actual build guide, go to [ASSEMBLY.md](./ASSEMBLY.md)**
 
-Here is a simple electromechanical schematic for how the electronics are wired:
+Here is a simple schematic for how the electronics are wired:
 
-![Schematic](./img/docs/electromechanical-schematic.png)
+![Schematic](./img/docs/schematic.png)
 
 ***
 
 ## Photos
-| | |
-| ------------------------- | --------------------------- |
+|                                |                                  |
+| ------------------------------ | -------------------------------- |
 | ![front](./img/docs/front.png) | ![back](./img/docs/back.png)     |
 | ![left](./img/docs/left.png)   | ![right](./img/docs/right.png)   |
 | ![top](./img/docs/top.png)     | ![bottom](./img/docs/bottom.png) |
 
 ***
 
-# **Uploading & Using SPARK-Util tools**
+# Uploading & Using SPARK-Util tools
 
-TODO
-
-*nodejs server is not needed*
+lol
 
 # **Software Documentation**
 
-## **Operating System**
+## Operating System
 
-We used Jetson Nano's operating system, which is Ubuntu 18.04. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in Assembly.md](./ASSEMBLY.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
+We used the Jetson Nano's existing operating system, which is Ubuntu 18.04 with Jetpack. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in Assembly.md](./ASSEMBLY.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
 
-## **Programming Language**
+## Programming Language
 
 All our code is in python (except the SPARK Control Panel and SPARK Randomizer, those are HTML/JS/CSS applications used for development).
 
@@ -159,83 +147,13 @@ Example:
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 ```
 
-## **IO**
+## **Code Documentation**
 
-*detail IO processes (camera and IMU input, motor output)*
+See [DOCS.md](./DOCS.md).
 
-***
+## **Algorithm**
 
-## **Input Processing**
-
-All the code for image processing can be found in `/Program/AI/converter.py`.
-
-### **Image Preprocessing**
-
-*TBD*
-
-### **Image Predictions**
-
-*TBD*
-
-# ****
-
-
-
-## **SLAM with LaTeX (gloves)**
-
-All the code for slam can be found in `/Program/AI/slam.py`.
-
-There are two main functions we have in `/Program/AI/slam.py`. The first one is `slam`, which takes an array of observed landmarks (wall corners, red pillars, and green pillars), and outputs the most likely spot the car is at. The `slam` function keeps track of landmarks that have been seen before, to create a map of the field.
-$2^2$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-- $\dfrac{0}{1} \neq \infty$
-
-*TBD*
-
-## **Driving**
-
-All the code for driving can be found in `/Program/AI/controller.py`.
-
-***
+oof
 
 ## **SPARK Control**
 

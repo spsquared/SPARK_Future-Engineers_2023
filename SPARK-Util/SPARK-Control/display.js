@@ -181,7 +181,7 @@ function drawLandmarks(landmarks) {
 function drawCar(pos, steering) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[3]);
+    mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.fillStyle = 'rgb(50, 50, 50)';
     mctx.fillRect(-6.65, -12, 13.3, 25);
@@ -192,7 +192,7 @@ function drawCar(pos, steering) {
 function drawRawLandmarks(rawLandmarks, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[3]);
+    mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     // draw wall things
     mctx.strokeStyle = 'rgb(0, 0, 255)';
@@ -214,7 +214,7 @@ function drawRawLandmarks(rawLandmarks, pos) {
 function drawWalls(walls, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[3]);
+    mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
@@ -234,7 +234,7 @@ function drawWalls(walls, pos) {
 function drawDistances(distances, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[3]);
+    mctx.rotate(pos[2]);
     mctx.globalAlpha = 0.5;
     mctx.strokeStyle = 'rgb(255, 255, 255)';
     mctx.fillStyle = 'rgb(255, 255, 255)';
