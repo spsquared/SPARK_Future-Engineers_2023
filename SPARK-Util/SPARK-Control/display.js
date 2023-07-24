@@ -78,7 +78,7 @@ function addData(data) {
         contours: data.contours,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: data.steering,
-        waypoints: data.waypoints,
+        waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][2]], data.waypoints[2]],
         rawDump: data.raw
     });
     if (data.images[3] == 0) sounds.ding();
@@ -93,6 +93,7 @@ function addData(data) {
 };
 const carConstants = {
     wallStarts: [164, 154],
+    undistortedWallStarts: [166, 160],
     undistortCrop: 140
 };
 function display() {
@@ -127,7 +128,7 @@ function display() {
 // screen-space overlays
 function drawOverlays(data) {
     function draw(camera, ctx) {
-        let wallStart = data.images[2] ? carConstants.undistortCrop : carConstants.wallStarts[camera] + 1;
+        let wallStart = carConstants.wallStarts[camera] + 1 - (data.images[2] ? carConstants.undistortCrop : 0);
         ctx.clearRect(0, 0, 544, 308);
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = 'rgb(255, 255, 255)';
@@ -322,14 +323,14 @@ hcDrawWaypoints.addEventListener('click', (e) => {
     display();
 });
 const hcRawDump = document.getElementById('hcRawDump');
-hcDrawWaypoints.addEventListener('click', (e) => {
+hcRawDump.addEventListener('click', (e) => {
     historyControls.rawDump = hcRawDump.checked;
     display();
 });
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
 hcDrawWaypoints.checked = historyControls.drawWaypoints;
-hcDrawWaypoints.checked = historyControls.rawDump;
+hcRawDump.checked = historyControls.rawDump;
 
 // controls
 historyControls.slider.oninput = (e) => {
