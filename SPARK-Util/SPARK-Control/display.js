@@ -62,7 +62,6 @@ function addCapture(images) {
 };
 function addData(data) {
     let encoding = data.images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
-    data.rawLandmarks.map(arr => console.log(arr)),
     history.unshift({
         type: 1,
         images: [
@@ -138,20 +137,20 @@ function drawOverlays(data) {
         ctx.globalAlpha = 1;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.contours[camera][0]) {
-            ctx.fillRect(data.contours[camera][0][i][0], wallStart, 1, data.heights[camera][data.contours[camera][0][i][0]])
+            ctx.fillRect(data.contours[camera][0][i][0], 0, 1, 308);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.contours[camera][1]) {
-            ctx.fillRect(data.contours[camera][1][i][0], wallStart, 1, data.heights[camera][data.contours[camera][1][i][0]])
+            ctx.fillRect(data.contours[camera][1][i][0], 0, 1, 308);
         }
         ctx.globalAlpha = 0.4;
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.contours[camera][0]) {
-            ctx.fillRect(data.contours[camera][0][i][0] - data.contours[camera][0][i][1], wallStart, data.contours[camera][0][i][1] * 2 + 1, data.heights[camera][data.contours[camera][0][i][0]]);
+            ctx.fillRect(data.contours[camera][0][i][0] - data.contours[camera][0][i][1], 0, data.contours[camera][0][i][1] * 2 + 1, 308);
         }
         ctx.fillStyle = 'rgb(0, 255, 0)';
         for (let i in data.contours[camera][1]) {
-            ctx.fillRect(data.contours[camera][1][i][0] - data.contours[camera][1][i][1], wallStart, data.contours[camera][1][i][1] * 2 + 1, data.heights[camera][data.contours[camera][1][i][0]]);
+            ctx.fillRect(data.contours[camera][1][i][0] - data.contours[camera][1][i][1], 0, data.contours[camera][1][i][1] * 2 + 1, 308);
         }
     };
     draw(0, ctx0);
@@ -444,6 +443,30 @@ setInterval(() => {
         sounds.tick();
     }
 }, 10);
+hasFocus = false;
+if (typeof window.requestIdleCallback == 'function') {
+    setInterval(() => {
+        window.requestIdleCallback(() => {
+            if (hasFocus && !document.hasFocus()) {
+                historyControls.slowmode = false;
+                historyControls.quickmode = false;
+                historyControls.back = false;
+                historyControls.forwards = false;
+            }
+            hasFocus = document.hasFocus();
+        }, { timeout: 40 });
+    }, 50);
+} else {
+    setInterval(() => {
+        if (hasFocus && !document.hasFocus()) {
+            historyControls.slowmode = false;
+            historyControls.quickmode = false;
+            historyControls.back = false;
+            historyControls.forwards = false;
+        }
+        hasFocus = document.hasFocus();
+    }, 50);
+}
 socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 socket.on('data', addData);
 
