@@ -150,14 +150,16 @@ def drive():
     
     # if centerWalls + leftWalls + rightWalls != 0:
     #     carAngle /= centerWalls + leftWalls + rightWalls
+
+    maxContourDistance = 80
     
     pillar = [None]
     for contour in rContours:
-        if pillar[0] == None or contour[2] < pillar[2]:
+        if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
             pillar = contour
             pillar.append(RED_PILLAR)
     for contour in gContours:
-        if pillar[0] == None or contour[2] < pillar[2]:
+        if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
             pillar = contour
             pillar.append(GREEN_PILLAR)
     
