@@ -230,12 +230,12 @@ function drawWalls(walls, pos) {
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
-    mctx.beginPath();
     mctx.strokeStyle = 'rgb(255, 160, 0)';
     mctx.font = '12px monospace';
     mctx.fillStyle = 'rgb(255, 255, 255';
     mctx.textAlign = 'center';
     mctx.textBaseline = 'middle';
+    mctx.beginPath();
     let labels = ['?', 'L', 'C', 'R'];
     for (let i in walls[1]) {
         mctx.moveTo(walls[1][i][0], walls[1][i][1]);
@@ -256,6 +256,7 @@ function drawDistances(distances, pos) {
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[2]);
     mctx.globalAlpha = 0.5;
+    mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(255, 255, 255)';
     mctx.fillStyle = 'rgb(255, 255, 255)';
     mctx.lineWidth = 1;
@@ -272,24 +273,26 @@ function drawDistances(distances, pos) {
 };
 // waypoints - both (SLAM uses absolute but simple uses relative)
 function drawWaypoints(waypoints, pos) {
-    if (waypoints.length == 0) return;
     if (waypoints[2]) {
         mctx.save();
         mctx.translate(pos[0], pos[1]);
         mctx.rotate(pos[2]);
     }
     mctx.globalAlpha = 1;
+    mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(0, 255, 255)';
     mctx.fillStyle = 'rgb(0, 255, 255)';
     mctx.lineWidth = 1;
     mctx.beginPath();
-    mctx.moveTo(waypoints[0][0], waypoints[0][1]);
-    for (let waypoint of waypoints[0]) {
-        mctx.lineTo(waypoint[0], waypoint[1]);
-        mctx.fillRect(waypoint[0] - 1, waypoint[1] - 1, 2, 2);
+    if (waypoints[0].length > 0) {
+        mctx.moveTo(waypoints[0][0], waypoints[0][1]);
+        for (let waypoint of waypoints[0]) {
+            mctx.lineTo(waypoint[0], waypoint[1]);
+            mctx.fillRect(waypoint[0] - 1, waypoint[1] - 1, 2, 2);
+        }
     }
     mctx.fillRect(waypoints[1][0] - 2, waypoints[1][1] - 2, 4, 4);
-    mctx.moveTo(waypoints[0][0], waypoints[0][1]);
+    mctx.moveTo(waypoints[1][0], waypoints[1][1]);
     if (waypoints[2]) mctx.lineTo(0, 0);
     else mctx.lineTo(pos[0], pos[1]);
     mctx.stroke();
