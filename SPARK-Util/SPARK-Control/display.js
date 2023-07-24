@@ -116,7 +116,7 @@ function display() {
         }
         if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
         drawCar(data.pos);
-        if (historyControls.rawDump) appendLog(JSON.stringify(data.raw), '#89CFF0');
+        if (historyControls.rawDump) appendLog(JSON.stringify(data.rawDump), 'skyblue');
     } else {
         ctx0.clearRect(0, 0, 544, 308);
         ctx1.clearRect(0, 0, 544, 308);
@@ -128,7 +128,7 @@ function display() {
 // screen-space overlays
 function drawOverlays(data) {
     function draw(camera, ctx) {
-        let wallStart = carConstants.wallStarts[camera] + 1 - (data.images[2] ? carConstants.undistortCrop : 0);
+        let wallStart = (data.images[2] ? carConstants.undistortedWallStarts[camera] - carConstants.undistortCrop : carConstants.wallStarts[camera]) + 1;
         ctx.clearRect(0, 0, 544, 308);
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = 'rgb(255, 255, 255)';
