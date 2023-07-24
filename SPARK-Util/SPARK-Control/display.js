@@ -25,6 +25,8 @@ const ctx0 = overlay0.getContext('2d');
 const ctx1 = overlay1.getContext('2d');
 const map = document.getElementById('map');
 const mctx = map.getContext('2d');
+const carImg = new Image();
+carImg.src = './assets/car.png';
 window.onresize = () => {
     map.width = 620;
     map.height = 620;
@@ -185,8 +187,7 @@ function drawCar(pos, steering) {
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
-    mctx.fillStyle = 'rgb(50, 50, 50)';
-    mctx.fillRect(-6.65, -12, 13.3, 25);
+    mctx.drawImage(carImg, -6.75, -12, 12.5, 24);
     // oops i calculated each wheel's steering angle
     mctx.restore();
 };
