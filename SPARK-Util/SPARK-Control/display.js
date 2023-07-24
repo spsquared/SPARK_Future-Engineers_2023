@@ -12,7 +12,9 @@ const historyControls = {
     quickmode: false,
     maxSize: 5000,
     drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
-    drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true
+    drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true,
+    drawWaypoints: window.localStorage.getItem('hc-drawWaypoints') ?? true,
+    rawDump: false
 };
 const fpsTimes = [];
 let fps = 0;
@@ -43,7 +45,8 @@ function addCapture(images) {
         type: 0,
         images: [
             encoding + images[0],
-            encoding + images[1]
+            encoding + images[1],
+            data.images[3] ?? 0
         ],
         fps: fps
     });
@@ -59,22 +62,24 @@ function addCapture(images) {
 };
 function addData(data) {
     let encoding = data.images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
+    data.rawLandmarks.map(arr => console.log(arr)),
     history.unshift({
         type: 1,
         images: [
             encoding + data.images[0],
-            encoding + data.images[1]
+            encoding + data.images[1],
+            data.images[3]
         ],
         distances: data.distances,
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
-        rawLandmarks: data.rawLandmarks.map(arr => arr.map(([l, h, c]) => [l[0], -l[1]])),
+        rawLandmarks: [data.rawLandmarks[0].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[1].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[2].map(([l, h, c]) => [l[0], -l[1]])],
         contours: data.contours,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: data.steering,
         waypoints: data.waypoints,
-        fps: fps,
+        rawDump: data.raw
     });
     if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
@@ -87,7 +92,8 @@ function addData(data) {
     fpsTimes.push(performance.now());
 };
 const carConstants = {
-    wallStarts: [164, 154]
+    wallStarts: [164, 154],
+    undistortCrop: 140
 };
 function display() {
     const data = history[historyControls.index];
@@ -107,7 +113,9 @@ function display() {
             drawDistances(data.distances, data.pos);
             drawWalls(data.walls, data.pos);
         }
+        if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
         drawCar(data.pos);
+        if (historyControls.rawDump) appendLog(JSON.stringify(data.raw), '#89CFF0');
     } else {
         ctx0.clearRect(0, 0, 544, 308);
         ctx1.clearRect(0, 0, 544, 308);
@@ -119,7 +127,7 @@ function display() {
 // screen-space overlays
 function drawOverlays(data) {
     function draw(camera, ctx) {
-        let wallStart = carConstants.wallStarts[camera] + 1;
+        let wallStart = data.images[2] ? carConstants.undistortCrop : carConstants.wallStarts[camera] + 1;
         ctx.clearRect(0, 0, 544, 308);
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = 'rgb(255, 255, 255)';
@@ -222,7 +230,7 @@ function drawWalls(walls, pos) {
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
     mctx.beginPath();
-    mctx.strokeStyle = 'rgb(255, 180, 0)';
+    mctx.strokeStyle = 'rgb(255, 160, 0)';
     mctx.font = '12px monospace';
     mctx.fillStyle = 'rgb(255, 255, 255';
     mctx.textAlign = 'center';
@@ -261,6 +269,33 @@ function drawDistances(distances, pos) {
     mctx.stroke();
     mctx.restore();
 };
+// waypoints - both (SLAM uses absolute but simple uses relative)
+function drawWaypoints(waypoints, pos) {
+    if (waypoints.length == 0) return;
+    if (waypoints[2]) {
+        mctx.save();
+        mctx.translate(pos[0], pos[1]);
+        mctx.rotate(pos[2]);
+    }
+    mctx.globalAlpha = 1;
+    mctx.strokeStyle = 'rgb(0, 255, 255)';
+    mctx.fillStyle = 'rgb(0, 255, 255)';
+    mctx.lineWidth = 1;
+    mctx.beginPath();
+    mctx.moveTo(waypoints[0][0], waypoints[0][1]);
+    for (let waypoint of waypoints[0]) {
+        mctx.lineTo(waypoint[0], waypoint[1]);
+        mctx.fillRect(waypoint[0] - 1, waypoint[1] - 1, 2, 2);
+    }
+    mctx.fillRect(waypoints[1][0] - 2, waypoints[1][1] - 2, 4, 4);
+    mctx.moveTo(waypoints[0][0], waypoints[0][1]);
+    if (waypoints[2]) mctx.lineTo(0, 0);
+    else mctx.lineTo(pos[0], pos[1]);
+    mctx.stroke();
+    if (waypoints[2]) {
+        mctx.restore();
+    }
+};
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     fps = fpsTimes.length;
@@ -272,14 +307,29 @@ const hcDrawRaw = document.getElementById('hcDrawRaw');
 hcDrawRaw.addEventListener('click', (e) => {
     historyControls.drawRaw = hcDrawRaw.checked;
     window.localStorage.setItem('hc-drawRaw', historyControls.drawRaw);
+    display();
 });
 const hcDrawDistances = document.getElementById('hcDrawDistances');
 hcDrawDistances.addEventListener('click', (e) => {
     historyControls.drawDistances = hcDrawDistances.checked;
     window.localStorage.setItem('hc-drawDistances', historyControls.drawDistances);
+    display();
+});
+const hcDrawWaypoints = document.getElementById('hcDrawWaypoints');
+hcDrawWaypoints.addEventListener('click', (e) => {
+    historyControls.drawWaypoints = hcDrawWaypoints.checked;
+    window.localStorage.setItem('hc-drawWaypoints', historyControls.drawWaypoints);
+    display();
+});
+const hcRawDump = document.getElementById('hcRawDump');
+hcDrawWaypoints.addEventListener('click', (e) => {
+    historyControls.rawDump = hcRawDump.checked;
+    display();
 });
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
+hcDrawWaypoints.checked = historyControls.drawWaypoints;
+hcDrawWaypoints.checked = historyControls.rawDump;
 
 // controls
 historyControls.slider.oninput = (e) => {
