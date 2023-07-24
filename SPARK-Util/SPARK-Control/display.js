@@ -46,7 +46,7 @@ function addCapture(images) {
         images: [
             encoding + images[0],
             encoding + images[1],
-            data.images[3] ?? 0
+            images[3] ?? 0
         ],
         fps: fps
     });
