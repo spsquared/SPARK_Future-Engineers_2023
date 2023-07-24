@@ -148,18 +148,10 @@ def drive():
         if pillar[0] == None or contour[2] < pillar[2]:
             pillar = contour
             pillar.append(RED_PILLAR)
-        if contour[2] < contourDistanceThreshold and contour[0] > -10 and contour[1] > 0:
-            steering += slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] + 10) * contourSteering
-            if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 + 30 * slam.carDirection
     for contour in gContours:
         if pillar[0] == None or contour[2] < pillar[2]:
             pillar = contour
             pillar.append(GREEN_PILLAR)
-        if contour[2] < contourDistanceThreshold and contour[0] < 10 and contour[1] > 0:
-            steering += -slam.carDirection * (contourDistanceThreshold - contour[2]) * abs(contour[0] - 10) * contourSteering
-            if contour[1] * slam.carDirection > 0:
-                turnDistance = 60 - 30 * slam.carDirection
     
     if centerWalls != 0 and centerWallDistance < 100:
         print("Corner SECTION")
