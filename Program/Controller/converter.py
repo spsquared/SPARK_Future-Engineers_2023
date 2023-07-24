@@ -65,8 +65,8 @@ def filter(imgIn: numpy.ndarray):
         grayImage = cv2.cvtColor(imgIn, cv2.COLOR_RGB2GRAY)
         blurredImg = cv2.GaussianBlur(grayImage, (3, 3), 0)
         # edge detection
-        lower = 50
-        upper = 125
+        lower = 40
+        upper = 120
         edgesImg = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
         return [edgesImg, blurredG, blurredR]
@@ -92,6 +92,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 160
 wallEnd = imageHeight
+contourStart = 160
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -169,7 +170,8 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:4] = 0
-    croppedLeft[:int(halfWidth / 2),:7] = 0
+    croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
+    croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
@@ -304,7 +306,7 @@ def processWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(imgIn, 30, 200)
+    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0]), 30, 200)
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
