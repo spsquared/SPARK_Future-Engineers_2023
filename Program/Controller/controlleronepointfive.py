@@ -206,24 +206,33 @@ def drive():
         else:
             xDistance = 0
             yDistance = pillar[Y] - 15
-            if leftWalls != 0 and rightWalls != 0:
-                if pillar[4] == RED_PILLAR:
-                    xDistance = (pillar[X] + rightWallDistance) / 2
-                else:
-                    xDistance = (pillar[X] - leftWallDistance) / 2
-            elif leftWalls != 0 and pillar[4] == GREEN_PILLAR:
-                xDistance = (pillar[X] - leftWallDistance) / 2
-            elif rightWalls != 0 and pillar[4] == RED_PILLAR:
-                xDistance = (pillar[X] + rightWallDistance) / 2
+            xDistance = pillar[X]
+            if pillar[4] == RED_PILLAR:
+                xDistance += 15
             else:
-                xDistance = pillar[X]
-                if pillar[4] == RED_PILLAR:
-                    xDistance += 10
-                else:
-                    xDistance -= 10
+                xDistance -= 15
+            # if leftWalls != 0 and rightWalls != 0:
+            #     if pillar[4] == RED_PILLAR:
+            #         xDistance = (pillar[X] + rightWallDistance) / 2
+            #     else:
+            #         xDistance = (pillar[X] - leftWallDistance) / 2
+            # elif leftWalls != 0 and pillar[4] == GREEN_PILLAR:
+            #     xDistance = (pillar[X] - leftWallDistance) / 2
+            # elif rightWalls != 0 and pillar[4] == RED_PILLAR:
+            #     xDistance = (pillar[X] + rightWallDistance) / 2
+            # else:
+            #     xDistance = pillar[X]
+            #     if pillar[4] == RED_PILLAR:
+            #         xDistance += 10
+            #     else:
+            #         xDistance -= 10
             waypointX = xDistance
             waypointY = yDistance
             steering = math.atan2(xDistance, yDistance) * 30
+            if pillar[4] == RED_PILLAR:
+                steering += 15
+            else:
+                steering -= 15
 
     # print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
