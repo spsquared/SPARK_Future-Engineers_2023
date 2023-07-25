@@ -7,10 +7,11 @@ const historyControls = {
     nextButton: document.getElementById('historyNext'),
     index: 0,
     back: false,
-    forwards: false,
+    forward: false,
     slowmode: false,
     quickmode: false,
     maxSize: 5000,
+    drawOverlays: window.localStorage.getItem('hc-drawOverlays') ?? true,
     drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
     drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true,
     drawWaypoints: window.localStorage.getItem('hc-drawWaypoints') ?? true,
@@ -75,10 +76,12 @@ function addData(data) {
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
         rawLandmarks: [data.rawLandmarks[0].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[1].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[2].map(([l, h, c]) => [l[0], -l[1]])],
         contours: data.contours,
+        wallLines: data.wallLines,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: Math.min(100, Math.max(-100, data.steering)),
         waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
-        rawDump: data.raw
+        rawDump: data.raw,
+        fps: fps
     });
     if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
@@ -101,7 +104,7 @@ function display() {
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {
-        drawOverlays(data);
+        if (historyControls.drawOverlays) drawOverlays(data);
         mctx.resetTransform();
         mctx.clearRect(0, 0, 620, 620);
         mctx.translate(10, 10);
@@ -130,11 +133,13 @@ function drawOverlays(data) {
         let wallStart = (data.images[2] ? carConstants.undistortedWallStarts[camera] - carConstants.undistortCrop : carConstants.wallStarts[camera]) + 1;
         ctx.clearRect(0, 0, 544, 308);
         ctx.globalAlpha = 0.5;
+        // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
             ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
         }
         ctx.globalAlpha = 1;
+        // contours and contour areas
         ctx.fillStyle = 'rgb(255, 0, 0)';
         for (let i in data.contours[camera][0]) {
             ctx.fillRect(data.contours[camera][0][i][0], 0, 1, 308);
@@ -152,6 +157,16 @@ function drawOverlays(data) {
         for (let i in data.contours[camera][1]) {
             ctx.fillRect(data.contours[camera][1][i][0] - data.contours[camera][1][i][1], 0, data.contours[camera][1][i][1] * 2 + 1, 308);
         }
+        // wall lines
+        mctx.setLineDash([]);
+        mctx.strokeStyle = 'rgb(255, 0, 153)'; // spink
+        mctx.lineWidth = 1;
+        mctx.beginPath();
+        for (let houghLine of data.wallLines[camera]) {
+            mctx.moveTo(houghLine[0], houghLine[1]);
+            mctx.lineTo(houghLine[2], houghLine[3]);
+        }
+        mctx.stroke();
     };
     draw(0, ctx0);
     draw(1, ctx1);
@@ -212,20 +227,22 @@ function drawRawLandmarks(rawLandmarks, pos) {
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
+    mctx.setLineDash([]);
+    mctx.lineWidth = 1;
     // draw wall things
-    mctx.strokeStyle = 'rgb(0, 0, 255)';
+    mctx.fillStyle = 'rgb(0, 0, 255)';
     for (let landmark of rawLandmarks[2]) {
         mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
-    mctx.fillStyle = 'rgb(255, 0, 0)';
+    mctx.strokeStyle = 'rgb(255, 0, 0)';
     for (let landmark of rawLandmarks[0]) {
-        mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
+        mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
     // draw green pillars
-    mctx.fillStyle = 'rgb(0, 255, 0)';
+    mctx.strokeStyle = 'rgb(0, 255, 0)';
     for (let landmark of rawLandmarks[1]) {
-        mctx.fillRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
+        mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
     }
     mctx.restore();
 };
@@ -313,6 +330,12 @@ setInterval(() => {
 }, 50);
 
 // controls 0
+const hcDrawOverlays = document.getElementById('hcDrawOverlays');
+hcDrawOverlays.addEventListener('click', (e) => {
+    historyControls.drawOverlays = hcDrawOverlays.checked;
+    window.localStorage.setItem('hc-drawOverlays', historyControls.drawOverlays);
+    display();
+});
 const hcDrawRaw = document.getElementById('hcDrawRaw');
 hcDrawRaw.addEventListener('click', (e) => {
     historyControls.drawRaw = hcDrawRaw.checked;
@@ -336,6 +359,7 @@ hcRawDump.addEventListener('click', (e) => {
     historyControls.rawDump = hcRawDump.checked;
     display();
 });
+hcDrawOverlays.checked = historyControls.drawOverlays;
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
 hcDrawWaypoints.checked = historyControls.drawWaypoints;
@@ -347,12 +371,14 @@ historyControls.slider.oninput = (e) => {
     display();
 };
 historyControls.nextButton.onclick = (e) => {
-    historyControls.index = Math.max(0, historyControls.index - 1);
+    if (historyControls.index == 0) return;
+    historyControls.index--;
     historyControls.slider.value = history.length - historyControls.index;
     display();
 };
 historyControls.previousButton.onclick = (e) => {
-    historyControls.index = Math.min(history.length - 1, historyControls.index + 1);
+    if (historyControls.index == history.length - 1) return;
+    historyControls.index++;
     historyControls.slider.value = history.length - historyControls.index;
     display();
 };
@@ -409,7 +435,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = true;
     } else if (e.key == 'ArrowRight') {
-        historyControls.forwards = true;
+        historyControls.forward = true;
     } else if (e.key == 'Control') {
         historyControls.quickmode = true;
     } else if (e.key == 'Shift') {
@@ -426,7 +452,7 @@ document.addEventListener('keyup', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = false;
     } else if (e.key == 'ArrowRight') {
-        historyControls.forwards = false;
+        historyControls.forward = false;
     } else if (e.key == 'Control') {
         historyControls.quickmode = false;
     } else if (e.key == 'Shift') {
@@ -441,11 +467,13 @@ setInterval(() => {
     timer = (timer + 1) % 20;
     if (historyControls.slowmode && timer % 20 != 0) return;
     if (!historyControls.quickmode && timer % 10 != 0) return;
-    if (historyControls.back && historyControls.forwards) return;
+    if (historyControls.back && historyControls.forward) return;
     if (historyControls.back) {
+        if (historyControls.index == history.length - 1) return;
         historyControls.previousButton.onclick();
         sounds.tick();
-    } else if (historyControls.forwards) {
+    } else if (historyControls.forward) {
+        if (historyControls.index == 0) return;
         historyControls.nextButton.onclick();
         sounds.tick();
     }
@@ -458,7 +486,7 @@ if (typeof window.requestIdleCallback == 'function') {
                 historyControls.slowmode = false;
                 historyControls.quickmode = false;
                 historyControls.back = false;
-                historyControls.forwards = false;
+                historyControls.forward = false;
             }
             hasFocus = document.hasFocus();
         }, { timeout: 40 });
@@ -469,7 +497,7 @@ if (typeof window.requestIdleCallback == 'function') {
             historyControls.slowmode = false;
             historyControls.quickmode = false;
             historyControls.back = false;
-            historyControls.forwards = false;
+            historyControls.forward = false;
         }
         hasFocus = document.hasFocus();
     }, 50);
