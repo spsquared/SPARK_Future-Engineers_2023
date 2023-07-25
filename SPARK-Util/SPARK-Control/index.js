@@ -125,7 +125,7 @@ socket.on('message', (msg) => {
     sounds.ding();
 });
 socket.on('programError', (err) => {
-    appendLog(`<strong>[REMOTE]</strong> An error occured:${err}`, 'red');
+    appendLog(`<strong>[REMOTE]</strong> An error occured:<br>${err}`, 'red');
     sounds.ping();
 });
 

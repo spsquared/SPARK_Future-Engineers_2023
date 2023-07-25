@@ -234,7 +234,7 @@ function drawRawLandmarks(rawLandmarks, pos) {
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
     // draw wall things
-    mctx.fillStyle = 'rgb(0, 0, 255)';
+    mctx.fillStyle = 'rgb(100, 100, 255)';
     for (let landmark of rawLandmarks[2]) {
         mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }

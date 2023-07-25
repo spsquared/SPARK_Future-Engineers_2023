@@ -62,7 +62,7 @@ if not os.path.exists('filtered_out/'):
 __serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 
 # single image save
-def capture(filter: bool, sendServer: bool):
+def capture(filter: bool = False, sendServer: bool = True):
     try:
         name = str(round(time.time()*1000))
         if filter:
@@ -106,7 +106,7 @@ __totalCaptured = 0
 __streamFiltering = False
 __streamServing = False
 __streamSaving = False
-def startSaveStream(filter: bool, sendServer: bool):
+def startSaveStream(filter: bool = False, sendServer: bool = True):
     global __streamThread, __streaming, __streamServing, __streamFiltering, __streamSaving
     if not __streaming:
         __streaming = True
@@ -172,7 +172,7 @@ def stopSaveStream():
         __totalCaptured = 0
         return True
     return False
-def startStream(filter: bool):
+def startStream(filter: bool = False):
     global __streamThread, __streaming, __streamServing, __streamFiltering, __streamSaving
     if not __streaming:
         __streaming = True
