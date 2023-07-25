@@ -13,17 +13,14 @@ import numpy
 
 # wrapper for camera functions
 
-__imageWidthRaw = 1088
-__imageHeightRaw = 616
 __imageWidth = 544
 __imageHeight = 308
 
-# __camera0 = CSICamera(capture_device=0, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
-# __camera1 = CSICamera(capture_device=1, width=__imageWidthRaw, height=__imageHeightRaw, capture_width=3264, capture_height=1848, capture_fps=28)
-__camera0 = NVCamera(sid=0, width=__imageWidthRaw, height=__imageHeightRaw)
-__camera1 = NVCamera(sid=1, width=__imageWidthRaw, height=__imageHeightRaw)
+# __camera0 = CSICamera(capture_device=0, width=__imageWidth, height=__imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
+# __camera1 = CSICamera(capture_device=1, width=__imageWidth, height=__imageHeight, capture_width=3264, capture_height=1848, capture_fps=28)
+__camera0 = NVCamera(sid=0, width=__imageWidth, height=__imageHeight)
+__camera1 = NVCamera(sid=1, width=__imageWidth, height=__imageHeight)
 __running = True
-__currentRawImages = [None, None]
 __currentImages = [None, None]
 __thread = None
 
@@ -35,10 +32,8 @@ def __update():
         # update loop that constantly updates the most recent image which can be read at any time
         while __running:
             start = time.time()
-            __currentRawImages[0] = __camera0.read()
-            __currentRawImages[1] = __camera1.read()
-            __currentImages[0] = downscale(__currentRawImages[0])
-            __currentImages[1] = downscale(__currentRawImages[1])
+            __currentImages[0] = __camera0.read()
+            __currentImages[1] = __camera1.read()
             time.sleep(max(0.02-(time.time()-start), 0))
     except Exception as err:
         traceback.print_exc()
@@ -57,9 +52,6 @@ def stop():
 def read():
     global __currentImages
     return __currentImages
-
-def downscale(img: numpy.ndarray):
-    return cv2.resize(img, (__imageWidth, __imageHeight), interpolation=cv2.INTER_NEAREST)
 
 # make folder if doesn't exist
 if not os.path.exists('image_out/'):
@@ -106,19 +98,6 @@ def capture(filter: bool, sendServer: bool):
         io.error()
         server.emit('programError', str(err))
         return False
-def captureFull(sendServer: bool):
-    name = str(round(time.time()*1000)) + '-f'
-    cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((__currentRawImages[0], __currentRawImages[1]), axis=1))
-    if sendServer:
-        server.emit('message', 'Captured ' + name + '.png')
-        encoded = [
-            base64.b64encode(cv2.imencode('.jpg', __currentRawImages[0], __serverQuality)[1]).decode(),
-            base64.b64encode(cv2.imencode('.jpg', __currentRawImages[1], __serverQuality)[1]).decode(),
-            0,
-            0
-        ]
-        server.emit('capture', encoded)
-    print('Captured ' + name + '.png')
 
 # save a stream of images at 10 fps
 __streamThread = None

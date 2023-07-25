@@ -48,8 +48,6 @@ def main():
                 traceback.print_exc()
                 io.error()
                 server.emit('programError', str(err))
-        def rawCapture(data):
-            io.camera.captureFull(True)
         def stream(data):
             nonlocal streaming
             streaming = not streaming
@@ -75,7 +73,6 @@ def main():
             server.emit('streamState', io.camera.streamState())
         server.on('drive', drive)
         server.on('capture', capture)
-        server.on('rawCapture', rawCapture)
         server.on('stream', stream)
         server.on('getColors', getColors)
         server.on('setColors', setColors)
