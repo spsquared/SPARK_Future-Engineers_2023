@@ -64,7 +64,6 @@ socket.on('connect', () => {
             socket.off('pong', confirm);
             stream.disabled = false;
             capture.disabled = false;
-            rawcapture.disabled = false;
             filterApply.disabled = false;
             socket.emit('getStreamState');
             socket.emit('getColors');
@@ -82,7 +81,6 @@ let ondisconnect = () => {
     setTimeout(reconnect, 10000);
     stream.disabled = true;
     capture.disabled = true;
-    rawcapture.disabled = true;
     filterApply.disabled = true;
     sounds.disconnect();
 };

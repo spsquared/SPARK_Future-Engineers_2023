@@ -160,9 +160,10 @@ function drawOverlays(data) {
         }
         if (data.wallLines != undefined) {
             // wall lines
+            ctx.globalAlpha = 1;
             ctx.setLineDash([]);
             ctx.strokeStyle = 'rgb(255, 0, 255)'; // spink
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2;
             ctx.beginPath();
             for (let houghLine of data.wallLines[camera]) {
                 ctx.moveTo(houghLine[0], houghLine[1] + wallStart);
@@ -515,7 +516,6 @@ const captureModSave = document.getElementById('captureModSave');
 const captureModFilter = document.getElementById('captureModFilter');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
-const rawcapture = document.getElementById('rawCapture');
 const streamToggle = document.getElementById('streamToggle');
 socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
@@ -544,9 +544,5 @@ stream.onclick = () => {
 capture.onclick = () => {
     socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, colors: getColors() });
 };
-rawcapture.onclick = () => {
-    socket.emit('rawCapture');
-};
 stream.disabled = true;
 capture.disabled = true;
-rawcapture.disabled = true;
