@@ -160,15 +160,15 @@ function drawOverlays(data) {
             ctx.fillRect(data.contours[camera][1][i][0] - data.contours[camera][1][i][1], 0, data.contours[camera][1][i][1] * 2 + 1, 308);
         }
         // wall lines
-        mctx.setLineDash([]);
-        mctx.strokeStyle = 'rgb(255, 0, 153)'; // spink
-        mctx.lineWidth = 1;
-        mctx.beginPath();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgb(255, 0, 153)'; // spink
+        ctx.lineWidth = 1;
+        ctx.beginPath();
         for (let houghLine of data.wallLines[camera]) {
-            mctx.moveTo(houghLine[0], houghLine[1]);
-            mctx.lineTo(houghLine[2], houghLine[3]);
+            ctx.moveTo(houghLine[0], houghLine[1]);
+            ctx.lineTo(houghLine[2], houghLine[3]);
         }
-        mctx.stroke();
+        ctx.stroke();
     };
     draw(0, ctx0);
     draw(1, ctx1);
