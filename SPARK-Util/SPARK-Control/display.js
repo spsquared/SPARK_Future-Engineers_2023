@@ -104,6 +104,8 @@ function display() {
     display0Img.src = data.images[0];
     display1Img.src = data.images[1];
     if (data.type == 1) {
+        ctx0.clearRect(0, 0, 544, 308);
+        ctx1.clearRect(0, 0, 544, 308);
         if (historyControls.drawOverlays) drawOverlays(data);
         mctx.resetTransform();
         mctx.clearRect(0, 0, 620, 620);
@@ -133,7 +135,6 @@ function display() {
 function drawOverlays(data) {
     function draw(camera, ctx) {
         let wallStart = (data.images[2] ? carConstants.undistortedWallStarts[camera] - carConstants.undistortCrop : carConstants.wallStarts[camera]) + 1;
-        ctx.clearRect(0, 0, 544, 308);
         ctx.globalAlpha = 0.5;
         // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
