@@ -96,7 +96,7 @@ def drive():
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(-slope, 1)
 
-            if abs(slope) < 0.75 and wall[0][Y] - wall[0][X] * slope > 0:
+            if slope < 1 + 0.25 * slam.carDirection and slope > -1 + 0.25 * slam.carDirection and wall[0][Y] - wall[0][X] * slope > 0:
                 wallType = CENTER
             else:
                 if wall[0][X] - wall[0][Y] / slope < 0:
@@ -185,7 +185,7 @@ def drive():
     
     if centerWalls != 0 and centerWallDistance < 110:
         print("Corner SECTION")
-        if slam.carSections != 0:
+        if slam.uTurnPillar != 0:
             slam.carDirection *= -1
             slam.carSections = 0
         if centerWallDistance < 60 and slam.carSectionsCooldown <= 0:
