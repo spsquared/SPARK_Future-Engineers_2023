@@ -76,7 +76,7 @@ function addData(data) {
         rawLandmarks: [data.rawLandmarks[0].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[1].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[2].map(([l, h, c]) => [l[0], -l[1]])],
         contours: data.contours,
         walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
-        steering: data.steering,
+        steering: Math.min(100, Math.max(-100, data.steering)),
         waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
         rawDump: data.raw
     });
@@ -114,7 +114,7 @@ function display() {
             drawWalls(data.walls, data.pos);
         }
         if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
-        drawCar(data.pos);
+        drawCar(data.pos, data.steering);
         if (historyControls.rawDump) appendLog(JSON.stringify(data.rawDump), 'skyblue');
     } else {
         ctx0.clearRect(0, 0, 544, 308);
@@ -195,8 +195,15 @@ function drawCar(pos, steering) {
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
-    mctx.drawImage(carImg, -6.75, -12, 12.5, 24);
-    // oops i calculated each wheel's steering angle
+    mctx.setLineDash([]);
+    mctx.strokeStyle = 'rgb(255, 255, 255)';
+    mctx.lineWidth = 0.5;
+    // definitely didn't calculate the steering angle for each wheel
+    mctx.beginPath();
+    mctx.moveTo(0, 3.4);
+    mctx.lineTo(-Math.sin(steering * 0.45) * 30, Math.cos(steering * 0.45) * 30);
+    mctx.stroke();
+    mctx.drawImage(carImg, -6.75, -10, 12.5, 24);
     mctx.restore();
 };
 // raw data - relative positioning
@@ -228,8 +235,8 @@ function drawWalls(walls, pos) {
     mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
-    mctx.lineWidth = 1;
     mctx.strokeStyle = 'rgb(255, 160, 0)';
+    mctx.lineWidth = 1;
     mctx.font = '12px monospace';
     mctx.fillStyle = 'rgb(255, 255, 255';
     mctx.textAlign = 'center';
@@ -281,7 +288,7 @@ function drawWaypoints(waypoints, pos) {
     mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(0, 255, 255)';
     mctx.fillStyle = 'rgb(0, 255, 255)';
-    mctx.lineWidth = 1;
+    mctx.lineWidth = 0.5;
     mctx.beginPath();
     if (waypoints[0].length > 0) {
         mctx.moveTo(waypoints[0][0], waypoints[0][1]);
