@@ -220,7 +220,7 @@ function drawCar(pos, steering) {
     // definitely didn't calculate the steering angle for each wheel
     mctx.beginPath();
     mctx.moveTo(0, 3.4);
-    mctx.lineTo(-Math.sin(steering * 0.45 * Math.PI / 180) * 30, -Math.cos(steering * 0.45 * Math.PI / 180) * 30);
+    mctx.lineTo(Math.sin(steering * 0.45 * Math.PI / 180) * 30, -Math.cos(steering * 0.45 * Math.PI / 180) * 30);
     mctx.stroke();
     mctx.drawImage(carImg, -6.25, -10, 12.5, 24);
     mctx.restore();
