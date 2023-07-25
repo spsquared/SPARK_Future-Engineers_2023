@@ -311,7 +311,7 @@ def processWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=[0,0,0]), 30, 200)
+    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=[0,0,0]), 30, 200)
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
@@ -322,7 +322,7 @@ def getContours(imgIn: numpy.ndarray):
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
             y = int(moment["m01"] / moment["m00"])
-            if y > 20:
+            if y > 21:
                 processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 

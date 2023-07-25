@@ -60,8 +60,8 @@ def drive():
     # slam.carAngle = io.imu.angle()
 
     if slam.carDirection == NO_DIRECTION:
-        leftDifferences = numpy.diff(leftHeights).append(-4)
-        rightDifferences = numpy.diff(numpy.flip(rightHeights)).append(-4)
+        leftDifferences = numpy.append(numpy.diff(leftHeights), -4)
+        rightDifferences = numpy.append(numpy.diff(numpy.flip(rightHeights)), -4)
         leftJump = numpy.argmax(leftDifferences[leftDifferences < -3])
         rightJump = numpy.argmax(rightDifferences[rightDifferences < -3])
         if leftJump < rightJump:
@@ -185,19 +185,22 @@ def drive():
     
     if centerWalls != 0 and centerWallDistance < 110:
         print("Corner SECTION")
+        if slam.carSections != 0:
+            slam.carDirection *= -1
+            slam.carSections = 0
         if centerWallDistance < 60 and slam.carSectionsCooldown <= 0:
             slam.carSections += 1
             slam.carSectionsCooldown = 15
         if pillar[0] == None:
             if centerWallDistance < 70:
-                steering = 100
+                steering = 100 * slam.carDirection
         elif pillar[4] == RED_PILLAR:
             # if centerWallDistance < 120:
             if pillar[1] < 50:
-                steering = 100
+                steering = 100 * slam.carDirection
         elif pillar[4] == GREEN_PILLAR:
             if pillar[1] < 20:
-                steering = 100
+                steering = 100 * slam.carDirection
         if steering == 0:
             if pillar[0] == None:
                 steering = -carAngle * 40
@@ -208,6 +211,8 @@ def drive():
             io.drive.steer(0)
             io.drive.throttle(0)
             return False
+        elif slam.carSections == 8 and slam.carSectionsCooldown <= 0 and pillar[0] != None:
+            slam.uTurnPillar = pillar[4]
         # if leftWalls != 0 and rightWalls != 0:
         #     total = leftWallDistance + rightWallDistance
         #     if total > 80 / math.cos(carAngle):
