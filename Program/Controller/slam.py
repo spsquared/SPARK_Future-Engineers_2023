@@ -103,14 +103,9 @@ CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 carDirection = NO_DIRECTION
 carDirection = CLOCKWISE
-carX = 150
-carY = 150
-carAngle = 0
-
-carSections = 0
-carSectionsCooldown = 0
-uTurnPillar = 0
-# carAngle = math.pi / 2
+carX = 50
+carY = 125
+carAngle = math.pi / 2
 
 maxErrorDistance = 20
 
