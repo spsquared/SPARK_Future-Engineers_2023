@@ -102,13 +102,18 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 carDirection = NO_DIRECTION
+carDirectionGuess = 0
+carDirectionGuesses = 0
 carX = 150
 carY = 150
 carAngle = 0
 
 carSections = 0
+carSectionsTimer = 0
+carSectionsExited = True
 carSectionsCooldown = 0
 uTurnPillar = 0
+uTurning = False
 # carAngle = math.pi / 2
 
 maxErrorDistance = 20

@@ -59,15 +59,21 @@ def drive():
 
     # slam.carAngle = io.imu.angle()
 
-    if slam.carDirection == NO_DIRECTION:
-        leftDifferences = numpy.append(numpy.diff(leftHeights), -4)
-        rightDifferences = numpy.append(numpy.diff(numpy.flip(rightHeights)), -4)
-        leftJump = numpy.argmax(leftDifferences[leftDifferences < -3])
-        rightJump = numpy.argmax(rightDifferences[rightDifferences < -3])
-        if leftJump < rightJump:
-            slam.carDirection = COUNTER_CLOCKWISE
+    if slam.carDirectionGuesses < 9:
+        threeFourths = int((converter.imageWidth - 3) * 3 / 4)
+        leftDifferences = numpy.diff(leftHeights, 3)
+        rightDifferences = numpy.diff(numpy.flip(rightHeights), 3)
+        leftJump = numpy.argmax(numpy.append(leftDifferences[:threeFourths] < -6, True))
+        rightJump = numpy.argmax(numpy.append(rightDifferences[:threeFourths] < -6, True))
+        leftJump2 = numpy.argmax(numpy.append(leftDifferences[threeFourths:] < -6, True))
+        rightJump2 = numpy.argmax(numpy.append(rightDifferences[threeFourths:] < -6, True))
+        slam.carDirectionGuesses += 1
+        slam.carDirectionGuess += leftJump + rightJump2 - rightJump - leftJump2
+        if slam.carDirectionGuess > 0:
+            slam.carDirection = 1
         else:
-            slam.carDirection = CLOCKWISE
+            slam.carDirection = -1
+        print(leftJump + rightJump2, rightJump + leftJump2)
         # slam.findStartingPosition(leftHeights, rightHeights)
     
     processedWalls = []
@@ -94,15 +100,36 @@ def drive():
             yIntercept = -wall[0][Y] + slope * wall[0][X]
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
-            angle = math.atan2(-slope, 1)
+            angle = math.atan2(slope, 1)
 
             if slope < 1 + 0.25 * slam.carDirection and slope > -1 + 0.25 * slam.carDirection and wall[0][Y] - wall[0][X] * slope > 0:
                 wallType = CENTER
             else:
-                if wall[0][X] - wall[0][Y] / slope < 0:
+                if abs(slope) < 0.5:
+                    wallType = UNKNOWN
+                elif wall[0][Y] - wall[0][X] * slope < 0 and (wall[0][X] < 0 or wall[1][X] < 0):
                     wallType = LEFT
-                else:
+                elif wall[0][Y] - wall[0][X] / slope > 0 and (wall[0][X] > 0 or wall[1][X] > 0):
                     wallType = RIGHT
+                else:
+                    if slam.carDirection == CLOCKWISE:
+                        if abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                            wallType = RIGHT
+                        elif abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                            wallType = LEFT
+                        elif wall[0][Y] - wall[0][X] / slope < 0:
+                            wallType = LEFT
+                        else:
+                            wallType = RIGHT
+                    else:
+                        if abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                            wallType = LEFT
+                        elif abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                            wallType = RIGHT
+                        elif wall[0][Y] - wall[0][X] / slope < 0:
+                            wallType = LEFT
+                        else:
+                            wallType = RIGHT
                 # if slope > 0:
                 #     wallType = LEFT
                 # else:
@@ -130,6 +157,11 @@ def drive():
             angle = 0
             wallType = CENTER
         
+        if distance > 200:
+            continue
+        if abs(wall[0][X]) > 100 and abs(wall[1][X]) > 100 and abs(wall[0][Y]) < 50 and abs(wall[1][Y]) < 50:
+            continue
+        
         if wallType == CENTER:
             centerWalls += 1
             centerWallDistance += distance
@@ -137,24 +169,30 @@ def drive():
         elif wallType == LEFT:
             leftWalls += 1
             leftWallDistance += distance
-            # carAngle += angle + math.pi / 2
+            newAngle = angle + math.pi / 2
+            if newAngle > math.pi / 2:
+                newAngle -= math.pi
+            carAngle += newAngle
         elif wallType == RIGHT:
             rightWalls += 1
             rightWallDistance += distance
-            # carAngle += angle - math.pi / 2
+            newAngle = angle + math.pi / 2
+            if newAngle > math.pi / 2:
+                newAngle -= math.pi
+            carAngle += newAngle
         
         processedWalls.append([wallType, distance, angle])
         
     if centerWalls != 0:
         centerWallDistance /= centerWalls
-        carAngle /= centerWalls
+        # carAngle /= centerWalls
     if leftWalls != 0:
         leftWallDistance /= leftWalls
     if rightWalls != 0:
         rightWallDistance /= rightWalls
     
-    # if centerWalls + leftWalls + rightWalls != 0:
-    #     carAngle /= centerWalls + leftWalls + rightWalls
+    if centerWalls + leftWalls + rightWalls != 0:
+        carAngle /= centerWalls + leftWalls + rightWalls
 
     maxContourDistance = 200
     
@@ -181,38 +219,80 @@ def drive():
     waypointX = 0
     waypointY = 0
     
+    slam.carSectionsTimer -= 1
+    if slam.carSectionsTimer < 0:
+        slam.carSectionsTimer = 0
     slam.carSectionsCooldown -= 1
+
+    def steerCenter():
+        nonlocal steering
+        if slam.carDirection == CLOCKWISE and rightWalls > 0 and rightWallDistance < 30:
+            steering = -50
+        elif slam.carDirection == COUNTER_CLOCKWISE and leftWalls > 0 and leftWallDistance < 30:
+            steering = 50
+        else:
+            steering = 100 * slam.carDirection
     
-    if centerWalls != 0 and centerWallDistance < 110:
+    if (centerWalls != 0 and centerWallDistance < 110) or slam.uTurning:
         print("Corner SECTION")
+        if centerWallDistance < 80 and slam.carSectionsCooldown <= 0 and slam.carSectionsExited:
+            slam.carSectionsTimer += 2
+            if slam.carSectionsTimer > 5:
+                slam.carSections += 1
+                slam.carSectionsCooldown = 20
+                slam.carSectionsExited = False
         if slam.uTurnPillar != 0:
-            slam.carDirection *= -1
-            slam.carSections = 0
-        if centerWallDistance < 60 and slam.carSectionsCooldown <= 0:
-            slam.carSections += 1
-            slam.carSectionsCooldown = 15
-        if pillar[0] == None:
-            if centerWallDistance < 70:
-                steering = 100 * slam.carDirection
-        elif pillar[4] == RED_PILLAR:
-            # if centerWallDistance < 120:
-            if pillar[1] < 50:
-                steering = 100 * slam.carDirection
-        elif pillar[4] == GREEN_PILLAR:
-            if pillar[1] < 20:
-                steering = 100 * slam.carDirection
-        if steering == 0:
+            if slam.uTurning == False:
+                io.imu.setAngle(0)
+            slam.uTurning = True
+            if slam.carDirectionGuess > 0:
+                slam.carDirection = -1
+                # if centerWallDistance < 70:
+                #     steerCenter()
+                # else:
+                #     steering = (math.pi / 2 - carAngle) * 40
+            else:
+                slam.carDirection = 1
+                # if centerWallDistance < 70:
+                #     steerCenter()
+            if abs(io.imu.angle()) > math.pi:
+                slam.uTurnPillar = 0
+                slam.uTurning = False
+            steering = -100
+                # else:
+                #     steering = (-math.pi / 2 - carAngle) * 40
+        else:
             if pillar[0] == None:
-                steering = -carAngle * 40
-            elif pillar[4] == GREEN_PILLAR and pillar[0] * slam.carDirection < 40:
-                steering = -50 * slam.carDirection - carAngle * 40
+                if centerWallDistance < 70:
+                    steerCenter()
+            elif pillar[4] == RED_PILLAR:
+                # if centerWallDistance < 120:
+                if pillar[1] < 35 + 15 * slam.carDirection:
+                    steerCenter()
+                elif centerWallDistance < 50:
+                    steerCenter()
+            elif pillar[4] == GREEN_PILLAR:
+                if pillar[1] < 35 - 15 * slam.carDirection:
+                    steerCenter()
+                elif centerWallDistance < 50:
+                    steerCenter()
+            if steering == 0:
+                if pillar[0] == None:
+                    steering = -carAngle * 40
+                elif slam.carDirection == CLOCKWISE and pillar[4] == GREEN_PILLAR and pillar[0] * slam.carDirection < 40:
+                    steering = -50 * slam.carDirection - carAngle * 40
+                elif slam.carDirection == COUNTER_CLOCKWISE and pillar[4] == RED_PILLAR and pillar[0] * slam.carDirection < 40:
+                    steering = -50 * slam.carDirection - carAngle * 40
     else:
-        if slam.carSections == 12 and slam.carSectionsCooldown <= 0:
+        slam.carSectionsExited = True
+        if slam.carSections >= 12 and slam.carSectionsCooldown <= 0:
             io.drive.steer(0)
             io.drive.throttle(0)
             return False
-        elif slam.carSections == 8 and slam.carSectionsCooldown <= 0 and pillar[0] != None:
+        elif slam.carSections == 1 and slam.carSectionsCooldown <= 0 and pillar[0] != None and pillar[2] < 40:
             slam.uTurnPillar = pillar[4]
+        if slam.carSections > 1 and slam.carSectionsCooldown <= 0:
+            slam.uTurnPillar = 0
         # if leftWalls != 0 and rightWalls != 0:
         #     total = leftWallDistance + rightWallDistance
         #     if total > 80 / math.cos(carAngle):
@@ -223,11 +303,11 @@ def drive():
         #         rightWallDistance += (60 / math.cos(carAngle) - total) / 2
         if pillar[0] == None:
             if leftWalls != 0 and rightWalls != 0:
-                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 100 - carAngle * 80
+                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 50 - carAngle * 80
             elif leftWalls != 0 and leftWallDistance < 20:
-                steering = 100
+                steering = 50
             elif rightWalls != 0 and rightWallDistance < 20:
-                steering = -100
+                steering = -50
             else:
                 steering = -carAngle * 40
         else:
@@ -292,7 +372,7 @@ def drive():
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, int(slam.carSections), carAngle]
+            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)

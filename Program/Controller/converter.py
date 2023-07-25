@@ -90,7 +90,7 @@ def undistort(imgIn: numpy.ndarray):
 wallStartLeft = 164
 wallStartRight = 154
 undistortedWallStartLeft = 166
-undistortedWallStartRight = 160
+undistortedWallStartRight = 159
 wallEnd = imageHeight
 contourStart = 150
 distanceTable = [[], []]
@@ -169,7 +169,8 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     croppedRight = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
 
     # adjust for camera tilt
-    croppedLeft[:halfWidth,:4] = 0
+    croppedLeft[:halfWidth,:2] = 0
+    croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
     croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
     croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
@@ -241,9 +242,9 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=30, # Min number of votes for valid line
-                minLineLength=30, # Min allowed length of line
-                maxLineGap=30 # Max allowed gap between line for joining them
+                threshold=75, # Min number of votes for valid line
+                minLineLength=20, # Min allowed length of line
+                maxLineGap=20 # Max allowed gap between line for joining them
                 ))
     def lineSort(line):
         return line[0][0]
@@ -286,7 +287,7 @@ def processWall(lines, dir):
             corner2 = getRawDistance(x2, y2, dir)
         if math.sqrt((corner1[0] - corner2[0])**2 + (corner1[1] - corner2[1])**2) < 10:
             continue
-        if math.sqrt((corner1[0])**2 + (corner1[1])**2) > 200 and math.sqrt((corner2[0])**2 + (corner2[1])**2) > 200:
+        if math.sqrt((corner1[0])**2 + (corner1[1])**2) > 190 and math.sqrt((corner2[0])**2 + (corner2[1])**2) > 190:
             continue
         walls.append([corner1, corner2])
         walls[len(walls) - 1][0].append(True)
@@ -322,7 +323,7 @@ def getContours(imgIn: numpy.ndarray):
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
             y = int(moment["m01"] / moment["m00"])
-            if y > 21:
+            if y > 9:
                 processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 
