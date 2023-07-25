@@ -109,6 +109,8 @@ function display() {
         if (historyControls.drawOverlays) drawOverlays(data);
         mctx.resetTransform();
         mctx.clearRect(0, 0, 620, 620);
+        // mctx.fillStyle = "#ffffff";
+        // mctx.fillRect(0, 0, 620, 620);
         mctx.translate(10, 10);
         mctx.scale(2, 2);
         mctx.globalAlpha = 1;
