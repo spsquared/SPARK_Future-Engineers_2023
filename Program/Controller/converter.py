@@ -39,7 +39,7 @@ RIGHT = 1
 # contour constants
 contourSizeConstant = 0.6
 
-minContourSize = 100
+minContourSize = 60
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -266,7 +266,7 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
             #     lastslope x+b=y
             #     b = newLines[len(newLines) - 1][3]
         lastLine = line[0]
-        newLines.append(line[0])
+        newLines.append([x1, y1, x2, y2])
     return newLines
 
 def processWall(lines, dir):
