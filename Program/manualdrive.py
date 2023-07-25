@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Controller import controller
+from Controller import slamcontroller
 from Controller import converter
 import traceback
 import cv2
