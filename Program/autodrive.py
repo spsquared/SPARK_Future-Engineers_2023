@@ -50,7 +50,7 @@ def main():
         io.drive.throttle(80)
         io.imu.setAngle(0)
         while running:
-            controller.drive()
+            running = controller.drive()
             # image = io.camera.read()
             # prediction = driver.predict(image, sendServer, infinite)
             # if prediction == "stop":

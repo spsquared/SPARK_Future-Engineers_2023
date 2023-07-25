@@ -47,13 +47,13 @@ def drive():
     rRightContours = converter.getContours(rRightImg)
     gRightContours = converter.getContours(gRightImg)
 
-    leftWalls = converter.getWalls(leftHeights.copy(), rLeftContours, gLeftContours)
-    rightWalls = converter.getWalls(rightHeights.copy(), rRightContours, gRightContours)
+    rawLeftWalls = converter.getWalls(leftHeights.copy(), rLeftContours, gLeftContours)
+    rawRightWalls = converter.getWalls(rightHeights.copy(), rRightContours, gRightContours)
 
     rContours = converter.mergeContours(rLeftContours, rRightContours, leftHeights, rightHeights)
     gContours = converter.mergeContours(gLeftContours, gRightContours, leftHeights, rightHeights)
 
-    corners, walls = converter.processWalls(leftWalls, rightWalls)
+    corners, walls = converter.processWalls(rawLeftWalls, rawRightWalls)
     # print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
 
@@ -83,7 +83,7 @@ def drive():
         
         if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
             slope = (wall[0][Y] - wall[1][Y]) / (wall[0][X] - wall[1][X])
-            yIntercept = -wall[0][Y] - slope * wall[0][X]
+            yIntercept = -wall[0][Y] + slope * wall[0][X]
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(-slope, 1)
@@ -173,10 +173,15 @@ def drive():
     waypointX = 0
     waypointY = 0
     
+    slam.carSectionsCooldown -= 1
+    
     if centerWalls != 0 and centerWallDistance < 110:
         print("Corner SECTION")
+        if centerWallDistance < 60 and slam.carSectionsCooldown <= 0:
+            slam.carSections += 1
+            slam.carSectionsCooldown = 15
         if pillar[0] == None:
-            if centerWallDistance < 100:
+            if centerWallDistance < 70:
                 steering = 100
         elif pillar[4] == RED_PILLAR:
             # if centerWallDistance < 120:
@@ -190,8 +195,11 @@ def drive():
                 steering = -carAngle * 40
             elif pillar[4] == GREEN_PILLAR and pillar[0] * slam.carDirection < 40:
                 steering = -50 * slam.carDirection - carAngle * 40
-            
     else:
+        if slam.carSections == 12 and slam.carSectionsCooldown <= 0:
+            io.drive.steer(0)
+            io.drive.throttle(0)
+            return False
         # if leftWalls != 0 and rightWalls != 0:
         #     total = leftWallDistance + rightWallDistance
         #     if total > 80 / math.cos(carAngle):
@@ -202,10 +210,10 @@ def drive():
         #         rightWallDistance += (60 / math.cos(carAngle) - total) / 2
         if pillar[0] == None:
             if leftWalls != 0 and rightWalls != 0:
-                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 200 - carAngle * 60
-            elif leftWalls != 0 and leftWallDistance < 30:
+                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 100 - carAngle * 80
+            elif leftWalls != 0 and leftWallDistance < 20:
                 steering = 100
-            elif rightWalls != 0 and rightWallDistance < 30:
+            elif rightWalls != 0 and rightWallDistance < 20:
                 steering = -100
             else:
                 steering = -carAngle * 40
@@ -244,9 +252,9 @@ def drive():
                 steering += 15
             else:
                 steering -= 15
-            if steering > 0 and rightWalls > 0 and rightWallDistance < 30:
+            if steering > 0 and rightWalls > 0 and rightWallDistance < 20:
                 steering = 0
-            if steering < 0 and leftWalls > 0 and leftWallDistance < 30:
+            if steering < 0 and leftWalls > 0 and leftWallDistance < 20:
                 steering = 0
 
     # print("driving: ", time.perf_counter() - start)
@@ -267,11 +275,11 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
-            'wallLines': [leftWalls, rightWalls],
+            'wallLines': [numpy.array(rawLeftWalls, dtype="int").tolist(), numpy.array(rawRightWalls, dtype="int").tolist()],
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, pillar[0] == None, carAngle]
+            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
@@ -286,6 +294,7 @@ def drive():
     # print(leftWalls)
 
     # return leftEdgesImg
+    return True
 
 def getDistance(a, b):
     try:
