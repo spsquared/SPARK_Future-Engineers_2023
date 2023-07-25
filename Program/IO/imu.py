@@ -34,7 +34,7 @@ def calibrate():
     for i in range(500):
         anglediffs.append(__mpu.gyro[2])
         if i % 10 == 0: print(str(i / 5) + '%')
-        time.sleep(0.02)
+        time.sleep(0.07)
     sum = 0
     for i in anglediffs:
         sum += i
