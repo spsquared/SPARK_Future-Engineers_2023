@@ -79,7 +79,7 @@ def setStatusBlink(blink: int):
     # 0 = off
     # 1 = solid
     # 2 = flashing
-    __statusBlink = blink
+    __statusBlink = min(2, max(0, blink))
 
 def __blink():
     global __running
