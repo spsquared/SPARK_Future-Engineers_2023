@@ -57,7 +57,7 @@ def drive():
     # print("image processing: ", time.perf_counter() - start)
     start = time.perf_counter()
 
-    slam.carAngle = io.imu.angle()
+    # slam.carAngle = io.imu.angle()
 
     if slam.carDirection == NO_DIRECTION:
         slam.findStartingPosition(leftHeights, rightHeights)
@@ -188,8 +188,8 @@ def drive():
         if steering == 0:
             if pillar[0] == None:
                 steering = -carAngle * 40
-            elif pillar[0] < 40:
-                steering = -50
+            elif pillar[4] == GREEN_PILLAR and pillar[0] * slam.carDirection < 40:
+                steering = -50 * slam.carDirection - carAngle * 40
             
     else:
         # if leftWalls != 0 and rightWalls != 0:
@@ -202,7 +202,7 @@ def drive():
         #         rightWallDistance += (60 / math.cos(carAngle) - total) / 2
         if pillar[0] == None:
             if leftWalls != 0 and rightWalls != 0:
-                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 200 - carAngle * 20
+                steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 200 - carAngle * 60
             elif leftWalls != 0 and leftWallDistance < 30:
                 steering = 100
             elif rightWalls != 0 and rightWallDistance < 30:
@@ -244,9 +244,9 @@ def drive():
                 steering += 15
             else:
                 steering -= 15
-            if steering > 0 and leftWallDistance < 30:
+            if steering > 0 and rightWalls > 0 and rightWallDistance < 30:
                 steering = 0
-            if steering < 0 and rightWallDistance < 30:
+            if steering < 0 and leftWalls > 0 and leftWallDistance < 30:
                 steering = 0
 
     # print("driving: ", time.perf_counter() - start)
@@ -267,6 +267,7 @@ def drive():
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
+            'wallLines': [leftWalls, rightWalls],
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],

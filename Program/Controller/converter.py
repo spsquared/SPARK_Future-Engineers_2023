@@ -10,9 +10,9 @@ import time
 
 # colors
 rm = redMin = (0, 80, 70)
-rM = redMax = (55, 255, 255)
-gm = greenMin = (35, 80, 45)
-gM = greenMax = (110, 255, 255)
+rM = redMax = (35, 255, 255)
+gm = greenMin = (55, 80, 45)
+gM = greenMax = (105, 255, 255)
 
 # camera constants
 imageWidth = 544
@@ -92,7 +92,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 160
 wallEnd = imageHeight
-contourStart = 160
+contourStart = 150
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -275,13 +275,18 @@ def processWall(lines, dir):
     lastCorner = [None]
     for line in lines:
         x1, y1, x2, y2 = line
-        if y1 > y2:
+        if y1 > y2 and y2 < 5:
             corner1 = getRawDistance(x1, y1, dir)
             corner2 = getRawDistance(int((x1 + x2) / 2), int((y1 + y2) / 2), dir)
-        else:
+        elif y2 > y1 and y1 < 5:
             corner1 = getRawDistance(int((x1 + x2) / 2), int((y1 + y2) / 2), dir)
             corner2 = getRawDistance(x2, y2, dir)
+        else:
+            corner1 = getRawDistance(x1, y1, dir)
+            corner2 = getRawDistance(x2, y2, dir)
         if math.sqrt((corner1[0] - corner2[0])**2 + (corner1[1] - corner2[1])**2) < 10:
+            continue
+        if math.sqrt((corner1[0])**2 + (corner1[1])**2) > 200 and math.sqrt((corner2[0])**2 + (corner2[1])**2) > 200:
             continue
         walls.append([corner1, corner2])
         walls[len(walls) - 1][0].append(True)
@@ -316,8 +321,9 @@ def getContours(imgIn: numpy.ndarray):
         if size > minContourSize:
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
-            # y = int(moment["m01"] / moment["m00"])
-            processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
+            y = int(moment["m01"] / moment["m00"])
+            if y > 20:
+                processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):
