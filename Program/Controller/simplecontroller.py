@@ -60,7 +60,15 @@ def drive():
     # slam.carAngle = io.imu.angle()
 
     if slam.carDirection == NO_DIRECTION:
-        slam.findStartingPosition(leftHeights, rightHeights)
+        leftDifferences = numpy.diff(leftHeights).append(-4)
+        rightDifferences = numpy.diff(numpy.flip(rightHeights)).append(-4)
+        leftJump = numpy.argmax(leftDifferences[leftDifferences < -3])
+        rightJump = numpy.argmax(rightDifferences[rightDifferences < -3])
+        if leftJump < rightJump:
+            slam.carDirection = COUNTER_CLOCKWISE
+        else:
+            slam.carDirection = CLOCKWISE
+        # slam.findStartingPosition(leftHeights, rightHeights)
     
     processedWalls = []
 
