@@ -23,7 +23,7 @@ Image processing:
     Find wall lines
     Merge contours and wall lines
 Simple Driving:
-    
+    Finding Car Direction
     Catagorize walls
     Filter pillars
     Calculate steering
@@ -56,6 +56,12 @@ Finding contours:
 Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border of 0 is added using `cv2.copyMakeBorder`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
 
 Finding Wall Lines:
+
+To find wall lines, we create a new image with only the bottom of the wall. For every obstacle, the nearby wall heights get set to 0 based on the size of the contour. Creating this image is optimized using `numpy.zeros`. The bottom of the wall is set to 255. We first create a list of indices so we can quickly set all the values to 255.
+
+Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on x value, similar slope lines are merged.
+
+Merging Contours and Wall Lines:
 
 Using `numpy.diff`, 
 

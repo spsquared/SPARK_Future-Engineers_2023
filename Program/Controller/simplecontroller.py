@@ -242,7 +242,7 @@ def drive():
                 slam.carSectionsCooldown = 20
                 slam.carSectionsExited = False
     
-    if (centerWalls != 0 and centerWallDistance < 110 and pillar[0] == None) or slam.uTurning:
+    if (centerWalls != 0 and centerWallDistance < 110 and (pillar[0] == None or pillar[0] * slam.carDirection)) or slam.uTurning:
         print("Corner SECTION")
         if slam.uTurnPillar == RED_PILLAR:
             if slam.uTurning == False:
