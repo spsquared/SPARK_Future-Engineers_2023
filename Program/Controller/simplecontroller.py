@@ -158,8 +158,10 @@ def drive():
             wallType = CENTER
         
         if distance > 200:
+            processedWalls.append([UNKNOWN, distance, angle])
             continue
         if abs(wall[0][X]) > 100 and abs(wall[1][X]) > 100 and abs(wall[0][Y]) < 50 and abs(wall[1][Y]) < 50:
+            processedWalls.append([UNKNOWN, distance, angle])
             continue
         
         if wallType == CENTER:
@@ -242,7 +244,7 @@ def drive():
                 slam.carSectionsCooldown = 20
                 slam.carSectionsExited = False
     
-    if (centerWalls != 0 and centerWallDistance < 110 and (pillar[0] == None or pillar[0] * slam.carDirection)) or slam.uTurning:
+    if (centerWalls != 0 and centerWallDistance < 110 and (pillar[0] == None or abs(pillar[0]) > 20)) or slam.uTurning:
         print("Corner SECTION")
         if slam.uTurnPillar == RED_PILLAR:
             if slam.uTurning == False:
@@ -371,10 +373,10 @@ def drive():
                 steering += 15
             else:
                 steering -= 15
-            if steering > 0 and rightWalls > 0 and rightWallDistance < 20:
-                steering = 0
-            if steering < 0 and leftWalls > 0 and leftWallDistance < 20:
-                steering = 0
+            if steering > 0 and rightWalls > 0 and (rightWallDistance < 20 or rightWallDistance < pillar[0]):
+                steering = -carAngle * 40
+            if steering < 0 and leftWalls > 0 and (leftWallDistance < 20 or leftWallDistance < -pillar[0]):
+                steering = -carAngle * 40
 
     # print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()

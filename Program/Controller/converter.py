@@ -242,8 +242,8 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=30, # Min number of votes for valid line
-                minLineLength=20, # Min allowed length of line
+                threshold=50, # Min number of votes for valid line
+                minLineLength=10, # Min allowed length of line
                 maxLineGap=20 # Max allowed gap between line for joining them
                 )
     if lines is not None:
@@ -260,17 +260,14 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
         x1, y1, x2, y2 = line[0]
         if y1 == 0 or y2 == 0:
             continue
-        # if lastLine[0] != None:
-        #     lastSlope = (lastLine[3] - lastLine[1]) / (lastLine[2] - lastLine[0])
-        #     slope = (y2 - y1) / (x2 - x1)
-        #     newY = lastLine[3] + (x1 - lastLine[2]) * lastSlope
-        #     if abs(y1 - newY) < 5 and abs(math.atan2(slope, 1) - math.atan2(lastSlope, 1)) < math.pi / 30:
-        #         newLines[len(newLines) - 1] = [newLines[len(newLines) - 1][0], newLines[len(newLines) - 1][1], x2, y2]
-        #         lastLine = line[0]
-        #         continue
-            # else:
-            #     lastslope x+b=y
-            #     b = newLines[len(newLines) - 1][3]
+        if lastLine[0] != None:
+            lastSlope = (lastLine[3] - lastLine[1]) / (lastLine[2] - lastLine[0])
+            slope = (y2 - y1) / (x2 - x1)
+            newY = lastLine[3] + (x1 - lastLine[2]) * lastSlope
+            if abs(x1 - lastLine[2]) < 100 and abs(y1 - newY) < 5 and abs(math.atan2(slope, 1) - math.atan2(lastSlope, 1)) < math.pi / 50:
+                newLines[len(newLines) - 1] = [newLines[len(newLines) - 1][0], newLines[len(newLines) - 1][1], x2, y2]
+                lastLine = line[0]
+                continue
         lastLine = line[0]
         newLines.append([x1, y1, x2, y2])
     return newLines
