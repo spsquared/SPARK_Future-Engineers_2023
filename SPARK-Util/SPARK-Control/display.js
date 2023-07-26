@@ -10,6 +10,7 @@ const historyControls = {
     forward: false,
     slowmode: false,
     quickmode: false,
+    playing: false,
     maxSize: 5000,
     drawOverlays: window.localStorage.getItem('hc-drawOverlays') ?? true,
     drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
@@ -331,7 +332,7 @@ setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     fps = fpsTimes.length;
     fpsDisplay.innerText = 'FPS: ' + fps;
-}, 50);
+}, 25);
 
 // controls 0
 const hcDrawOverlays = document.getElementById('hcDrawOverlays');
@@ -385,6 +386,18 @@ historyControls.previousButton.onclick = (e) => {
     historyControls.index++;
     historyControls.slider.value = history.length - historyControls.index;
     display();
+};
+async function startPlayback() {
+    if (historyControls.playing) return;
+    historyControls.playing = true;
+    while (historyControls.index > 0 && historyControls.playing) {
+        let start = performance.now();
+        historyControls.index--;
+        historyControls.slider.value = history.length - historyControls.index;
+        display();
+        await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
+    }
+    historyControls.playing = false;
 };
 function downloadFrame() {
     const render = document.createElement('canvas');
@@ -444,8 +457,11 @@ document.addEventListener('keydown', (e) => {
         historyControls.quickmode = true;
     } else if (e.key == 'Shift') {
         historyControls.slowmode = true;
+    } else if (e.key == ' ') {
+        if (historyControls.playing) historyControls.playing = false;
+        else startPlayback();
     } else if (e.key.toLowerCase() == 's' && e.ctrlKey) {
-        downloadSession();
+        exportSession();
         e.preventDefault();
     } else if (e.key.toLowerCase() == 'o' && e.ctrlKey) {
         importSession();
@@ -469,6 +485,7 @@ historyControls.slider.onkeydown = (e) => {
 let timer = 0;
 setInterval(() => {
     timer = (timer + 1) % 20;
+    if (historyControls.playing) return;
     if (historyControls.slowmode && timer % 20 != 0) return;
     if (!historyControls.quickmode && timer % 10 != 0) return;
     if (historyControls.back && historyControls.forward) return;
