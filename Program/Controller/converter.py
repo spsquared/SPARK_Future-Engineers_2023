@@ -317,7 +317,7 @@ def processWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=[0,0,0]), 30, 200)
+    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=0), 30, 200)
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     

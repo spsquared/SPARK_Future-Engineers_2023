@@ -23,6 +23,7 @@ Image processing:
     Find wall lines
     Merge contours and wall lines
 Simple Driving:
+    
     Catagorize walls
     Filter pillars
     Calculate steering
@@ -36,8 +37,27 @@ All code for Image Processsing is in `Converter.py`
 
 Undistorting images:
 
-At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [Assembly.md] for instructions on how to get the distortion matrix.
-`cv2.remap`
+At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [ASSEMBLY.md](./ASSEMBLY.md#) for instructions on how to get the distortion matrix.
+
+The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image being cropped out.
+
+Filtering images:
+
+Using `cv2.inRange`, a mask for red colors and green colors are created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
+
+Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2.GaussianBlur`. Then, using `cv2.Canny`, edges are detected in the image.
+
+Finding Wall Heights:
+
+The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value that is 255. If no 255 values are found, `numpy.argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+
+Finding contours:
+
+Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border of 0 is added using `cv2.copyMakeBorder`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
+
+Finding Wall Lines:
+
+Using `numpy.diff`, 
 
 MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
 
