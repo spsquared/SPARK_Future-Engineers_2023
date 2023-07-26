@@ -11,23 +11,22 @@ document algorithm here lol
 
 # Algorithm
 
-It runs a constant loop on frames.
+Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`.
 
-General outline:
-
-Image processing:
-    Taking iamges
-    Undistort and filter Iamges
-    Find wall heights
-    Find contours
-    Find wall lines
-    Merge contours and wall lines
-Simple Driving:
-    
-    Catagorize walls
-    Filter pillars
-    Calculate steering
-
+## General Outline
+* Image Processing
+    1. Capture images
+    2. Undistort and filter
+    3. Find wall heights
+    4. Find contours
+    5. Find wall lines
+    6. Merge & Convert wall lines and contours
+* Simple Driving
+    1. Categorize walls
+    2. Filter traffic signals
+    3. Calculate steering
+* SLAM Driving
+    1. Non-functional (but if it works it'll be really cool)
 
 Image Processing:
 
@@ -64,6 +63,7 @@ MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
 # Code Documentation
 
 ## General Structure
+
 Control of the vehicle is handled by various modules, grouped into `IO`, `Controller`, and `Util` packages. `IO` modules handle reading sensors and controlling motors, and is used to interface with the physical vehicle. The `Controller` package contains modules that handle processing images into data, which is then fed into other modules that use that data to calculate the path the vehicle should follow. The `Util` modules are tools used to set up and debug the programs.
 
 ## IO
