@@ -21,7 +21,8 @@ Below is a detailed step-by-step guide to recreate SPARK g2.
     * [Board Setup, SSHFS, Static IP](#board-setup-sshfs--static-ip)
     * [Enable GPIO & I2C](#enable-gpio-and-i2c)
     * [Remove GUI, Autologin, & Run-on-startup](#text-only-auto-login--run-on-startup)
-    * [Camera Color Fix](#camera-color-correction)
+    * [SPARK Control Panel Setup](#setup-for-spark-control-panel)
+    * [Camera Calibration](#camera-calibration)
 
 ***
 
@@ -189,3 +190,4 @@ sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
 
 Next, calibrate the cameras. If you skip this step, the distortion correction may have error and the program may not function as intended.
 
+aaaaa @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian 
