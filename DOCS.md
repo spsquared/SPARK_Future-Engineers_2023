@@ -10,6 +10,35 @@
 document algorithm here lol
 
 # Algorithm
+
+It runs a constant loop on frames.
+
+General outline:
+
+Image processing:
+    Taking iamges
+    Undistort and filter Iamges
+    Find wall heights
+    Find contours
+    Find wall lines
+    Merge contours and wall lines
+Simple Driving:
+    Catagorize walls
+    Filter pillars
+    Calculate steering
+
+
+Image Processing:
+
+All code for Image Processsing is in `Converter.py`
+
+// buh taking images??
+
+Undistorting images:
+
+At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [Assembly.md] for instructions on how to get the distortion matrix.
+`cv2.remap`
+
 MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
 
 # Code Documentation
