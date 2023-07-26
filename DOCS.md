@@ -63,7 +63,11 @@ Using `cv2.HoughLinesP`, we can find lines on this newly created image. After so
 
 Merging Contours and Wall Lines:
 
-Using `numpy.diff`, 
+Simple Driving:
+
+Finding Car Direction:
+
+For the first 9 frames, we search for a gap on the wall to find if we are going clockwise or counterclockwise. Using `numpy.diff`, we can find differences in the wall heights. After this, we use `numpy.argmax` to find the first large difference.
 
 MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
 

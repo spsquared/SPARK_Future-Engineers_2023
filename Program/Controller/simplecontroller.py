@@ -65,8 +65,8 @@ def drive():
         rightDifferences = numpy.diff(numpy.flip(rightHeights), 3)
         leftJump = numpy.argmax(numpy.append(leftDifferences[:threeFourths] < -6, True))
         rightJump = numpy.argmax(numpy.append(rightDifferences[:threeFourths] < -6, True))
-        leftJump2 = numpy.argmax(numpy.append(leftDifferences[threeFourths:] < -6, True))
-        rightJump2 = numpy.argmax(numpy.append(rightDifferences[threeFourths:] < -6, True))
+        leftJump2 = numpy.argmax(numpy.append(numpy.flip(leftDifferences[threeFourths:]) < -6, True))
+        rightJump2 = numpy.argmax(numpy.append(numpy.flip(rightDifferences[threeFourths:]) < -6, True))
         slam.carDirectionGuesses += 1
         slam.carDirectionGuess += leftJump + rightJump2 - rightJump - leftJump2
         if slam.carDirectionGuess > 0:
