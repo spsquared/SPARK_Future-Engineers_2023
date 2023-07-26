@@ -107,29 +107,29 @@ def drive():
             else:
                 if abs(slope) < 0.5:
                     wallType = UNKNOWN
-                elif wall[0][Y] - wall[0][X] * slope < 0 and (wall[0][X] < 0 or wall[1][X] < 0):
+                elif wall[0][X] - wall[0][Y] / slope < 0:
                     wallType = LEFT
-                elif wall[0][Y] - wall[0][X] / slope > 0 and (wall[0][X] > 0 or wall[1][X] > 0):
-                    wallType = RIGHT
                 else:
-                    if slam.carDirection == CLOCKWISE:
-                        if abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
-                            wallType = RIGHT
-                        elif abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
-                            wallType = LEFT
-                        elif wall[0][Y] - wall[0][X] / slope < 0:
-                            wallType = LEFT
-                        else:
-                            wallType = RIGHT
-                    else:
-                        if abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
-                            wallType = LEFT
-                        elif abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
-                            wallType = RIGHT
-                        elif wall[0][Y] - wall[0][X] / slope < 0:
-                            wallType = LEFT
-                        else:
-                            wallType = RIGHT
+                    wallType = RIGHT
+                # else:
+                #     if slam.carDirection == CLOCKWISE:
+                #         if abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                #             wallType = RIGHT
+                #         elif abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                #             wallType = LEFT
+                #         elif wall[0][Y] - wall[0][X] / slope < 0:
+                #             wallType = LEFT
+                #         else:
+                #             wallType = RIGHT
+                #     else:
+                #         if abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                #             wallType = LEFT
+                #         elif abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                #             wallType = RIGHT
+                #         elif wall[0][Y] - wall[0][X] / slope < 0:
+                #             wallType = LEFT
+                #         else:
+                #             wallType = RIGHT
                 # if slope > 0:
                 #     wallType = LEFT
                 # else:
@@ -215,6 +215,7 @@ def drive():
                 pillar.append(GREEN_PILLAR)
     
     steering = 0
+    throttle = 80
 
     waypointX = 0
     waypointY = 0
@@ -234,15 +235,18 @@ def drive():
             steering = 100 * slam.carDirection
     
     if (centerWalls != 0 and centerWallDistance < 110) or slam.uTurning:
-        print("Corner SECTION")
         if centerWallDistance < 80 and slam.carSectionsCooldown <= 0 and slam.carSectionsExited:
             slam.carSectionsTimer += 2
             if slam.carSectionsTimer > 5:
                 slam.carSections += 1
                 slam.carSectionsCooldown = 20
                 slam.carSectionsExited = False
-        if slam.uTurnPillar != 0:
+    
+    if (centerWalls != 0 and centerWallDistance < 110 and pillar[0] == None) or slam.uTurning:
+        print("Corner SECTION")
+        if slam.uTurnPillar == RED_PILLAR:
             if slam.uTurning == False:
+                slam.uTurnStage = 0
                 io.imu.setAngle(0)
             slam.uTurning = True
             if slam.carDirectionGuess > 0:
@@ -255,10 +259,21 @@ def drive():
                 slam.carDirection = 1
                 # if centerWallDistance < 70:
                 #     steerCenter()
-            if abs(io.imu.angle()) > math.pi:
-                slam.uTurnPillar = 0
-                slam.uTurning = False
-            steering = -100
+            if slam.uTurnStage == 0:
+                steering = -100
+            elif slam.uTurnStage == 1:
+                steering = 100
+                throttle = -80
+            else:
+                throttle = -80
+                if slam.uTurnStage == 6:
+                    slam.uTurnPillar = 0
+                    slam.uTurning = False
+                slam.uTurnStage += 1
+            carAngle = io.imu.angle()
+            if slam.uTurnStage < 2 and abs(io.imu.angle()) > math.pi / 2 * 0.7:
+                slam.uTurnStage += 1
+                io.imu.setAngle(0)
                 # else:
                 #     steering = (-math.pi / 2 - carAngle) * 40
         else:
@@ -289,9 +304,9 @@ def drive():
             io.drive.steer(0)
             io.drive.throttle(0)
             return False
-        elif slam.carSections == 1 and slam.carSectionsCooldown <= 0 and pillar[0] != None and pillar[2] < 40:
+        elif slam.carSections == 8 and slam.carSectionsCooldown <= 0 and pillar[0] != None and pillar[2] < 40:
             slam.uTurnPillar = pillar[4]
-        if slam.carSections > 1 and slam.carSectionsCooldown <= 0:
+        if slam.carSections > 8 and slam.carSectionsCooldown <= 0:
             slam.uTurnPillar = 0
         # if leftWalls != 0 and rightWalls != 0:
         #     total = leftWallDistance + rightWallDistance
@@ -314,8 +329,18 @@ def drive():
             pillarDirection = 1
             if pillar[4] == GREEN_PILLAR:
                 pillarDirection = -1
-            tangentX = pillar[X] + pillar[Y] / pillar[2] * 20 * pillarDirection
-            tangentY = pillar[Y] - pillar[X] / pillar[2] * 20 * pillarDirection
+            if pillar[2] < 20:
+                tangentDistance = 20
+                tangentAngle = math.atan2(pillar[X], pillar[Y]) + math.pi / 2 * pillarDirection
+                tangentX = math.cos(tangentAngle) * tangentDistance
+                tangentY = math.sin(tangentAngle) * tangentDistance
+            else:
+                tangentDistance = math.sqrt(pillar[2]**2 - 400)
+                tangentAngle = pillar[3] - math.asin(20 / pillar[2]) * pillarDirection
+                tangentX = math.cos(tangentAngle) * tangentDistance
+                tangentY = math.sin(tangentAngle) * tangentDistance
+            # tangentX = pillar[X] + pillar[Y] / pillar[2] * 20 * pillarDirection
+            # tangentY = pillar[Y] - pillar[X] / pillar[2] * 20 * pillarDirection
             # xDistance = 0
             # yDistance = pillar[Y] - 15
             # xDistance = pillar[X]
@@ -337,10 +362,11 @@ def drive():
             #     if pillar[4] == RED_PILLAR:
             #         xDistance += 10
             #     else:
-            #         xDistance -= 10
+            #         xDistance -= 1
             waypointX = tangentX
             waypointY = tangentY
             steering = math.atan2(tangentX, tangentY) * 180
+            # steering = tangentAngle * 180
             if pillar[4] == RED_PILLAR:
                 steering += 15
             else:
@@ -377,6 +403,7 @@ def drive():
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
     
+    io.drive.throttle(throttle)
     io.drive.steer(steering)
 
     print("total: ", time.perf_counter() - totalStart)

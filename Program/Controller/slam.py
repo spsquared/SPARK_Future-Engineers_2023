@@ -114,6 +114,7 @@ carSectionsExited = True
 carSectionsCooldown = 0
 uTurnPillar = 0
 uTurning = False
+uTurnStage = 0
 # carAngle = math.pi / 2
 
 maxErrorDistance = 20

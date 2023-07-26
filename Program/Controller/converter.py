@@ -238,14 +238,19 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
 
     # Apply HoughLinesP method to 
     # to directly obtain line end points
-    lines = list(cv2.HoughLinesP(
+    lines = cv2.HoughLinesP(
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=75, # Min number of votes for valid line
+                threshold=100, # Min number of votes for valid line
                 minLineLength=20, # Min allowed length of line
                 maxLineGap=20 # Max allowed gap between line for joining them
-                ))
+                )
+    if lines is not None:
+        lines = list(lines)
+    else:
+        lines = []
+
     def lineSort(line):
         return line[0][0]
     lines.sort(key=lineSort)
