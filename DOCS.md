@@ -69,6 +69,28 @@ Finding Car Direction:
 
 For the first 9 frames, we search for a gap on the wall to find if we are going clockwise or counterclockwise. Using `numpy.diff`, we can find differences in the wall heights. After this, we use `numpy.argmax` to find the first large difference.
 
+Categorizing walls:
+
+There are 4 possible categories of walls: Left, Center, Right, and Unknown. The slope of the wall relative to the car is calculated. If the slope is relatively small and the wall is in front of the car, the wall gets classified as a center wall. Otherwise, if the slope is small but it is behind the car, the wal gets classified as Unknown. If the wall is to the left of the car, it is a left wall, if it is to the right, it is a right wall.
+
+Filtering Traffic Signals:
+
+We find the largest pillar. If there are multiple pillars in the same spot we take the average of their positions.
+
+Calculating steering:
+
+We calculate the average distance to the left walls, center walls, and right walls. Based on the relative angles of the walls to the car, we can calculate the angle of the car relative to the map. There are 3 cases for steering:
+
+1. Center wall < 110cm
+2. We are Uturning
+3. Default case
+
+In case 1, if there is no pillar detected, the car will keep straight and turn when the center wall is less than 70cm away. If there is a pillar detected, the car will turn when the pillar is close enough to pass in front or behind it.
+
+In case 2, the car uses a precalculated set of instructions for making the 3 point turn.
+
+In case 3, if there is no pillar detected, the car will keep straight. If there is a pillar, the car will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and right tangent for red pillars. Then, the car tries to keep itself pointed towards that tangent point.
+
 MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
 
 # Code Documentation
