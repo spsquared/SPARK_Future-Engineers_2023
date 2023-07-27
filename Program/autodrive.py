@@ -51,6 +51,7 @@ def main():
         io.imu.setAngle(0)
         while running:
             running = controller.drive()
+            if infinite: running = True
             # image = io.camera.read()
             # prediction = driver.predict(image, sendServer, infinite)
             # if prediction == "stop":

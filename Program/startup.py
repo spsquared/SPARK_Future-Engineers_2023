@@ -1,5 +1,6 @@
 import Jetson.GPIO as GPIO
 import time
+import subprocess
 import os
 
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     time.sleep(0.5)
     GPIO.cleanup()
 
-    os.system('node ' + path + '/Util/server.js')
+    subprocess.Popen(['node', path + 'Util/server.js'])
 
     # in competition, wait for button press
     fd = open(path + 'run_on_startup.txt', 'r')
