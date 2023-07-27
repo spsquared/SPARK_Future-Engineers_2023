@@ -5,36 +5,36 @@
 </div>
 
 # Contents
-* (oof)[./oof]
-
-document algorithm here lol
+* [Algorithm](#algorithm)
+    * [Outline](#general-outline)
+    * [Image Processing](#image-processing)
+    * [Simple Driver](#simple-driver)
+* [Code Structure](#code-structure)
 
 # Algorithm
 
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
 ## General Outline
-* [Image Pre-Processing](#image-pre-processing)
+* [Image Processing](#image-processing)
     1. Capture
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
     4. [Find wall heights](#finding-wall-heights)
-    5. [Find contours]()
-    6. Find wall lines
-    7. Merge & Convert wall lines and contours
-* Simple Driving
-    0. Find Car Direction
-    1. Categorize walls
-    2. Filter traffic signals
-    3. Calculate steering
-* SLAM Driving
+    5. [Find contours](#finding-contours)
+    6. [Find wall lines](#finding-wall-lines)
+    7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
+* [Simple Driver](#simple-driver)
+    1. [Find Car Direction](#finding-car-direction)
+    2. [Categorize Walls](#categorizing-walls)
+    3. [Filter Traffic Signals](#filtering-traffic-signals)
+    4. [Calculate Steering](#calculating-steering)
+* SLAM Driver
     1. Non-functional (but if it works it'll be really cool)
 
-## Image Pre-Processing
+## Image Processing
 
-All code for Image Processsing is in `Converter.py`
-
-// buh taking images??
+All code for image processing is in `./Program/Controller/converter.py`.
 
 ### Undistorting
 
@@ -52,7 +52,7 @@ Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2
 
 The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value that is 255. If no 255 values are found, `numpy.argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
-### Finding contours
+### Finding Contours
 
 Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border of 0 is added using `cv2.copyMakeBorder`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
 
@@ -62,23 +62,25 @@ To find wall lines, we create a new image with only the bottom of the wall. For 
 
 Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on x value, similar slope lines are merged.
 
-Merging Contours and Wall Lines:
+### Merge Contours & Wall Lines
 
-Simple Driving:
+## Simple Driver
 
-Finding Car Direction:
+All code for the simple driver is in `./Program/Controller/simpledriver.py`.
+
+### Finding Car Direction
 
 For the first 9 frames, we search for a gap on the wall to find if we are going clockwise or counterclockwise. Using `numpy.diff`, we can find differences in the wall heights. After this, we use `numpy.argmax` to find the first large difference.
 
-Categorizing walls:
+### Categorizing Walls
 
 There are 4 possible categories of walls: Left, Center, Right, and Unknown. The slope of the wall relative to the car is calculated. If the slope is relatively small and the wall is in front of the car, the wall gets classified as a center wall. Otherwise, if the slope is small but it is behind the car, the wal gets classified as Unknown. If the wall is to the left of the car, it is a left wall, if it is to the right, it is a right wall.
 
-Filtering Traffic Signals:
+### Filtering Traffic Signals
 
 We find the largest pillar. If there are multiple pillars in the same spot we take the average of their positions.
 
-Calculating steering:
+### Calculating Steering
 
 We calculate the average distance to the left walls, center walls, and right walls. Based on the relative angles of the walls to the car, we can calculate the angle of the car relative to the map. There are 3 cases for steering:
 
@@ -92,11 +94,7 @@ In case 2, the car uses a precalculated set of instructions for making the 3 poi
 
 In case 3, if there is no pillar detected, the car will keep straight. If there is a pillar, the car will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and right tangent for red pillars. Then, the car tries to keep itself pointed towards that tangent point.
 
-MAITIAN EXPLAIN ALGORITHM bETTER SO I CAN WRITE DOCUMENTATION???
-
-# Code Documentation
-
-## General Structure
+# Code Structure
 
 Control of the vehicle is handled by various modules, grouped into `IO`, `Controller`, and `Util` packages. `IO` modules handle reading sensors and controlling motors, and is used to interface with the physical vehicle. The `Controller` package contains modules that handle processing images into data, which is then fed into other modules that use that data to calculate the path the vehicle should follow. The `Util` modules are tools used to set up and debug the programs.
 
@@ -130,7 +128,7 @@ All physical IO for the vehicle is handled by the `io` module, found in `/Progra
 | `trim(trim)`              | Sets the offset for the steering servo in degrees, where 0 is no offset and positive is right.<br>`trim: int (-inf, inf)`                                                              | Nothing                         |
 | `setSmoothFactor(smooth)` | Sets the smoothing factor for steering, as a decimal, where 0 is no smoothing and approaching 1 increases smoothing. A smoothing value of 1 disables steering.<br>`smooth: int [0, 1)` | Nothing                         |
 | `getSmoothfactor()`       | Gets the current smoothing factor                                                                                                                                                      | Current smooth factor (`float`) |
-| `currentSteering`         | Gets the current steering value                                                                                                                                                        | Current steering (`float`)      |
+| `currentSteering()`         | Gets the current steering value                                                                                                                                                        | Current steering (`float`)      |
 | `stop()`                  | Stops the `drive` module. Sets throttle to 0. `steer(str)` has no effect after calling this.                                                                                           | Nothing                         |
 
 ### Camera
@@ -158,3 +156,19 @@ All physical IO for the vehicle is handled by the `io` module, found in `/Progra
 | `angle()`            | Gets the current vehicle angle around Z-axis, calculated by integrating the rotational velocity.            | Angle in radians (`float`) |
 | `setAngle(newAngle)` | Sets the vehicle angle (useful for SLAM or resetting the angle).<br>`newAngle: float (-inf, inf) default=0` | Nothing                    |
 | `stop()`             | Stops the `imu` module. Angle integration stops after calling this.                                         | Nothing                    |
+
+## Controller
+
+The driving decisions are handled by the drivers in `/Program/Controller/`. There are three controllers - `simplecontroller`, `slamcontroller`, and `borkencontroller` - though two (`slamcontroller` and `borkencontroller`) are not functional. Images are first processed by the `converter` module to generate location data used in the controllers.
+
+### Converter
+
+`converter` is the image processor that is used to extract data from images. It mainly handles undistorting, filtering, and running detection algorithms on images.
+
+| Property   | Description                                | Return Value           |
+| ---------- | ------------------------------------------ | ---------------------- |
+| `redMin`   | Minimum HSV values to be considered red.   | `tuple[int, int, int]` |
+| `redMax`   | Maximum HSV values to be considered red.   | `tuple[int, int, int]` |
+| `greenMin` | Minimum HSV values to be considered green. | `tuple[int, int, int]` |
+| `greenMax` | Maximum HSV values to be considered green. | `tuple[int, int, int]` |
+|            |                                            |                        |
