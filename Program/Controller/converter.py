@@ -11,8 +11,8 @@ import time
 # colors
 rm = redMin = (0, 80, 70)
 rM = redMax = (35, 255, 255)
-gm = greenMin = (55, 80, 45)
-gM = greenMax = (105, 255, 255)
+gm = greenMin = (55, 100, 50)
+gM = greenMax = (95, 255, 255)
 
 # camera constants
 imageWidth = 544
@@ -314,7 +314,8 @@ def processWalls(leftLines, rightLines):
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
 def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=0), 30, 200)
+    edges = cv2.Canny(cv2.medianBlur(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=0), 3), 30, 200)
+
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
