@@ -80,7 +80,9 @@ You will need (at least) the following tools:
 
 ## Chassis Assembly
 
-guide through 3d printing and assembling (oof), ensure that steering assembly instructions are clear. note that part of the motor mount has to be grinded away for some versions of the drive motor and the 3d modeled rear axle assembly cannot be printed. (buy the parts off of schumacher's website!!!) 3d printed parts are in the `/3D Models/` folder and are in the orientation they should be printed in but also include Onshape document
+Sorry! We couldn't get to the assembly instructions in time! Most of the assembly should be fairly simple, and follow the pinout sheet linked below and connect to their corresponding pins on the other boards.
+
+<!-- guide through 3d printing and assembling (oof), ensure that steering assembly instructions are clear. note that part of the motor mount has to be grinded away for some versions of the drive motor and the 3d modeled rear axle assembly cannot be printed. (buy the parts off of schumacher's website!!!) 3d printed parts are in the `/3D Models/` folder and are in the orientation they should be printed in but also include Onshape document -->
 
 pinout sheet:
 https://docs.google.com/spreadsheets/d/1WAe1DtCbWhLoC4L6yzJYvS99iHG4yAiWakqxsy8os7s/edit?usp=sharing
@@ -187,12 +189,12 @@ Reboot the Jetson Nano to test if these changes worked. No GUI should appear and
 
 Enable run-on-startup by editing `run-on-startup.txt` in the folder. Replace the first line with `true`.
 
-Go through `startup.py` and `/IO/io.py`, and change `path` to the absolute filepath of your directory (same as filepath in the previous steps)
+Go to `startup.py`, and change `path` to the absolute filepath of your directory (same as filepath in the previous steps)
 
 Example:
 
 ```
-path = '/home/nano/Documents/SPARK_FutureEngineers_2022/'
+path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 ```
 
 Reboot the Jetson Nano again

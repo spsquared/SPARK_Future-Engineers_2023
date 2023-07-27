@@ -129,7 +129,7 @@ logotext.onload = () => {
             logoctx.restore();
         }
         logoctx.fillStyle = '#202020';
-        logoctx.fillRect(-pxw * 10 * fadeX, pxh * 5 * fadeY - pxh * 5, pxw * 10, pxh * 5 + 1);
+        logoctx.fillRect(-pxw * 10 * fadeX, pxh * 5 * fadeY - pxh * 5, pxw * 10, pxh * 5 + 0.5);
         logoctx.fillRect(pxw * 10 * fadeX, pxh * 10 - pxh * 5 * fadeY, pxw * 10, pxh * 5);
         // frames.push(logocanvas.toDataURL('image/png'));
     }, 20);

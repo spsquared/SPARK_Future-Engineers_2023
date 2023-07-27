@@ -17,8 +17,6 @@ gM = greenMax = (95, 255, 255)
 # camera constants
 imageWidth = 544
 imageHeight = 308
-focalLength = 170 # 100 for zoomed out image
-focalLength = 63.4046735159
 focalLength = 80
 wallHeight = 10
 cameraOffsetX = 3

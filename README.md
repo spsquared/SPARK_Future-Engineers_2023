@@ -52,9 +52,9 @@ Here is a simple schematic for how the electronics are wired:
 ## Photos
 |                                |                                  |
 | ------------------------------ | -------------------------------- |
-| ![front](./img/docs/front.png) | ![back](./img/docs/back.png)     |
-| ![left](./img/docs/left.png)   | ![right](./img/docs/right.png)   |
-| ![top](./img/docs/top.png)     | ![bottom](./img/docs/bottom.png) |
+| ![front](./img/docs/front.jpg) | ![back](./img/docs/back.jpg)     |
+| ![left](./img/docs/left.jpg)   | ![right](./img/docs/right.jpg)   |
+| ![top](./img/docs/top.jpg)     | ![bottom](./img/docs/bottom.jpg) |
 
 ***
 
@@ -91,7 +91,7 @@ Dependencies:
 * time
 * threading
 
-The **entire** `Program` directory must be uploaded in order for the program to run.
+The **entire** `Program` directory must be uploaded in order for the program to run. Ensure the `path` constant in `startup.py` is defined properly.
 
 Example:
 
@@ -153,12 +153,15 @@ const initcolors = [
 
 # Team Photos
 
-![Team Photo](./img/team-photo.HEIC)
-![Rickroll](./img/rickroll.HEIC)
+![Team Photo](./img/team-photo.jpg)
+![Rickroll](./img/rickroll.jpg)
 
 ***
 
-# Demonstration Video
+# Demonstration Videos
+
+[![WRO 2023 Future Engineers US East Coast - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/9aOxgYunco4)
+[![WRO 2023 Future Engineers US East Coast - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/JWf80Lf_OrA)
 
 # LiPo Battery Safety Notice
 
