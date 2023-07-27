@@ -64,9 +64,11 @@ Using `cv2.HoughLinesP`, we can find lines on this newly created image. After so
 
 ### Merge Contours & Wall Lines
 
-We can find the distance to any point on the top of the wall. 
+We can find the distance to any point on the top of the wall. Diagram 1 is a side view of the camera and the wall. Our cameras are positioned at the same height as the wall, so the top of the wall forms a straight line on the image. In diagram 1, the right line is the wall, which we know is 10cm tall. `d` is the distance we want to calculate. `new f` is the new focal length, which we will calculate later. `h` is the height of the wall in pixels, which we get when we find the wall heights. The two triangles are similar, so $\frac{new f}{h} = \frac{d}{10cm}$. Isolating $d$ gives us $d = \frac{10cm \times newf}{h}$.
 
-diagram
+To calculate $new f$, we need to know the base focal length. For our undistorted image, we use an approximation of 80px as the base focal length. Diagram 2 is a birds eye view of the camera. $f$ is the base focal length, and $x$ is the x position of the wall relative to the center. Using the pythagorean theorem, we get $new f = \sqrt{f^2 + x^2}$.
+
+/img/diagram.png
 
 Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the car. For wall lines, we convert each endpoint and connect them together.
 
