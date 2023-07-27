@@ -16,7 +16,7 @@ __trim = 0.03414636758096449 # change this to calibrated number
 __thread = None
 __running = True
 def __update():
-    global __angle, __running
+    global __angle, __running, __trim
     lastTick = time.time()
     try:
         while __running:
@@ -29,6 +29,7 @@ def __update():
         server.emit('programError', str(err))
 
 def calibrate():
+    global __trim
     print('[!] CALIBRATING GYROSCOPE - DO NOT TOUCH [!]')
     anglediffs = []
     for i in range(500):
@@ -49,6 +50,7 @@ def calibrate():
 
 # gyro stuff
 def angle():
+    global __angle
     return __angle
 def setAngle(newAngle: float = 0):
     global __angle
