@@ -4,10 +4,6 @@ import Jetson.GPIO as GPIO
 from threading import Thread
 import time
 
-fd = open('/home/nano/Documents/b.txt', 'w+')
-fd.write('gpio imported')
-fd.close()
-
 # unified IO wrapper that handles all IO for the program
 
 __running = True

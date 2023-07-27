@@ -9,9 +9,6 @@ running = True
 def main():
     global running
     try:
-        fd = open('/home/nano/Documents/a.txt', 'w+')
-        fd.write('opened file')
-        fd.close()
         io.setStatusBlink(0)
         infinite = False
         wait = False
@@ -27,9 +24,6 @@ def main():
         if infinite:
             print('PROGRAM RUNNING IN INFINITE MODE!')
         io.setStatusBlink(1)
-        fd = open('/home/nano/Documents/a.txt', 'w+')
-        fd.write('button')
-        fd.close()
         if wait:
             print('Waiting for button')
             io.waitForButton()
