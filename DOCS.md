@@ -54,7 +54,7 @@ The edges image is cropped to remove areas on the top and bottom of the image. T
 
 ### Finding contours
 
-Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border of 0 is added using `cv2.copyMakeBorder`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
+Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border is added using `cv2.copyMakeBorder`. The edges are blurred using `cv2.medianBlur`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
 
 ### Finding Wall Lines
 
@@ -63,6 +63,12 @@ To find wall lines, we create a new image with only the bottom of the wall. For 
 Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on x value, similar slope lines are merged.
 
 Merging Contours and Wall Lines:
+
+We can find the distance to any point on the top of the wall. 
+
+diagram
+
+Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the car. For wall lines, we convert each endpoint and connect them together.
 
 Simple Driving:
 
@@ -88,7 +94,7 @@ We calculate the average distance to the left walls, center walls, and right wal
 
 In case 1, if there is no pillar detected, the car will keep straight and turn when the center wall is less than 70cm away. If there is a pillar detected, the car will turn when the pillar is close enough to pass in front or behind it.
 
-In case 2, the car uses a precalculated set of instructions for making the 3 point turn.
+In case 2, the car uses a precalculated set of instructions for making the 3 point turn. The gyro is used to determine how far we have turned.
 
 In case 3, if there is no pillar detected, the car will keep straight. If there is a pillar, the car will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and right tangent for red pillars. Then, the car tries to keep itself pointed towards that tangent point.
 
