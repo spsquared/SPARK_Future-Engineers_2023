@@ -249,6 +249,6 @@ sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
 
 Next, calibrate the cameras. If you skip this step, the distortion correction may have error and the program may not function as intended.
 
-aaaaa @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian @maitian 
+First, you need to run manualdrive and take pictures of a chessboard. Take roughly 10 pictures. Place these pictures in `dist/calibration`, and then run the first cell of `calibrate.ipynb`. The program should print out DIM, K, and D. If there is an error, make sure all the pictures have the full size of the chessboard. Paste these values of DIM, K, and D into the second cell where it says `# Paste matrices here`. Run the second cell to ensure the distortion matrices work. Now you can paste K and D into `converter.py`.
 
 TODO: Camera calibration, car assembly
