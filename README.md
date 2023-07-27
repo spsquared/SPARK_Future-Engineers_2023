@@ -139,7 +139,7 @@ Dependencies:
 * time
 * threading
 
-The **entire** `Program` directory must be uploaded in order for the program to run. Make sure the directory in `path` in `/Program/IO/io.py` is set correctly (you can use any existing directory with a `lock.txt`, but the uploaded folder is recommended)
+The **entire** `Program` directory must be uploaded in order for the program to run.
 
 Example:
 

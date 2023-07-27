@@ -1,10 +1,14 @@
+
+
 import Jetson.GPIO as GPIO
 from threading import Thread
 import time
 
-# unified IO wrapper that handles all IO for the program
+fd = open('/home/nano/Documents/b.txt', 'w+')
+fd.write('gpio imported')
+fd.close()
 
-__path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
+# unified IO wrapper that handles all IO for the program
 
 __running = True
 __blinkThread = None
@@ -31,13 +35,6 @@ def error():
         return True
     return False
 
-# initialize and check if io has been imported multiple times
-__fd = open(__path + '../lock.txt', 'w+')
-if __fd.read() == '1':
-    error()
-    raise Exception('[!] SETUP HAS DETECTED THAT SETUP IS CURRENTLY RUNNING. PLEASE CLOSE SETUP TO CONTINUE. [!]')
-__fd.write('1')
-__fd.close()
 GPIO.setwarnings(False)
 GPIO.cleanup()
 # GPIO.setmode(GPIO.BOARD)
@@ -54,11 +51,8 @@ from IO import camera
 from IO import imu
 
 def close():
-    global __blinkThread, __borkedThread, __running, __borked, __path, __pwm
+    global __blinkThread, __borkedThread, __running, __borked, __pwm
     if __running:
-        __fd = open(__path + '../lock.txt', 'w+')
-        __fd.write('0')
-        __fd.close()
         __running = False
         drive.stop()
         camera.stop()
