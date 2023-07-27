@@ -110,8 +110,9 @@ carAngle = 0
 
 carSections = 0
 carSectionsTimer = 0
-carSectionsExited = True
+carSectionsExited = 0
 carSectionsCooldown = 0
+carSectionsEnd = -1
 uTurnPillar = 0
 uTurning = False
 uTurnStage = 0
