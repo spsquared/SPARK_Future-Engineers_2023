@@ -1,5 +1,3 @@
-
-
 import Jetson.GPIO as GPIO
 from threading import Thread
 import time

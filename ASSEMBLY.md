@@ -110,7 +110,8 @@ To run the program on startup, first obtain the directory of the program folder 
 
 ```
 [Service]
-ExecStart=cd /filepath /usr/bin/python3 /filepath/startup.py
+WorkingDirectory=/filepath
+ExecStart=/usr/bin/python3 -u /filepath/startup.py
 User=username
 
 [Install]
