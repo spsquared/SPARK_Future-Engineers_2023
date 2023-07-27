@@ -47,7 +47,7 @@ def main():
         if sendServer:
             server.open()
         server.on('stop', stop)
-        io.drive.throttle(80)
+        io.drive.throttle(100)
         io.imu.setAngle(0)
         while running:
             running = controller.drive()

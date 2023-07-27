@@ -74,7 +74,7 @@ def drive():
             slam.carDirection = 1
         else:
             slam.carDirection = -1
-        print(leftJump + rightJump2, rightJump + leftJump2)
+        # print(leftJump + rightJump2, rightJump + leftJump2)
         # slam.findStartingPosition(leftHeights, rightHeights)
     
     processedWalls = []
@@ -306,11 +306,8 @@ def drive():
                     slam.uTurning = True
     if centerWalls == 0 or centerWallDistance > 200:
         slam.carSectionsExited -= 1
-        if slam.carSectionsExited == 0:
-            if slam.carSections == 12:
-                slam.carSectionsEnd = 20
     
-    if slam.carSectionsEnd == 0:
+    if slam.carSections == 12 and slam.carSectionsExited <= 0 and centerWalls != 0:
         io.drive.steer(0)
         io.drive.throttle(0)
         return False
@@ -366,7 +363,7 @@ def drive():
             # else:
             #     steering = (-math.pi / 2 - carAngle) * 40
     elif (centerWalls != 0 and centerWallDistance < 120 and (pillar[0] == None or (pillar[4] == RED_PILLAR and slam.carDirection == CLOCKWISE) or (pillar[4] == GREEN_PILLAR and slam.carDirection == COUNTER_CLOCKWISE) or abs(pillar[0]) > 20)) or slam.uTurning:
-        print("Corner SECTION")
+        # print("Corner SECTION")
         if pillar[0] == None:
             if centerWallDistance < 70:
                 steerCenter()
@@ -431,7 +428,7 @@ def drive():
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, int(slam.carSections), carAngle]
+            'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, slam.uTurnStage, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
@@ -440,7 +437,7 @@ def drive():
     if throttle is not None:
         io.drive.throttle(throttle)
 
-    print("total: ", time.perf_counter() - totalStart)
+    # print("total: ", time.perf_counter() - totalStart)
     # for points in leftWalls:
     #     x1,y1,x2,y2=points
     #     cv2.line(leftEdgesImg,(x1,y1),(x2,y2),125,2)
