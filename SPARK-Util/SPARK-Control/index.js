@@ -46,6 +46,7 @@ const initcolors = [
     ],
 ];
 
+appendLog('Connecting...');
 const socket = io(ip + ':4040', {
     autoConnect: false,
     reconnection: false

@@ -25,10 +25,13 @@ __running = True
 def __update():
     global __currStr, __targetStr, __steeringCenter, __steeringRange, __steeringTrim, __pwm, __running, __smoothFactor
     try:
+        lastAngle = 0
         while __running:
-            __currStr = (1 - __smoothFactor) * __currStr + __smoothFactor * __targetStr
-            __pwm.servo[1].angle = (__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim
-            time.sleep(0.05)
+            __currStr = ((1 - __smoothFactor) * __currStr) + (__smoothFactor * __targetStr)
+            angle = round((__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim)
+            if angle != lastAngle: __pwm.servo[1].angle = angle
+            lastAngle = angle
+            time.sleep(0.02)
     except Exception as err:
         traceback.print_exc()
         io.error()
@@ -42,7 +45,7 @@ def throttle(thr: int):
     if (__currThr < 0):__pwm.continuous_servo[0].throttle = (__currThr / 100) * (-__throttleRev) + 0.1
     else: __pwm.continuous_servo[0].throttle = (__currThr / 100) * __throttleFwd + 0.1
 def trim(trim: int):
-    global __steeringTrim, __pwm
+    global __steeringTrim
     __steeringTrim = trim
     steer(__currStr)
 def setSmoothFactor(smooth: float):

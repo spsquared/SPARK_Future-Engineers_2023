@@ -45,7 +45,7 @@ from IO import camera
 from IO import imu
 
 def close():
-    global __blinkThread, __borkedThread, __running, __borked, __pwm
+    global __blinkThread, __borkedThread, __running, __borked
     if __running:
         __running = False
         drive.stop()
