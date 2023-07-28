@@ -9,8 +9,8 @@ import time
 # converts images into data usable for SLAM and driving
 
 # colors
-rm = redMin = (0, 80, 70)
-rM = redMax = (35, 255, 255)
+rm = redMin = (0, 110, 70)
+rM = redMax = (20, 255, 255)
 gm = greenMin = (55, 100, 50)
 gM = greenMax = (95, 255, 255)
 
@@ -37,7 +37,7 @@ RIGHT = 1
 # contour constants
 contourSizeConstant = 0.6
 
-minContourSize = 60
+minContourSize = 80
 
 def filter(imgIn: numpy.ndarray):
     try:
