@@ -68,7 +68,7 @@ We can find the distance to any point on the top of the wall. Diagram 1 is a sid
 
 To calculate $new f$, we need to know the base focal length. For our undistorted image, we use an approximation of 80px as the base focal length. Diagram 2 is a birds eye view of the camera. $f$ is the base focal length, and $x$ is the x position of the wall relative to the center. Using the pythagorean theorem, we get $new f = \sqrt{f^2 + x^2}$.
 
-/img/diagram.png
+![focal length](/img/docs/distance-calc.png)
 
 Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the car. For wall lines, we convert each endpoint and connect them together.
 
