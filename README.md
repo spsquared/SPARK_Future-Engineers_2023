@@ -111,7 +111,7 @@ SPARK Control Panel is our own testing and debugging software.
 
 <div align=center>
 
-![SPARK Control Panel](./img/docs/SPARK_Control.png)
+![SPARK Control Panel](./img/docs/spark-control.png)
 
 </div>
 
