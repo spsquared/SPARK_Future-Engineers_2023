@@ -37,7 +37,7 @@ for (const div of toggleGens) {
 
 const initcolors = [
     [
-        [25, 255, 255],
+        [21, 255, 255],
         [0, 95, 75]
     ],
     [
@@ -58,12 +58,12 @@ let autoReconnect = true;
 socket.on('connect', () => {
     appendLog('Waiting for remote...');
     let num = Math.random();
-    socket.once('pong', function confirm(n) {
+    socket.on('pong', function confirm(n) {
         if (n == num) {
+            socket.off('pong', confirm);
             clearInterval(pingspam)
             connected = true;
             appendLog('Connected!', 'lime');
-            socket.off('pong', confirm);
             stream.disabled = false;
             capture.disabled = false;
             filterApply.disabled = false;

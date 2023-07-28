@@ -11,6 +11,8 @@
     * [Simple Driver](#simple-driver)
 * [Code Structure](#code-structure)
 
+***
+
 # Algorithm
 
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
@@ -31,6 +33,8 @@ Our program runs a constant update loop. All controller code can be found in `./
     4. [Calculate Steering](#calculating-steering)
 * SLAM Driver
     1. Non-functional (but if it works it'll be really cool)
+
+***
 
 ## Image Processing
 
@@ -68,13 +72,19 @@ We can find the distance to any point on the top of the wall. Diagram 1 is a sid
 
 To calculate $new f$, we need to know the base focal length. For our undistorted image, we use an approximation of 80px as the base focal length. Diagram 2 is a birds eye view of the camera. $f$ is the base focal length, and $x$ is the x position of the wall relative to the center. Using the pythagorean theorem, we get $new f = \sqrt{f^2 + x^2}$.
 
+<div align=center>
+
 ![focal length](/img/docs/distance-calc.png)
+
+</div>
 
 Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the car. For wall lines, we convert each endpoint and connect them together.
 
+***
+
 ## Simple Driver
 
-All code for the simple driver is in `./Program/Controller/simpledriver.py`.
+All code for the simple driver is in `./Program/Controller/simplecontroller.py`.
 
 ### Finding Car Direction
 
@@ -101,6 +111,8 @@ In case 1, if there is no pillar detected, the car will keep straight and turn w
 In case 2, the car uses a precalculated set of instructions for making the 3 point turn. The gyro is used to determine how far we have turned.
 
 In case 3, if there is no pillar detected, the car will keep straight. If there is a pillar, the car will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and right tangent for red pillars. Then, the car tries to keep itself pointed towards that tangent point.
+
+***
 
 # Code Structure
 
@@ -164,6 +176,8 @@ All physical IO for the vehicle is handled by the `io` module, found in `/Progra
 | `angle()`            | Gets the current vehicle angle around Z-axis, calculated by integrating the rotational velocity.            | Angle in radians (`float`) |
 | `setAngle(newAngle)` | Sets the vehicle angle (useful for SLAM or resetting the angle).<br>`newAngle: float (-inf, inf) default=0` | Nothing                    |
 | `stop()`             | Stops the `imu` module. Angle integration stops after calling this.                                         | Nothing                    |
+
+***
 
 ## Controller
 
