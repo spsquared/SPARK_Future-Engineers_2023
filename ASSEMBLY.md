@@ -78,6 +78,8 @@ You will need (at least) the following tools:
 
 *There may be items not listed that are used in the build guide, we apologize if that happens.*
 
+***
+
 ## Chassis Assembly
 
 Sorry! We couldn't get to the assembly instructions in time! Print out the parts located in `/dist/3D Models/`. in their given orientation (they have been oriented for the best print results) Most of the assembly should be fairly simple (the rear axle assembly should be bought from [Schumacher Racing's site](https://www.racing-cars.com/gt12/atom-2/) and NOT PRINTED), and follow the pinout sheet linked below and connect to their corresponding pins on the other boards. Some holes may need to be drilled out to make screws fit.
@@ -99,6 +101,8 @@ For soldering, we recommend soldering the regulators to their own connectors **i
 Follow the quick start guide for the ESC to solder the motor connections. Brief summary: solder A, B, and C connectors to the motor (or supplied connectors). Ensure the sensor wire is secure before mounting motor and ESC.
 
 **WARNING:** DO NOT CONNECT THE ESC 3-PIN DIRECTLY TO THE SERVO DRIVER! IT WILL BACKDRIVE THE REGULATOR AND BREAK IT! ONLY CONNECT THE PWM PIN (white)!
+
+***
 
 ## Jetson Nano Setup
 
@@ -265,5 +269,3 @@ sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
 Next, calibrate the cameras. If you skip this step, the distortion correction may have error and the program may not function as intended.
 
 First, you need to run manualdrive and take pictures of a chessboard. Take roughly 10 pictures. Place these pictures in `dist/calibration`, and then run the first cell of `calibrate.ipynb`. The program should print out DIM, K, and D. If there is an error, make sure all the pictures have the full size of the chessboard. Paste these values of DIM, K, and D into the second cell where it says `# Paste matrices here`. Run the second cell to ensure the distortion matrices work. Now you can paste K and D into `converter.py`, at line 25.
-
-TODO: Car assembly

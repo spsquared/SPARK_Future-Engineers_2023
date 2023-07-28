@@ -12,16 +12,17 @@
 
 # Contents
 * [Hardware](#hardware-documentation)
-    * [Parts List](#parts-list)
     * [Assembly Instructions & Diagrams](#assembly)
     * [Photos](#photos)
+* [Uploading Programs](#uploading-programs)
 * [Software](#software-documentation)
     * [Operating System](#operating-system)
     * [Programming Language](#programming-language)
-    * [IO](#io)
-    * [Input Processing](#input-processing)
-        * [TBD](/)
-    * [SPARK Control Panel](#spark-control)
+    * [Code Documentation](#code-documentation)
+    * [SPARK Utilities](#spark-utilities)
+        * [Setup Instructions](#using-spark-utilities)
+        * [SPARK Control Panel](#spark-control-panel)
+        * [Using SPARK Control Panel](#using-spark-control-panel-to-change-parameters)
 * [Team Photos!!](#team-photos)
 * [Demonstrations](#demonstration-video)
 * [LiPo Battery Safety Notice](#lipo-battery-safety-notice)
@@ -47,8 +48,6 @@ Here is a simple schematic for how the electronics are wired:
 
 ![Schematic](./img/docs/schematic.png)
 
-***
-
 ## Photos
 |                                |                                  |
 | ------------------------------ | -------------------------------- |
@@ -58,17 +57,19 @@ Here is a simple schematic for how the electronics are wired:
 
 ***
 
-# Uploading & Using SPARK-Util tools
+# Uploading Programs
 
 Make sure you have gone through the [Jetson Nano setup](./ASSEMBLY.md#jetson-nano-setup) steps and set your static IP, have some form of sshfs, and created the program directory. To upload the program, simply copy the contents of the "Program" into the remote directory. **Do not delete the previous directory; you will have to re-install packages!**
 
-
+***
 
 # Software Documentation
 
 ## Operating System
 
-We used the Jetson Nano's existing operating system, which is Ubuntu 18.04 with Jetpack. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in Assembly.md](./ASSEMBLY.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
+We used the Jetson Nano's existing operating system, which is Ubuntu 18.04 with Jetpack. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in ASSEMBLY.md](./ASSEMBLY.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
+
+***
 
 ## Programming Language
 
@@ -99,15 +100,25 @@ Example:
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 ```
 
+***
+
 ## Code Documentation
 
 See [DOCS.md](./DOCS.md).
 
-## SPARK Control
+***
 
-***NEEDS UPDATING***
+## SPARK Utilities
 
-SPARK Control Panel is our own testing and debugging software.
+We've created some applications to make running and debugging more streamlined. There are two main tools: [SPARK Control Panel](#spark-control-panel) and [SPARK Randomizer](#spark-randomizer).
+
+#### Using SPARK Utilities
+
+SPARK Utilities require a local server to load resources from. The runner can be found in `./SPARK-Util/` in the form of a [.bat](./SPARK-Util/static.bat) and a [Node.js JavaScript](./SPARK-Util/static.js). **You need [Node.js installed](https://nodejs.org/en/download) to use these tools!** Run the runners and navigate to [`localhost:8081`](localhost:8081) in your browser. It should automatically redirect you to the SPARK Control Panel. To open the Randomizer you can navigate to [`localhost:8081/SPARK-Randomiser`](localhost:8081/SPARK-Randomiser). (For whatever reason, the randomizer path is spelled in the british locale)
+
+#### SPARK Control Panel
+
+SPARK Control Panel is our own testing and debugging software. It allows us to log detailed information about the program's data and present it in a graphical format. SPARK Utilities work wirelessly, so as long as the network is configured correctly (see [ASSEMBLY.md](./ASSEMBLY.md#setup-for-spark-control-panel)) SPARK Control Panel can communicate with the robot.
 
 <div align=center>
 
@@ -115,9 +126,11 @@ SPARK Control Panel is our own testing and debugging software.
 
 </div>
 
-#### Setup
+It contains a dropdown to [modify the filter items on-the-fly](#using-spark-control-panel-to-change-parameters)
 
-SPARK Control Panel requires some setup to use. See [Assembly.MD](./Assembly.md#setup-for-spark-control-panel) for more information.
+*Note: SPARK Control Panel is not necessary and competition runs have this feature turned off to reduce latency.*
+
+#### Using SPARK Control Panel to Change Parameters
 
 It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply change the HSV sliders and click the "Capture" button with the "Filter" option on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
 
@@ -149,6 +162,16 @@ const initcolors = [
 
 **Don't forget to upload the `Program` folder again!**
 
+#### SPARK Randomizer
+
+SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache-inducing randomizing system is too much to handle. SPARK Randomizer generates valid cases (as long as the right button is clicked) according to the 2022 rules.
+
+<div align=center>
+
+![SPARK Randomizer](./img/docs/spark-randomizer.png)
+
+</div>
+
 ***
 
 # Team Photos
@@ -162,6 +185,8 @@ const initcolors = [
 
 [![WRO 2023 Future Engineers US East Coast - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/9aOxgYunco4)
 [![WRO 2023 Future Engineers US East Coast - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/JWf80Lf_OrA)
+
+***
 
 # LiPo Battery Safety Notice
 
