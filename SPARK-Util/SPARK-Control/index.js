@@ -421,7 +421,8 @@ document.getElementById('disconnect').onclick = async () => {
         }
     }, 1500);
     let badidea = setInterval(() => {
-        displayImg.src = './rickastley.png';
+        display0Img.src = './assets/rickastley.png';
+        display1Img.src = './assets/rickastley.png';
         if (Math.random() < 0.1) {
             let chars = 'AβCDEFGHIJKLMNOPQRSTUVWYZaβcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-=_+`~[]\\{}|;\':",./<>?';
             let random = '';
@@ -468,19 +469,6 @@ async function animateAll() {
             animate(slider, Math.round(Math.random()));
         }, Math.random() * 3000);
     }
-    let angle = 0;
-    let distance = 0;
-    setInterval(() => {
-        // angle += Math.random()*0.8-0.4;
-        angle += Math.random() * 0.5;
-        distance = Math.max(-110, Math.min(distance + Math.random() * 20 - 10, 110));
-        let x = Math.cos(angle) * distance;
-        let y = Math.sin(angle) * distance;
-        joystickPin.style.bottom = 114 - y + 'px';
-        joystickPin.style.right = 114 - x + 'px';
-        sliderX.style.bottom = 140 - y + 'px';
-        sliderY.style.right = 140 - x + 'px';
-    }, 20);
     let backwards = false;
     setInterval(() => {
         if (backwards) {

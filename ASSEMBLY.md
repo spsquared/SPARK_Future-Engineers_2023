@@ -80,7 +80,13 @@ You will need (at least) the following tools:
 
 ## Chassis Assembly
 
-Sorry! We couldn't get to the assembly instructions in time! Most of the assembly should be fairly simple, and follow the pinout sheet linked below and connect to their corresponding pins on the other boards.
+Sorry! We couldn't get to the assembly instructions in time! Print out the parts located in `/dist/3D Models/`. in their given orientation (they have been oriented for the best print results) Most of the assembly should be fairly simple, and follow the pinout sheet linked below and connect to their corresponding pins on the other boards. Some holes may need to be drilled out to make screws fit.
+
+If you need a reference model we have our [OnShape document linked](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590). (The ESC and IMU have not been modeled. The ESC goes in the rear, within the raised rectangle. The IMU should be mounted to the 4 unpopulated holes with M2.5 screws.)
+
+For I2C connectors, Yellow should be SCL and blue should be SDA; there is no set standard.
+
+Follow instructions within the ESC quick start guide 
 
 <!-- guide through 3d printing and assembling (oof), ensure that steering assembly instructions are clear. note that part of the motor mount has to be grinded away for some versions of the drive motor and the 3d modeled rear axle assembly cannot be printed. (buy the parts off of schumacher's website!!!) 3d printed parts are in the `/3D Models/` folder and are in the orientation they should be printed in but also include Onshape document -->
 
