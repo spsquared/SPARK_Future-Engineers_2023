@@ -55,8 +55,9 @@ let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
+    appendLog('Waiting for remote...');
     let num = Math.random();
-    socket.on('pong', function confirm(n) {
+    socket.once('pong', function confirm(n) {
         if (n == num) {
             clearInterval(pingspam)
             connected = true;
