@@ -9,10 +9,10 @@ import time
 # converts images into data usable for SLAM and driving
 
 # colors
-rm = redMin = (0, 80, 70)
-rM = redMax = (35, 255, 255)
-gm = greenMin = (55, 100, 50)
-gM = greenMax = (95, 255, 255)
+rm = redMin = (0, 110, 70)
+rM = redMax = (20, 255, 255)
+gm = greenMin = (55, 0, 0)
+gM = greenMax = (105, 255, 255)
 
 # camera constants
 imageWidth = 544
@@ -37,7 +37,7 @@ RIGHT = 1
 # contour constants
 contourSizeConstant = 0.6
 
-minContourSize = 60
+minContourSize = 100
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -90,7 +90,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 159
 wallEnd = imageHeight
-contourStart = 150
+contourStart = 160
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
@@ -168,9 +168,9 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:2] = 0
-    croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
-    croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
-    croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
+    croppedLeft[:int(halfWidth * 3 / 4),:3] = 0
+    # croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
+    # croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
@@ -324,8 +324,8 @@ def getContours(imgIn: numpy.ndarray):
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
             y = int(moment["m01"] / moment["m00"])
-            if y > 9:
-                processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
+            # if y > 9:
+            processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):

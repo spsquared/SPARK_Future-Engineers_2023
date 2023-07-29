@@ -21,6 +21,8 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
+speed = 85
+
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer

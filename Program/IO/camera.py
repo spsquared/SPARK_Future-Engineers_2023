@@ -45,8 +45,8 @@ def stop():
     if __running:
         __running = False
         __thread.join()
-        __camera0.__running = False
-        __camera1.__running = False
+        __camera0.stop()
+        __camera1.stop()
 
 # read current image
 def read():

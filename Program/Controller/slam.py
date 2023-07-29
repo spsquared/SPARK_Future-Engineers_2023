@@ -117,6 +117,7 @@ uTurnPillar = 0
 uTurning = False
 uTurnStage = 0
 uTurnGyroAngle = 0
+uTurnWallDistance = 0
 # carAngle = math.pi / 2
 
 maxErrorDistance = 20
