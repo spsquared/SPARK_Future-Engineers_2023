@@ -23,6 +23,11 @@ def main():
                     sendServer = False
         if infinite:
             print('PROGRAM RUNNING IN INFINITE MODE!')
+        if sendServer:
+            server.open()
+            controller.setMode(sendServer=True)
+        else:
+            controller.setMode(sendServer=False)
         io.setStatusBlink(1)
         if wait:
             print('Waiting for button')
@@ -44,13 +49,8 @@ def main():
             io.close()
             print('stopped by 3 laps')
             exit(0)
-        if sendServer:
-            server.open()
-            controller.setMode(sendServer=True)
-        else:
-            controller.setMode(sendServer=False)
         server.on('stop', stop)
-        io.drive.throttle(80)
+        io.drive.throttle(85)
         io.imu.setAngle(0)
         while running:
             running = controller.drive()
@@ -75,6 +75,12 @@ def main():
         io.error()
         server.emit('programError', str(err))
     running = False
+    io.drive.throttle(0)
+    try:
+        while True:
+            time.sleep(99)
+    except KeyboardInterrupt:
+        pass
     io.close()
     server.close()
 

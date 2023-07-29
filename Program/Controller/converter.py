@@ -11,8 +11,8 @@ import time
 # colors
 rm = redMin = (0, 110, 70)
 rM = redMax = (20, 255, 255)
-gm = greenMin = (55, 100, 50)
-gM = greenMax = (95, 255, 255)
+gm = greenMin = (55, 0, 0)
+gM = greenMax = (105, 255, 255)
 
 # camera constants
 imageWidth = 544
@@ -37,7 +37,7 @@ RIGHT = 1
 # contour constants
 contourSizeConstant = 0.6
 
-minContourSize = 80
+minContourSize = 100
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -90,7 +90,7 @@ wallStartRight = 154
 undistortedWallStartLeft = 166
 undistortedWallStartRight = 159
 wallEnd = imageHeight
-contourStart = 150
+contourStart = 160
 distanceTable = [[], []]
 halfWidth = round(imageWidth / 2)
 def generateDistanceTable():
