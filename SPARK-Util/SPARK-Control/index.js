@@ -37,12 +37,12 @@ for (const div of toggleGens) {
 
 const initcolors = [
     [
-        [21, 255, 255],
-        [0, 95, 75]
+        [20, 255, 255],
+        [0, 110, 70]
     ],
     [
-        [110, 255, 255],
-        [30, 30, 40]
+        [105, 255, 255],
+        [55, 0, 0]
     ],
 ];
 
@@ -335,6 +335,7 @@ function setColors(colors) {
     }
 };
 {
+    // THIS IS BORKEN
     let k = 0;
     for (let i = 0; i < 2; i++) {
         for (let j = 0; j < 6; j++) {

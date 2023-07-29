@@ -331,7 +331,7 @@ function drawWaypoints(waypoints, pos) {
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     fps = fpsTimes.length;
-    fpsDisplay.innerText = 'FPS: ' + fps;
+    if (!historyControls.playing) fpsDisplay.innerText = 'FPS: ' + fps;
 }, 25);
 
 // controls 0
@@ -395,6 +395,7 @@ async function startPlayback() {
         historyControls.index--;
         historyControls.slider.value = history.length - historyControls.index;
         display();
+        fpsDisplay.innerText = 'FPS: ' + history[historyControls.index].fps ?? 10;
         await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
     }
     historyControls.playing = false;
