@@ -168,9 +168,9 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:2] = 0
-    croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
-    croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
-    croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
+    croppedLeft[:int(halfWidth * 3 / 4),:3] = 0
+    # croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
+    # croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
@@ -324,8 +324,8 @@ def getContours(imgIn: numpy.ndarray):
             moment = cv2.moments(contour)
             x = int(moment["m10"] / moment["m00"])
             y = int(moment["m01"] / moment["m00"])
-            if y > 9:
-                processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
+            # if y > 9:
+            processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):

@@ -23,6 +23,8 @@ turnCooldown = 40
 passedPillar = 0
 lastSend = 0
 
+speed = 85
+
 debug = False
 useServer = True
 infinite = False

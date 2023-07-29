@@ -42,16 +42,10 @@ def main():
             io.close()
             print('stopped by emergency stop button')
             exit(0)
-        def stop2(data):
-            global running
-            running = False
-            io.setStatusBlink(0)
-            io.close()
-            print('stopped by 3 laps')
-            exit(0)
         server.on('stop', stop)
-        io.drive.throttle(85)
+        io.drive.throttle(controller.speed)
         io.imu.setAngle(0)
+        waitForStop = False
         while running:
             running = controller.drive()
             if infinite: running = True
@@ -67,6 +61,7 @@ def main():
             #     break
             # io.drive.steer(prediction)
             # print("Current Prediction: " + str(prediction))
+        print('Stopped by driver command')
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
@@ -74,10 +69,11 @@ def main():
         traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
+        waitForStop = True
     running = False
     io.drive.throttle(0)
     try:
-        while True:
+        while True and waitForStop:
             time.sleep(99)
     except KeyboardInterrupt:
         pass

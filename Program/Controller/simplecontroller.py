@@ -23,6 +23,17 @@ NO_DIRECTION = 0
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = -1
 
+# WARNING !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
+# WARNNIG !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
+# WARNING !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
+NO_PILLARS = True
+if NO_PILLARS:
+    print("[!] [!] [!] [!] No pillar mode is on! [!] [!] [!] [!]") # oh noes no pillar mode is on
+
+# speed !!!!
+speed = 85
+# speed = 95
+
 useServer = True
 def setMode(sendServer: bool = None):
     global useServer
@@ -209,22 +220,23 @@ def drive():
     maxContourDistance = 200
     
     pillar = [None]
-    for contour in rContours:
-        if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
-            if pillar[0] != None and pillar[4] == RED_PILLAR and math.sqrt((pillar[0] - contour[0])**2 + (pillar[1] - contour[1])**2) < 40:
-                pillar[0] = (pillar[0] + contour[0]) / 2
-                pillar[1] = (pillar[1] + contour[1]) / 2
-            else:
-                pillar = contour
-                pillar.append(RED_PILLAR)
-    for contour in gContours:
-        if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
-            if pillar[0] != None and pillar[4] == GREEN_PILLAR and math.sqrt((pillar[0] - contour[0])**2 + (pillar[1] - contour[1])**2) < 40:
-                pillar[0] = (pillar[0] + contour[0]) / 2
-                pillar[1] = (pillar[1] + contour[1]) / 2
-            else:
-                pillar = contour
-                pillar.append(GREEN_PILLAR)
+    if not NO_PILLARS:
+        for contour in rContours:
+            if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
+                if pillar[0] != None and pillar[4] == RED_PILLAR and math.sqrt((pillar[0] - contour[0])**2 + (pillar[1] - contour[1])**2) < 40:
+                    pillar[0] = (pillar[0] + contour[0]) / 2
+                    pillar[1] = (pillar[1] + contour[1]) / 2
+                else:
+                    pillar = contour
+                    pillar.append(RED_PILLAR)
+        for contour in gContours:
+            if contour[2] < maxContourDistance and (pillar[0] == None or contour[2] < pillar[2]):
+                if pillar[0] != None and pillar[4] == GREEN_PILLAR and math.sqrt((pillar[0] - contour[0])**2 + (pillar[1] - contour[1])**2) < 40:
+                    pillar[0] = (pillar[0] + contour[0]) / 2
+                    pillar[1] = (pillar[1] + contour[1]) / 2
+                else:
+                    pillar = contour
+                    pillar.append(GREEN_PILLAR)
     
     steering = 0
     throttle = None
@@ -351,25 +363,25 @@ def drive():
             # if centerWallDistance < 70:
             #     steerCenter()
         if slam.uTurnStage == 0:
-            throttle = 85
+            throttle = speed
             if centerWalls > 0 and centerWallDistance < 85:
                 slam.uTurnStage += 1
         elif slam.uTurnStage == 1:
             steering = -100
-            throttle = 85
+            throttle = speed
         elif slam.uTurnStage <= 9:
-            throttle = 85
+            throttle = speed
             slam.uTurnStage += 1
             if (pillar[0] != None and abs(pillar[0]) < 100 and pillar[1] < 50) or (centerWalls > 0 and centerWallDistance < 50):
                 slam.uTurnStage = 10
                 slam.uTurnGyroAngle = io.imu.angle()
         elif slam.uTurnStage == 10:
             steering = 100
-            throttle = -85
+            throttle = -speed
         elif slam.uTurnStage <= 17:
             if slam.uTurnStage <= 13:
                 steering = 50
-            throttle = 85
+            throttle = speed
             slam.uTurnStage += 1
         else:
             slam.uTurnPillar = 0
@@ -380,7 +392,7 @@ def drive():
         #     slam.uTurnPillar = 0
         #     slam.uTurning = False
             # if slam.uTurnStage <= 6:
-            #     throttle = -80
+            #     throttle = -speed
             # else:
             #     if slam.uTurnStage <= 10:
             #         steering = 50
@@ -396,8 +408,14 @@ def drive():
     elif (centerWalls != 0 and centerWallDistance < 120 and (pillar[0] == None or (pillar[4] == RED_PILLAR and slam.carDirection == CLOCKWISE) or (pillar[4] == GREEN_PILLAR and slam.carDirection == COUNTER_CLOCKWISE) or abs(pillar[0]) > 20)) or slam.uTurning:
         # print("Corner SECTION")
         if pillar[0] == None:
-            if centerWallDistance < 70:
-                steerCenter()
+            if NO_PILLARS:
+                if centerWallDistance < 85:
+                    steerCenter()
+            else:
+                if centerWallDistance < 80:
+                    steerCenter()
+                # if centerWallDistance < 70:
+                #     steerCenter()
         elif pillar[4] == RED_PILLAR:
             # if centerWallDistance < 120:
             if pillar[1] < 45 + 25 * slam.carDirection:
