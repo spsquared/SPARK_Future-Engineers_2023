@@ -11,7 +11,7 @@ import time
 # colors
 rm = redMin = (0, 110, 70)
 rM = redMax = (20, 255, 255)
-gm = greenMin = (55, 0, 0)
+gm = greenMin = (50, 0, 50)
 gM = greenMax = (105, 255, 255)
 
 # camera constants
@@ -37,7 +37,7 @@ RIGHT = 1
 # contour constants
 contourSizeConstant = 0.6
 
-minContourSize = 100
+minContourSize = 90
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -168,9 +168,9 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     # adjust for camera tilt
     croppedLeft[:halfWidth,:2] = 0
-    croppedLeft[:int(halfWidth * 3 / 4),:3] = 0
-    # croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
-    # croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
+    croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
+    croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
+    croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
     # find the bottom edge of the wall
     rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
