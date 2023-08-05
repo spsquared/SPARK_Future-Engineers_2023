@@ -60,6 +60,7 @@ def getSmoothFactor():
     return __smoothFactor
 
 def stop():
+    global __running
     steer(0)
     throttle(0)
     __running = False
