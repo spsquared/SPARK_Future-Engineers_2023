@@ -14,8 +14,6 @@ if __name__ == '__main__':
     time.sleep(0.5)
     GPIO.cleanup()
 
-    subprocess.Popen(['node', path + 'Util/server.js'])
-
     # in competition, wait for button press
     fd = open(path + 'run_on_startup.txt', 'r')
     run_startup = fd.readlines()[0]

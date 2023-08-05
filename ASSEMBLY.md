@@ -202,6 +202,20 @@ sudo chmod 644 /etc/systemd/system/spark_startup.service
 systemctl enable /etc/systemd/system/spark_startup.service
 ```
 
+If you wish to use the SPARK Control Panel, repeat the above steps to create a second startup service (`spark_server.service`). The contents should look like the below:
+
+```
+[Service]
+WorkingDirectory=/filepath
+ExecStart=/usr/local/bin/node /filepath/Util/server.js
+User=username
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Make sure to add the same permissions as `spark_startup.service`.
+
 Reboot the Jetson Nano to test if these changes worked. No GUI should appear and you shuld be automatically logged in.
 
 Enable run-on-startup by editing `run-on-startup.txt` in the folder. Replace the first line with `true`.

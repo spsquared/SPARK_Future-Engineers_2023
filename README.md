@@ -11,6 +11,7 @@
 ***
 
 # Contents
+* [High-Level Overview](#high-level-overview)
 * [Hardware](#hardware-documentation)
     * [Assembly Instructions & Diagrams](#assembly)
     * [Photos](#photos)
@@ -26,6 +27,12 @@
 * [Team Photos!!](#team-photos)
 * [Demonstrations](#demonstration-video)
 * [LiPo Battery Safety Notice](#lipo-battery-safety-notice)
+
+***
+
+# High-Level Overview
+
+TODO
 
 ***
 
