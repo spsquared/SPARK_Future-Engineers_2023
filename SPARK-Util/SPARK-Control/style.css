@@ -446,7 +446,7 @@ canvas {
     background-color: lightgray;
     transition: 200ms ease transform;
     transform: translateY(-100%);
-    --tabImage: url(./assets/arrow-down.svg)
+    --tabImage: url(./assets/arrow-down.svg);
 }
 #dropdownTab {
     position: absolute;

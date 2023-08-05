@@ -367,7 +367,7 @@ document.getElementById('disconnect').onclick = async () => {
     autoReconnect = false;
     if (rickrolled) return;
     rickrolled = true;
-    // animateAll();
+    animateAll();
     let rickrolls = [];
     let ready = 0;
     for (let i = 0; i < 100; i++) {
@@ -405,7 +405,7 @@ document.getElementById('disconnect').onclick = async () => {
             return;
         }
         let stupid = window.open('about:blank', '_blank', 'width=250; height=242');
-        stupid.document.write('<style>body { overflow: hidden; }</style><img src="./rickastley.png" style="position: absolute; top: 0; left: 0; width: 100vw;">');
+        stupid.document.write('<style>body { overflow: hidden; }</style><img src="./assets/rickastley.png" style="position: absolute; top: 0; left: 0; width: 100vw;">');
         if (stupid != null) {
             aaaaaaaaaaaa.push(stupid);
             let bad = setInterval(() => {
@@ -462,9 +462,9 @@ async function animate(slider, backwards) {
     }
 };
 async function animateAll() {
+    let lsd = 0;
     setInterval(() => {
-        // document.body.style.backgroundColor = 'hsl(' + sliders[0].value*2 + ' ' + sliders[3].value*(100/255) + '% ' + sliders[6].value*(50/255) + '%)';
-        document.body.style.backgroundColor = 'hsl(' + sliders[0].value * 2 + ' ' + sliders[3].value * (100 / 255) + '% 50%)';
+        document.body.style.backgroundColor = `hsl(${lsd = (lsd + 5) % 360}, 100%, 50%)`;
     }, 50);
     for (let slider of sliders) {
         setTimeout(() => {
@@ -474,12 +474,14 @@ async function animateAll() {
     let backwards = false;
     setInterval(() => {
         if (backwards) {
-            displayBack();
+            historyControls.back = true;
+            historyControls.forward = false;
         } else {
-            displayFront();
+            historyControls.back = false;
+            historyControls.forward = true;
         }
-        if (index == 0) backwards = true;
-        if (index == history.length - 1) backwards = false;
+        if (historyControls.index == 0) backwards = true;
+        if (historyControls.index == history.length - 1) backwards = false;
     }, 1);
 };
 async function animateAll2() {

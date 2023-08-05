@@ -36,7 +36,7 @@ logotext.onload = () => {
         }
     };
     let logodraw = setInterval(() => {
-        // cameraShake *= 1.4;
+        // cameraShake *= 1.32;
         // cameraShake = 200;
         // cameraShake = 500;
         timer += 20;

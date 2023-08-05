@@ -172,48 +172,46 @@ var drawPillar = function (color, rotations, position) {
     ctx.translate(-155, -155);
 }
 var images = [];
-images.push(new Image());
-images[images.length - 1].src = "./images/grep.png";
-images.push(new Image());
-images[images.length - 1].src = "./images/meadowguarder.png";
-images.push(new Image());
-images[images.length - 1].src = "./images/oceanguarder.png";
-images.push(new Image());
-images[images.length - 1].src = "./images/Ten Eyed One.png";
-images.push(new Image());
-images[images.length - 1].src = "./images/the blob.png";
-images.push(new Image());
-images[images.length - 1].src = './images/piston-large.png';
-images.push(new Image());
-images[images.length - 1].src = './images/Preview.png';
-images.push(new Image());
-images[images.length - 1].src = './images/World.png';
-images.push(new Image());
-images[images.length - 1].src = './images/11-25-21-b.png';
-images.push(new Image());
-images[images.length - 1].src = './images/mountainguarder.png';
-images.push(new Image());
-images[images.length - 1].src = './images/rickastley.png';
+const addTheImage = (theId) => {
+    var theImage = new Image();
+    let theSource = "./images/" + theId
+    theImage.src = theSource
+    images.push(theImage)
+};
+addTheImage('grep.png');
+addTheImage('meadowguarder.png');
+addTheImage('oceanguarder.png');
+addTheImage('mountainguarder.png')
+addTheImage('Ten Eyed One.png');
+addTheImage('the blob.png');
+addTheImage('piston-large.png');
+addTheImage("Preview.png");
+addTheImage("Preview.png");
+addTheImage("World.png");
+addTheImage("11-25-21-b.png")
+addTheImage("rickastley.png")
+addTheImage("cover.png")
+addTheImage('Screenshot (13473).png');
 var drawGaruderPillar = function (rotations, position) {
     ctx.translate(155, 155);
     ctx.rotate(0.5 * Math.PI * rotations);
     if (position === 0) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -52.5, -112.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -52.5, -112.5, 20, 20);
     }
     else if (position === 1) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -2.5, -112.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -2.5, -112.5, 20, 20);
     }
     else if (position === 2) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], 47.5, -112.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], 47.5, -112.5, 20, 20);
     }
     else if (position === 3) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -52.5, -92.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -52.5, -92.5, 20, 20);
     }
     else if (position === 4) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -2.5, -92.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], -2.5, -92.5, 20, 20);
     }
     else if (position === 5) {
-        ctx.drawImage(images[Math.floor(Math.random() * images.length)], 47.5, -92.5, 15, 15);
+        ctx.drawImage(images[Math.floor(Math.random() * images.length)], 47.5, -92.5, 20, 20);
     }
     ctx.rotate(-0.5 * Math.PI * rotations);
     ctx.translate(-155, -155);
