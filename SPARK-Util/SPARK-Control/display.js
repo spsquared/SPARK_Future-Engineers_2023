@@ -20,6 +20,7 @@ const historyControls = {
 };
 const fpsTimes = [];
 let fps = 0;
+let LBJrttAAAyqhh0E0T2v3u02f10f6q00d04w1E0T3v6u03f0q00d04S____00000000000E0b4hp1f0aow8so0F2e7600 = 'autosuggest';
 const fpsDisplay = document.getElementById('fps');
 const display0Img = document.getElementById('display0Img');
 const display1Img = document.getElementById('display1Img');
