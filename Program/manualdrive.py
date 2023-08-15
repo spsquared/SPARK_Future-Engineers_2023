@@ -96,8 +96,8 @@ def main():
                 io.imu.calibrate()
             elif msg == 'stop':
                 break
-            elif msg != '':
-                server.emit('message', msg)
+            # elif msg != '':
+            #     server.emit('message', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
