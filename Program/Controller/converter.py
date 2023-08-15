@@ -11,7 +11,7 @@ import time
 # colors
 rm = redMin = (0, 110, 70)
 rM = redMax = (20, 255, 255)
-gm = greenMin = (50, 0, 50)
+gm = greenMin = (50, 50, 50)
 gM = greenMax = (105, 255, 255)
 
 # camera constants
