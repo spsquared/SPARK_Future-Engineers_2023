@@ -65,6 +65,7 @@ def main():
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
+        print('oof!!!11!!!!!')
         print('---------------------- AN ERROR OCCURED ----------------------')
         traceback.print_exc()
         io.error()
