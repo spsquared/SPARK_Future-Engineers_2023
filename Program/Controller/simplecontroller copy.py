@@ -218,6 +218,18 @@ def drive():
         carAngle /= centerWalls + leftWalls + rightWalls
     
     slam.carAngle = (carAngle + slam.carAngle) / 2
+    if slam.carDirection == CLOCKWISE:
+        slam.carX = leftWallDistance
+        slam.carY = 300 - centerWallDistance
+    else:
+        slam.carX = 300 - rightWallDistance
+        slam.carY = centerWallDistance
+    
+    for i in range(slam.carSections):
+        x = slam.carY
+        y = 300 - slam.carX
+        slam.carX = x
+        slam.carY = y
 
     maxContourDistance = 200
     
