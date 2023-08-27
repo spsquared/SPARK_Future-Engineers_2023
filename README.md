@@ -6,7 +6,7 @@
 
 ***
 
-**Official GitHub repository for WRO USA Future Engineers team SPARK 2023. All code, documentation, and files are located here.**
+**Official GitHub repository for WRO USA Future Engineers team SPÄRK 2023. All code, documentation, and files are located here.**
 
 ***
 
@@ -36,7 +36,7 @@ TODO
 
 ***
 
-###### Hardware Documentation
+# Hardware Documentation
 
 ## ASSEMBLY
 
