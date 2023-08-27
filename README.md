@@ -36,9 +36,9 @@ TODO
 
 ***
 
-# Hardware Documentation
+###### Hardware Documentation
 
-## Assembly
+## ASSEMBLY
 
 Shortened assembly instructions:
 1. Print 3D models
@@ -49,7 +49,7 @@ Shortened assembly instructions:
 6. Attach electronics
 7. Attach upper platform
 
-#### **For an actual build guide, go to [ASSEMBLY.md](./ASSEMBLY.md)**
+#### **For an actual build guide, go to [Assembly.md](./Assembly.md)**
 
 Here is a simple schematic for how the electronics are wired:
 

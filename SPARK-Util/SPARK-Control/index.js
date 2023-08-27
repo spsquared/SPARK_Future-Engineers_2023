@@ -357,7 +357,7 @@ socket.on('colors', setColors);
 //     send('stop', {});
 // };
 document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() == 'c' && e.ctrlKey) socket.emit('stop');
+    if (e.key.toLowerCase() == 'c' && e.ctrlKey && !e.shiftKey) socket.emit('stop');
 });
 
 let rickrolled = false;
