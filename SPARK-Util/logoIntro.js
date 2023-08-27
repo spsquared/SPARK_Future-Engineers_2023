@@ -118,7 +118,6 @@ logotext.onload = () => {
             logoctx.rotate(Math.random() * cameraShake * 0.004 - cameraShake * 0.002);
             logoctx.translate(-window.innerWidth / 2, -window.innerHeight / 2);
             logoctx.fillStyle = '#47D89F';
-            logoctx.fillStyle = 'rgb(123,500,9)';
             logoctx.fillRect(pxw * 2 - pxh, pxh * 4.5, pxh, pxh);
             logoctx.fillStyle = '#3C70FF';
             logoctx.fillRect(pxw * 2 - pxh * 2, (pxh * 5 - pxh * 1.5) * logoY, pxh * 2, pxh);

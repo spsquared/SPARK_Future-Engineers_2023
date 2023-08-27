@@ -36,7 +36,7 @@ TODO
 
 ***
 
-###### Hardware Documentation
+# Hardware Documentation
 
 ## ASSEMBLY
 
