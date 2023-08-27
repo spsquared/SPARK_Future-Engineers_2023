@@ -103,6 +103,8 @@ def drive():
     rightWallAngle = 0
 
     carAngle = 0
+    drCarX = slam.carX + math.cos(slam.carAngle) * slam.carSpeed
+    drCarY = slam.carY + math.sin(slam.carAngle) * slam.carSpeed
 
     for wall in walls:
         UNKNOWN = -1
@@ -217,14 +219,19 @@ def drive():
     if centerWalls + leftWalls + rightWalls != 0:
         carAngle /= centerWalls + leftWalls + rightWalls
     
-    slam.carAngle = (carAngle + slam.carAngle) / 2
+    lmCarX = 0
+    lmCarY = 0
     if slam.carDirection == CLOCKWISE:
-        slam.carX = leftWallDistance
-        slam.carY = 300 - centerWallDistance
+        lmCarX = leftWallDistance
+        lmCarY = 300 - centerWallDistance
     else:
-        slam.carX = 300 - rightWallDistance
-        slam.carY = centerWallDistance
+        lmCarX = 300 - rightWallDistance
+        lmCarY = centerWallDistance
     
+    slam.carAngle = (carAngle + slam.carAngle) / 2
+    slam.carSpeed = math.sqrt(math.pow((drCarX + lmCarX) / 2 - slam.carX, 2) + math.pow((drCarY + lmCarY) / 2 - slam.carY, 2))
+    slam.carX = (drCarX + lmCarX) / 2
+    slam.carY = (drCarY + lmCarY) / 2
     for i in range(slam.carSections):
         x = slam.carY
         y = 300 - slam.carX
