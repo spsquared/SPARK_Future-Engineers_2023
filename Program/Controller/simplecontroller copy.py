@@ -343,6 +343,7 @@ def drive():
         if slam.carSectionsCooldown <= 0 and slam.carSectionsExited <= 0:
             slam.carSectionsTimer += 2
             if slam.carSectionsTimer > 3:
+                slam.carAngle += slam.carDirection * math.pi / 2
                 slam.carSections += 1
                 slam.carSectionsCooldown = 3000
                 slam.carSectionsExited = 3
