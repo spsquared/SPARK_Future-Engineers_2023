@@ -232,7 +232,7 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
             if i >= 0 and i < imageWidth:
                 heights[i] = 0
     
-    img = numpy.zeros((wallEnd - undistortCrop, imageWidth), dtype="uint8")
+    img = numpy.zeros((wallEnd - undistortCrop + 1, imageWidth), dtype="uint8")
     
     indices = numpy.dstack((heights, numpy.arange(imageWidth)))
     img[tuple(numpy.transpose(indices))] = 255
