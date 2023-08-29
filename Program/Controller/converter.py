@@ -18,6 +18,7 @@ gM = greenMax = (105, 255, 255)
 imageWidth = 544
 imageHeight = 308
 focalLength = 100
+focalLength = 80
 wallHeightOffset = 3
 wallHeight = 10
 cameraOffsetX = 3
@@ -64,7 +65,7 @@ def filter(imgIn: numpy.ndarray):
         grayImage = cv2.cvtColor(imgIn, cv2.COLOR_RGB2GRAY)
         blurredImg = cv2.GaussianBlur(grayImage, (3, 3), 0)
         # edge detection
-        lower = 40
+        lower = 30
         upper = 120
         edgesImg = cv2.Canny(blurredImg, lower, upper, 3)
         # combine images
@@ -164,20 +165,20 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     global wallHeight, undistortedWallStartLeft, undistortedWallStartRight, wallEnd
     
     # crop and then flip
-    croppedLeftBottom = numpy.hstack((numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
-    croppedRightBottom = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
-    croppedLeftTop = numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[:undistortedWallStartLeft - undistortCrop],1), 0, 1),cropEndArray))
-    croppedRightTop = numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[:undistortedWallStartRight - undistortCrop],1), 0, 1),cropEndArray))
+    croppedLeft = numpy.hstack((numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
+    croppedRight = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight - undistortCrop:wallEnd - undistortCrop], 0, 1),cropEndArray))
+    # croppedLeftTop = numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[:undistortedWallStartLeft - undistortCrop],0), 0, 1),cropEndArray))
+    # croppedRightTop = numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[:undistortedWallStartRight - undistortCrop],0), 0, 1),cropEndArray))
 
     # adjust for camera tilt
-    # croppedLeft[:halfWidth,:2] = 0
-    # croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
-    # croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
-    # croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
+    croppedLeft[:halfWidth,:2] = 0
+    croppedLeft[:int(halfWidth * 3 / 4),:5] = 0
+    croppedLeft[:int(halfWidth / 2 + 10),:8] = 0
+    croppedLeft[:int(halfWidth / 4 + 10),:11] = 0
 
     # find the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeftBottom, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop, axis=1), dtype="int")
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRightBottom, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop, axis=1), dtype="int")
+    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="int")
+    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="int")
 
     return [rawHeightsLeft, rawHeightsRight]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
