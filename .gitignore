@@ -4,3 +4,7 @@ Program/Util/auth.json
 SPARK-Util/SPARK-Control/config.js
 
 __pycache__/
+
+# dumb apple things
+*.DS_Store
+*._DS_Store
