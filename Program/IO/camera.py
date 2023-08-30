@@ -56,8 +56,8 @@ def read():
 # make folder if doesn't exist
 if not os.path.exists(os.path.abspath('image_out/')):
     os.mkdir(os.path.abspath('image_out/'))
-if not os.path.exists(os.path.abspath('image_out/')):
-    os.mkdir(os.path.abspath('image_out/'))
+if not os.path.exists(os.path.abspath('filtered_out/')):
+    os.mkdir(os.path.abspath('filtered_out/'))
 
 __serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 
