@@ -106,11 +106,12 @@ def drive():
     # drCarX = slam.carX + math.cos(slam.carAngle) * slam.carSpeed
     # drCarY = slam.carY + math.sin(slam.carAngle) * slam.carSpeed
 
+    UNKNOWN = -1
+    LEFT = 0
+    CENTER = 1
+    RIGHT = 2
+
     for wall in walls:
-        UNKNOWN = -1
-        LEFT = 0
-        CENTER = 1
-        RIGHT = 2
         wallType = 0
         
         if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
