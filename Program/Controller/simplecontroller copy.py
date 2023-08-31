@@ -111,11 +111,19 @@ def drive():
     CENTER = 1
     RIGHT = 2
 
+    sin = math.sin(-slam.carAngle)
+    cos = math.cos(-slam.carAngle)
+
     for wall in walls:
         x1 = wall[0][X]
         y1 = wall[0][Y]
         x2 = wall[1][X]
         y2 = wall[1][Y]
+
+        wall[0][X] = x1 * cos + y1 * sin
+        wall[0][Y] = x1 * -sin + y1 * cos
+        wall[1][X] = x2 * cos + y2 * sin
+        wall[1][Y] = x2 * -sin + y2 * cos
 
         wallType = 0
         
@@ -126,10 +134,10 @@ def drive():
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(slope, 1)
 
-            if abs(angle + slam.carAngle) < 30 / 180 * math.pi and wall[0][Y] - wall[0][X] * slope > 10:
+            if abs(angle) < 30 / 180 * math.pi and wall[0][Y] - wall[0][X] * slope > 10:
                 wallType = CENTER
             else:
-                if abs(angle + slam.carAngle) < 30 / 180 * math.pi:
+                if abs(angle) < 30 / 180 * math.pi:
                     wallType = UNKNOWN
                 elif wall[0][X] - wall[0][Y] / slope < 0:
                     wallType = LEFT
@@ -180,6 +188,8 @@ def drive():
             distance = abs(wall[0][Y])
             angle = 0
             wallType = CENTER
+
+        angle += slam.carAngle
         
         if distance > 200:
             processedWalls.append([UNKNOWN, distance, angle])
