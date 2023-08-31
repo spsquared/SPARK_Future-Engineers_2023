@@ -92,7 +92,7 @@ def main():
                 server.emit('predictStreamState', [False])
                 print('Ended prediction stream')
         def resetPrediction(data):
-            io.camera.converter.slam.carAngle = 0
+            controller.slam.carAngle = 0
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):

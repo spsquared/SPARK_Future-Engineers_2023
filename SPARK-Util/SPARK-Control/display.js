@@ -589,7 +589,7 @@ capture.onclick = () => {
 };
 predict.onclick = () => {
     streamToggle.checked = !streamToggle.checked;
-    socket.emit('predict', {});
+    socket.emit('predictStream', {});
 };
 resetPredictor.onclick = () => {
     socket.emit('resetPrediction', {});
