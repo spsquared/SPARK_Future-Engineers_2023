@@ -112,6 +112,11 @@ def drive():
     RIGHT = 2
 
     for wall in walls:
+        x1 = wall[0][X]
+        y1 = wall[0][Y]
+        x2 = wall[1][X]
+        y2 = wall[1][Y]
+
         wallType = 0
         
         if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
