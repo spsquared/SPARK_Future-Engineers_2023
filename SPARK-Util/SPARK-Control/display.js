@@ -398,13 +398,13 @@ async function startPlayback() {
     historyControls.playing = true;
     let start = performance.now();
     while (historyControls.index > 0 && historyControls.playing) {
-        if (historyControls[historyControls.index].frameTime !== undefined) await new Promise((resolve) => setTimeout(resolve, Math.min(historyControls[historyControls.index].frameTime - (performance.now() - start), 1000)));
+        if (history[historyControls.index].frameTime !== undefined) await new Promise((resolve) => setTimeout(resolve, Math.min(history[historyControls.index].frameTime - (performance.now() - start), 1000)));
         start = performance.now();
         historyControls.index--;
         historyControls.slider.value = history.length - historyControls.index;
         display();
         fpsDisplay.innerText = 'FPS: ' + history[historyControls.index].fps ?? 10;
-        if (historyControls[historyControls.index].frameTime === undefined) await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
+        if (history[historyControls.index].frameTime === undefined) await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
     }
     historyControls.playing = false;
 };
@@ -542,6 +542,7 @@ const captureModSave = document.getElementById('captureModSave');
 const captureModFilter = document.getElementById('captureModFilter');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
+const predict = document.getElementById('predict');
 const streamToggle = document.getElementById('streamToggle');
 socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
@@ -569,6 +570,9 @@ stream.onclick = () => {
 };
 capture.onclick = () => {
     socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, colors: getColors() });
+};
+predict.onclick = () => {
+    socket.emit('predict', { });
 };
 stream.disabled = true;
 capture.disabled = true;
