@@ -576,3 +576,4 @@ predict.onclick = () => {
 };
 stream.disabled = true;
 capture.disabled = true;
+predict.disabled = true;
