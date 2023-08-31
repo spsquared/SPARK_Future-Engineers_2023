@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Controller import slamcontroller
+from Controller import simplecontroller as controller
 from Controller import converter
 import traceback
 import cv2
@@ -65,6 +65,8 @@ def main():
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
                     io.camera.startStream(data[0]['filter'])
+        def predict():
+            controller.drive(True)
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):
@@ -74,6 +76,7 @@ def main():
         server.on('drive', drive)
         server.on('capture', capture)
         server.on('stream', stream)
+        server.on('predict', predict)
         server.on('getColors', getColors)
         server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)
