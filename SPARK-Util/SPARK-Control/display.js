@@ -19,6 +19,7 @@ const historyControls = {
     rawDump: false
 };
 const fpsTimes = [];
+let lastFrame = performance.now();
 let fps = 0;
 let LBJrttAAAyqhh0E0T2v3u02f10f6q00d04w1E0T3v6u03f0q00d04S____00000000000E0b4hp1f0aow8so0F2e7600 = 'autosuggest';
 const fpsDisplay = document.getElementById('fps');
@@ -51,8 +52,10 @@ function addCapture(images) {
             encoding + images[1],
             images[3] ?? 0
         ],
+        frameTime: performance.now() - lastFrame,
         fps: fps
     });
+    lastFrame = performance.now();
     if (images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
@@ -83,8 +86,10 @@ function addData(data) {
         steering: Math.min(100, Math.max(-100, data.steering)),
         waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
         rawDump: data.raw,
+        frameTime: performance.now() - lastFrame,
         fps: fps
     });
+    lastFrame = performance.now();
     if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
     let scrollWith = historyControls.slider.value == historyControls.slider.max;
@@ -391,13 +396,15 @@ historyControls.previousButton.onclick = (e) => {
 async function startPlayback() {
     if (historyControls.playing) return;
     historyControls.playing = true;
+    let start = performance.now();
     while (historyControls.index > 0 && historyControls.playing) {
-        let start = performance.now();
+        if (historyControls[historyControls.index].frameTime !== undefined) await new Promise((resolve) => setTimeout(resolve, Math.min(historyControls[historyControls.index].frameTime - (performance.now() - start), 1000)));
+        start = performance.now();
         historyControls.index--;
         historyControls.slider.value = history.length - historyControls.index;
         display();
         fpsDisplay.innerText = 'FPS: ' + history[historyControls.index].fps ?? 10;
-        await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
+        if (historyControls[historyControls.index].frameTime === undefined) await new Promise((resolve) => setTimeout(resolve, (1000 / Math.max(1, history[historyControls.index].fps ?? 10)) - (performance.now() - start)));
     }
     historyControls.playing = false;
 };
