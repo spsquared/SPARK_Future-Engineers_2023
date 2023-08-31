@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 import traceback
 import numpy
 import cv2
@@ -93,7 +93,7 @@ wallStartRight = 154
 undistortedWallStartLeft = [169, 167, 161, 165]
 undistortedWallStartRight = [152, 152, 154, 157]
 
-maximumTopWallHeightLeft = 7
+maximumTopWallHeightLeft = 4
 maximumTopWallHeightRight = 4
 
 wallEnd = imageHeight
