@@ -36,6 +36,11 @@
                                 <div class="generateToggle" toggleID="captureModSave" toggleLabel="Save:"></div>
                                 <div class="generateToggle" toggleID="captureModFilter" toggleLabel="Filter:"></div>
                             </div>
+                            <div id="predictButtonContainer">
+                                <button id="predict" class="largeButton">START PREDICTIONS</button>
+                                <input type="checkbox" id="predictToggle">
+                                <button id="resetPredictor" class="largeButton">RESET</button>
+                            </div>
                             <div class="divider"></div>
                             <div id="mapControls">
                                 <div class="generateToggle" toggleID="hcDrawOverlays" toggleLabel="Overlays:"></div>
@@ -80,7 +85,7 @@
     </div>
     <div id="rightPane">
         <canvas id="map"></canvas>
-        <input type="checkbox" id="dropdownTabCheckbox"> <!-- wow it's teh dumb CSS thing again -->
+        <input type="checkbox" id="dropdownTabCheckbox"> <!-- wow it's teh dumb CS​S thing again -->
         <div id="dropdown">
             <div id="filterAdjust">
                 <div id="filterAdjustLabels">

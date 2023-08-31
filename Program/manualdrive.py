@@ -1,11 +1,12 @@
 from IO import io
 from Util import server
-from Controller import slamcontroller
+from Controller import simplecontroller as controller
 from Controller import converter
 import traceback
 import cv2
 import base64
 import time
+from threading import Thread
 
 running = True
 def main():
@@ -15,6 +16,7 @@ def main():
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         streaming = False
+        predictStreaming = False
         def drive(data):
             io.drive.throttle(data[0]['throttle'])
             io.drive.steer(data[0]['steering'])
@@ -65,15 +67,45 @@ def main():
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
                     io.camera.startStream(data[0]['filter'])
+        def predictStream(data):
+            nonlocal predictStreaming
+            predictStreaming = not predictStreaming
+            if predictStreaming:
+                def loop():
+                    nonlocal predictStreaming
+                    try:
+                        while predictStreaming:
+                            start = time.time()
+                            controller.drive(True)
+                            time.sleep(max(0.1-(time.time()-start), 0))
+                    except Exception as err:
+                        traceback.print_exc()
+                        io.error()
+                        server.emit('programError', str(err))
+                thread = Thread(target = loop)
+                thread.start()
+                server.emit('message', 'Began prediction stream')
+                server.emit('predictStreamState', [True])
+                print('Began prediction stream')
+            else:
+                server.emit('message', 'Ended prediction stream')
+                server.emit('predictStreamState', [False])
+                print('Ended prediction stream')
+        def resetPrediction(data):
+            controller.slam.carAngle = 0
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):
             converter.setColors(data[0], True)
         def getStreamState(data):
+            nonlocal predictStreaming
             server.emit('streamState', io.camera.streamState())
+            server.emit('predictStreamState', [predictStreaming])
         server.on('drive', drive)
         server.on('capture', capture)
         server.on('stream', stream)
+        server.on('predictStream', predictStream)
+        server.on('resetPrediction', resetPrediction)
         server.on('getColors', getColors)
         server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)

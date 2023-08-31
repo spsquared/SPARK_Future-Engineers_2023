@@ -28,7 +28,7 @@ def setMode(sendServer: bool = None):
     global useServer
     if sendServer != None: useServer = sendServer
 
-def drive():
+def drive(manual: bool = False):
 # def drive(img):
     imgs = io.camera.io.camera.io.camera.io.camera.io.camera.read()
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(imgs[0]))
@@ -79,7 +79,9 @@ def drive():
     # for l in leftWalls:
     #     cv2.line(read[0], (l[0], l[1] + 14), (l[2], l[3] + 14), (255, 0, 0), 1)
     # return read[0]
+    if manual: return True
     io.drive.steer(steering)
+    return True
 
 def getSteering(leftHeights, rightHeights, rLeftContours, gLeftContours, rRightContours, gRightContours):
     global contourSizeThreshold

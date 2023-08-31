@@ -1,5 +1,5 @@
-# from IO import io
-# from Util import server
+from IO import io
+from Util import server
 import traceback
 import numpy
 import cv2
@@ -19,6 +19,7 @@ imageWidth = 544
 imageHeight = 308
 focalLength = 100
 focalLength = 80
+focalLength = 100
 wallHeightOffset = 3
 wallHeight = 10
 cameraOffsetX = 3

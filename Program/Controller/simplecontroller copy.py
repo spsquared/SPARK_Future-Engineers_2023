@@ -103,8 +103,6 @@ def drive():
     rightWallAngle = 0
 
     carAngle = 0
-    # drCarX = slam.carX + math.cos(slam.carAngle) * slam.carSpeed
-    # drCarY = slam.carY + math.sin(slam.carAngle) * slam.carSpeed
 
     for wall in walls:
         UNKNOWN = -1
@@ -120,10 +118,10 @@ def drive():
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(slope, 1)
 
-            if abs(angle + slam.carAngle) < 30 / 180 * math.pi and wall[0][Y] - wall[0][X] * slope > 10:
+            if slope < 0.85 + 0.4 * slam.carDirection and slope > -0.85 + 0.4 * slam.carDirection and wall[0][Y] - wall[0][X] * slope > 10:
                 wallType = CENTER
             else:
-                if abs(angle + slam.carAngle) < 30 / 180 * math.pi:
+                if abs(slope) < 0.5:
                     wallType = UNKNOWN
                 elif wall[0][X] - wall[0][Y] / slope < 0:
                     wallType = LEFT
@@ -218,8 +216,6 @@ def drive():
     
     if centerWalls + leftWalls + rightWalls != 0:
         carAngle /= centerWalls + leftWalls + rightWalls
-    
-    slam.carAngle = (carAngle + slam.carAngle) / 2
 
     maxContourDistance = 200
     
@@ -326,7 +322,6 @@ def drive():
         if slam.carSectionsCooldown <= 0 and slam.carSectionsExited <= 0:
             slam.carSectionsTimer += 2
             if slam.carSectionsTimer > 3:
-                slam.carAngle += slam.carDirection * math.pi / 2
                 slam.carSections += 1
                 slam.carSectionsCooldown = 3000
                 slam.carSectionsExited = 3
@@ -481,7 +476,7 @@ def drive():
             ],
             'distances': [],
             'heights': [leftHeights.tolist(), rightHeights.tolist()],
-            'pos': [150, 150,  carAngle],
+            'pos': [slam.carX, slam.carY, slam.carAngle],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
