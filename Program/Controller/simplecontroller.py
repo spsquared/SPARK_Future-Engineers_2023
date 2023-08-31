@@ -111,6 +111,8 @@ def drive():
     CENTER = 1
     RIGHT = 2
 
+    slam.carAngle = math.pi / 2
+
     sin = math.sin(-slam.carAngle)
     cos = math.cos(-slam.carAngle)
 
