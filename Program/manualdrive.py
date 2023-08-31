@@ -67,6 +67,8 @@ def main():
                     io.camera.startStream(data[0]['filter'])
         def predict(data):
             controller.drive(True)
+        def resetPrediction(data):
+            slam.carAngle = 0
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):
