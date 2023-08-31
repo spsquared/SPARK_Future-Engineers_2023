@@ -65,7 +65,7 @@ def main():
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
                     io.camera.startStream(data[0]['filter'])
-        def predict():
+        def predict(data):
             controller.drive(True)
         def getColors(data):
             server.emit('colors', converter.getColors())
