@@ -7,7 +7,7 @@ div {
 }
 img {
     -webkit-user-drag: none;
-    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 canvas {
     image-rendering: crisp-edges;
