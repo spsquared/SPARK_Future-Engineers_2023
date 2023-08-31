@@ -39,7 +39,7 @@ def setMode(sendServer: bool = None):
     global useServer
     if sendServer != None: useServer = sendServer
 
-def drive():
+def drive(manual: bool = False):
 # def drive(img):
     totalStart = time.perf_counter()
     start = time.perf_counter()
@@ -111,8 +111,6 @@ def drive():
     CENTER = 1
     RIGHT = 2
 
-    slam.carAngle = math.pi / 2
-
     sin = math.sin(-slam.carAngle)
     cos = math.cos(-slam.carAngle)
 
@@ -122,10 +120,10 @@ def drive():
         x2 = wall[1][X]
         y2 = wall[1][Y]
 
-        wall[0][X] = x1 * cos + y1 * sin
-        wall[0][Y] = x1 * -sin + y1 * cos
-        wall[1][X] = x2 * cos + y2 * sin
-        wall[1][Y] = x2 * -sin + y2 * cos
+        wall[0][X] = x1 * cos + y1 * -sin
+        wall[0][Y] = x1 * sin + y1 * cos
+        wall[1][X] = x2 * cos + y2 * -sin
+        wall[1][Y] = x2 * sin + y2 * cos
 
         wallType = 0
         
@@ -512,6 +510,8 @@ def drive():
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
     
+    if manual:
+        return True
     io.drive.steer(steering)
     if throttle is not None:
         io.drive.throttle(throttle)
