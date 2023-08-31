@@ -592,7 +592,7 @@ predict.onclick = () => {
     socket.emit('predict', {});
 };
 resetPredictor.onclick = () => {
-    socket.emit('resetController', {});
+    socket.emit('resetPrediction', {});
 };
 stream.disabled = true;
 capture.disabled = true;
