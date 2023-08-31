@@ -543,7 +543,9 @@ const captureModFilter = document.getElementById('captureModFilter');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
 const predict = document.getElementById('predict');
+const resetPredictor = document.getElementById('resetPredictor');
 const streamToggle = document.getElementById('streamToggle');
+const predictToggle = document.getElementById('predictToggle');
 socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
     streamModFilter.checked = state[1];
@@ -564,6 +566,20 @@ socket.on('streamState', (state) => {
         sounds.stop();
     }
 });
+socket.on('predictStreamState', (state) => {
+    predictToggle.checked = state[0];
+    if (predictToggle.checked) {
+        predict.style.backgroundColor = 'red';
+        predict.style.borderColor = 'firebrick';
+        predict.innerText = 'STOP PREDICTIONS';
+        sounds.start();
+    } else {
+        predict.style.backgroundColor = '';
+        predict.style.borderColor = '';
+        predict.innerText = 'START PREDICTIONS';
+        sounds.stop();
+    }
+});
 stream.onclick = () => {
     streamToggle.checked = !streamToggle.checked;
     socket.emit('stream', { save: streamModSave.checked, filter: streamModFilter.checked, colors: getColors() });
@@ -572,8 +588,13 @@ capture.onclick = () => {
     socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, colors: getColors() });
 };
 predict.onclick = () => {
-    socket.emit('predict', { });
+    streamToggle.checked = !streamToggle.checked;
+    socket.emit('predict', {});
+};
+resetPredictor.onclick = () => {
+    socket.emit('resetController', {});
 };
 stream.disabled = true;
 capture.disabled = true;
 predict.disabled = true;
+resetPredictor.disabled = true;
