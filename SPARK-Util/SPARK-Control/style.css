@@ -222,7 +222,7 @@ canvas {
     margin-top: 8px;
     text-align: center;
 }
-#streamButtonContainer, #captureButtonContainer {
+#streamButtonContainer, #captureButtonContainer, #predictButtonContainer {
     display: flex;
     width: 100%;
     margin-top: 8px;
@@ -231,7 +231,7 @@ canvas {
 #streamToggle {
     display: none;
 }
-#stream, #capture {
+#stream, #capture, #predict {
     flex-grow: 1;
     background-color: lime;
     border-color: limegreen;

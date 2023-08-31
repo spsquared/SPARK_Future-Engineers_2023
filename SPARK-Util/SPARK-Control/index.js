@@ -66,6 +66,7 @@ socket.on('connect', () => {
             appendLog('Connected!', 'lime');
             stream.disabled = false;
             capture.disabled = false;
+            predict.disabled = false;
             filterApply.disabled = false;
             socket.emit('getStreamState');
             socket.emit('getColors');
@@ -83,6 +84,7 @@ let ondisconnect = () => {
     setTimeout(reconnect, 10000);
     stream.disabled = true;
     capture.disabled = true;
+    predict.disabled = true;
     filterApply.disabled = true;
     sounds.disconnect();
 };
