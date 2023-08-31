@@ -68,7 +68,7 @@ def main():
         def predict(data):
             controller.drive(True)
         def resetPrediction(data):
-            slam.carAngle = 0
+            io.camera.converter.slam.carAngle = 0
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):
@@ -79,6 +79,7 @@ def main():
         server.on('capture', capture)
         server.on('stream', stream)
         server.on('predict', predict)
+        server.on('resetController', resetPrediction)
         server.on('getColors', getColors)
         server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)
