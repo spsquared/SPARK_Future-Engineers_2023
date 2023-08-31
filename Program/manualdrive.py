@@ -91,6 +91,8 @@ def main():
                 server.emit('message', 'Ended prediction stream')
                 server.emit('predictStreamState', [False])
                 print('Ended prediction stream')
+        def resetPrediction(data):
+            io.camera.converter.slam.carAngle = 0
         def getColors(data):
             server.emit('colors', converter.getColors())
         def setColors(data):
@@ -103,6 +105,7 @@ def main():
         server.on('capture', capture)
         server.on('stream', stream)
         server.on('predictStream', predictStream)
+        server.on('resetPrediction', resetPrediction)
         server.on('getColors', getColors)
         server.on('setColors', setColors)
         server.on('getStreamState', getStreamState)
