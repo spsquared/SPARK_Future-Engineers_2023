@@ -135,7 +135,6 @@ function display() {
         mctx.clearRect(0, 0, 620, 620);
     }
 };
-// debug displays
 // screen-space overlays
 function drawOverlays(data) {
     function draw(camera, ctx) {
@@ -144,7 +143,7 @@ function drawOverlays(data) {
         // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
         for (let i in data.heights[camera]) {
-            ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
+            ctx.fillRect(i, 308, 1, -data.heights[camera][i]);
         }
         ctx.globalAlpha = 1;
         // contours and contour areas
@@ -169,7 +168,7 @@ function drawOverlays(data) {
             // wall lines
             ctx.globalAlpha = 1;
             ctx.setLineDash([]);
-            ctx.strokeStyle = 'rgb(255, 0, 255)'; // spink
+            ctx.strokeStyle = 'rgb(255, 0, 255)'; // (was) spink
             ctx.lineWidth = 2;
             ctx.beginPath();
             for (let houghLine of data.wallLines[camera]) {
