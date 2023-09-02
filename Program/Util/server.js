@@ -48,8 +48,7 @@ hostio.on('connection', (socket) => {
     socket.on('timeout', handleDisconnect);
     socket.on('error', handleDisconnect);
     if (hostConnectionCount > 1) {
-        io.emit('multipleHosts');
-        hostio.emit('multipleHosts');
+        console.error('More than one host server connected!')
     }
     socket.onAny((event, ...args) => { // python socketio only allows 1 argument but sure
         io.emit(event, ...args);
