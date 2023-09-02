@@ -1,6 +1,5 @@
 import Jetson.GPIO as GPIO
 import time
-import subprocess
 import os
 
 path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'

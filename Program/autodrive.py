@@ -49,18 +49,6 @@ def main():
         while running:
             running = controller.drive()
             if infinite: running = True
-            # image = io.camera.read()
-            # prediction = driver.predict(image, sendServer, infinite)
-            # if prediction == "stop":
-            #     # drive.throttle(-20)
-            #     io.drive.steer(0)
-            #     # time.sleep(0.2)
-            #     io.drive.throttle(0)
-            #     time.sleep(0.2)
-            #     stop2(1)
-            #     break
-            # io.drive.steer(prediction)
-            # print("Current Prediction: " + str(prediction))
         print('Stopped by driver command')
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')

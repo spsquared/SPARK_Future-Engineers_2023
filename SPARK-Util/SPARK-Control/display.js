@@ -142,8 +142,14 @@ function drawOverlays(data) {
         ctx.globalAlpha = 0.5;
         // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
-        for (let i in data.heights[camera]) {
-            ctx.fillRect(i, 308, 1, -data.heights[camera][i]);
+        if (data.heights[camera].length === 544) {
+            for (let i = 0; i < 272; i++) {
+                ctx.fillRect(i, data.heights[camera + 272], 1, data.heights[camera][i]);
+            }
+        } else {
+            for (let i in data.heights[camera]) {
+                ctx.fillRect(i, wallStart, 1, data.heights[camera][i]);
+            }
         }
         ctx.globalAlpha = 1;
         // contours and contour areas
