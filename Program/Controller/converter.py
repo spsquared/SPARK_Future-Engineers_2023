@@ -1,5 +1,5 @@
-from IO import io
-from Util import server
+# from IO import io
+# from Util import server
 import traceback
 import numpy
 import cv2
@@ -93,7 +93,7 @@ wallStartRight = 154
 undistortedWallStartLeft = [169, 167, 161, 165]
 undistortedWallStartRight = [152, 152, 154, 157]
 
-maximumTopWallHeightLeft = 7
+maximumTopWallHeightLeft = 4
 maximumTopWallHeightRight = 4
 
 wallEnd = imageHeight
@@ -199,7 +199,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # rawHeightsLeft = numpy.append(numpy.append(numpy.array(numpy.argmax(croppedLeftBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedLeftBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop2, axis=1), dtype="int")),numpy.array(numpy.argmax(croppedLeftBottom3, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop3, axis=1), dtype="int"))
     # rawHeightsRight = numpy.append(numpy.array(numpy.argmax(croppedRightBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedRightBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop2, axis=1), dtype="int"))
 
-    return [numpy.array(rawHeightsLeft,dtype="int"), numpy.array(rawHeightsRight,dtype="int")]
+    return [numpy.array(rawHeightsLeft,dtype="int") + 1, numpy.array(rawHeightsRight,dtype="int") + 1]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
     return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
