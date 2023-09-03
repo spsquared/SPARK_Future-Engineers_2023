@@ -215,7 +215,7 @@ function drawLandmarks(landmarks) {
     for (let i = 16; i < 24; i++) {
         if (landmarks[i][2]) mctx.fillRect(landmarks[i][0] - 2.5, landmarks[i][1] - 2.5, 5, 5);
     }
-    // draw landmark POI "dots"
+    // draw landmark POI dots
     mctx.fillStyle = 'rgb(255, 255, 255)';
     for (let landmark of landmarks) {
         if (landmark[2]) mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
