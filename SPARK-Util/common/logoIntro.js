@@ -12,7 +12,7 @@ logocanvas.style = `
 document.body.appendChild(logocanvas);
 const logoctx = logocanvas.getContext('2d');
 const logotext = new Image();
-logotext.src = './../logoIntroText.png';
+logotext.src = '/common/logoIntroText.png';
 logotext.onload = () => {
     let infinite = false;
     let logoY = -0.9;

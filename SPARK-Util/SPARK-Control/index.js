@@ -547,3 +547,6 @@ async function animateAll2() {
         document.body.style.transform = "scale(" + scale + ") rotate(" + rotate + "deg) translate(" + (Math.random() * 30 - 15) + "px, " + (Math.random() * 30 - 15) + "px)";
     }, 5);
 };
+
+document.getElementById('slideoutTabCheckbox').addEventListener('click', () => sounds.click());
+document.getElementById('dropdownTabCheckbox').addEventListener('click', () => sounds.click());
