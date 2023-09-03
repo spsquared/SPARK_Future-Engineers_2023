@@ -2,7 +2,8 @@ const log = document.getElementById('log');
 function appendLog(text, color, clean = true) {
     const div = document.createElement('div');
     div.classList.add('logBlock');
-    (clean ? div.innerHTML : div.innerText) = text;
+    if (clean) div.innerHTML = text;
+    else div.innerText = text;
     div.style.backgroundColor = color ?? '';
     let scroll = false;
     if (log.scrollTop + log.clientHeight >= log.scrollHeight - 5) scroll = true;
@@ -131,7 +132,7 @@ socket.on('message', (msg) => {
     sounds.ding();
 });
 socket.on('unsafe', (msg) => {
-    appendLog(msg, '', false);
+    appendLog(msg, clean = false);
     sounds.ding();
 });
 socket.on('programError', (err) => {
