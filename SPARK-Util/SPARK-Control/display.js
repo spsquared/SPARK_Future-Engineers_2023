@@ -142,9 +142,9 @@ function drawOverlays(data) {
         ctx.globalAlpha = 0.5;
         // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
-        if (data.heights[camera].length === 544) {
+        if (data.heights[camera + 2] !== undefined) {
             for (let i = 0; i < 272; i++) {
-                ctx.fillRect(i, data.heights[camera + 272], 1, data.heights[camera][i]);
+                ctx.fillRect(i, data.heights[camera + 2][i], 1, data.heights[camera][i]);
             }
         } else {
             for (let i in data.heights[camera]) {
