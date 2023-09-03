@@ -131,7 +131,7 @@ socket.on('message', (msg) => {
     sounds.ding();
 });
 socket.on('unsafe', (msg) => {
-    appendLog(msg, clean = false);
+    appendLog(msg, '', false);
     sounds.ding();
 });
 socket.on('programError', (err) => {
