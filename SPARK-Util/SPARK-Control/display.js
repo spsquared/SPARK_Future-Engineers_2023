@@ -143,7 +143,7 @@ function drawOverlays(data) {
         // wall heights
         ctx.fillStyle = 'rgb(255, 255, 255)';
         if (data.heights[camera + 2] !== undefined) {
-            for (let i = 0; i < 272; i++) {
+            for (let i in data.heights[camera]) {
                 ctx.fillRect(i, data.heights[camera + 2][i], 1, data.heights[camera][i]);
             }
         } else {
