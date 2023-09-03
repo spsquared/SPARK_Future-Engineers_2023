@@ -22,7 +22,7 @@ const sounds = {
 };
 for (let id in sounds) {
     const request = new XMLHttpRequest();
-    request.open('GET', `./sounds/${id}.mp3`, true);
+    request.open('GET', `/common/sounds/${id}.mp3`, true);
     request.responseType = 'arraybuffer';
     request.onload = () => {
         if (request.status >= 200 && request.status < 400) audioContext.decodeAudioData(request.response, (buf) => {
@@ -65,5 +65,3 @@ document.addEventListener('visibilitychange', () => {
 document.querySelectorAll('button').forEach(el => el.addEventListener('click', () => sounds.click()));
 document.querySelectorAll('.slider').forEach(el => el.addEventListener('input', () => sounds.tick()));
 document.querySelectorAll('.toggleInput').forEach(el => el.addEventListener('click', () => sounds.click()));
-document.getElementById('slideoutTabCheckbox').addEventListener('click', () => sounds.click());
-document.getElementById('dropdownTabCheckbox').addEventListener('click', () => sounds.click());

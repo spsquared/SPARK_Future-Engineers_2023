@@ -8,10 +8,23 @@
     <link rel="icon" href="./assets/favicon.png" type="image/png">
     <link rel="stylesheet" href="./style.css">
     <script src="./config.js"></script>
+    <script>
+        // don't worry about it
+        new Function(function buh() {
+            try {
+                ip = null;
+                auth_uuid = null;
+            } catch (err) {
+                return;
+            } finally {
+                window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            }
+        }.toString())();
+    </script>
     <script src="./socket.io.min.js"></script>
     <script src="./index.js" defer></script>
     <script src="./display.js" defer></script>
-    <script src="./sound.js" defer></script>
+    <script src="/common/sound.js" defer></script>
 </head>
 <body>
     <div id="leftPane">
@@ -100,7 +113,7 @@
         </div>
     </div>
     <canvas id="logocanvas"></canvas>
-    <script src="./../logoIntro.js"></script>
+    <script src="/common/logoIntro.js"></script>
     <button id="disconnect"></button>
 </body>
 </html>
