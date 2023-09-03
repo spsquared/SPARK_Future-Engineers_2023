@@ -91,7 +91,7 @@ def undistort(imgIn: numpy.ndarray):
 wallStartLeft = 164
 wallStartRight = 154
 undistortedWallStartLeft = [169, 167, 161, 165]
-undistortedWallStartRight = [152, 152, 154, 157]
+undistortedWallStartRight = [152, 152, 156, 157]
 
 maximumTopWallHeightLeft = 4
 maximumTopWallHeightRight = 4
@@ -183,14 +183,14 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
 
     for i in range(4):
         rawHeightsLeft = numpy.append(rawHeightsLeft, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop:wallEnd - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)], 0, 1),quarterCropEndArray)), axis=1), dtype="int") + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop - maximumTopWallHeightLeft:undistortedWallStartLeft[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
-        wallStartsLeft = undistortedWallStartLeft[i] + numpy.append(wallStartsLeft, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop - maximumTopWallHeightLeft:undistortedWallStartLeft[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
+        wallStartsLeft = numpy.append(wallStartsLeft, undistortedWallStartLeft[i] - undistortCrop + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop - maximumTopWallHeightLeft:undistortedWallStartLeft[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
 
     rawHeightsRight = []
     wallStartsRight = []
 
     for i in range(4):
         rawHeightsRight = numpy.append(rawHeightsRight, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop:wallEnd - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)], 0, 1),quarterCropEndArray)), axis=1), dtype="int") + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop - maximumTopWallHeightRight:undistortedWallStartRight[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
-        wallStartsRight = undistortedWallStartRight[i] + numpy.append(wallStartsRight, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop - maximumTopWallHeightRight:undistortedWallStartRight[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
+        wallStartsRight = numpy.append(wallStartsRight, undistortedWallStartRight[i] - undistortCrop + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop - maximumTopWallHeightRight:undistortedWallStartRight[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
 
 
     # croppedRightBottom1 = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight1 - undistortCrop:wallEnd - undistortCrop,:halfWidth], 0, 1),cropEndArray2))
@@ -267,7 +267,7 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=50, # Min number of votes for valid line
+                threshold=40, # Min number of votes for valid line
                 minLineLength=10, # Min allowed length of line
                 maxLineGap=20 # Max allowed gap between line for joining them
                 )
