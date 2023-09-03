@@ -111,8 +111,10 @@ def drive(manual: bool = False):
     CENTER = 1
     RIGHT = 2
 
-    sin = math.sin(-slam.carAngle)
-    cos = math.cos(-slam.carAngle)
+    slam.carAngle = 0
+
+    sin = -math.sin(slam.carAngle)
+    cos = math.cos(slam.carAngle)
 
     for wall in walls:
         x1 = wall[0][X]
@@ -236,6 +238,7 @@ def drive(manual: bool = False):
         carAngle /= centerWalls + leftWalls + rightWalls
     
     slam.carAngle = (carAngle + slam.carAngle) / 2
+    slam.carAngle = carAngle
 
     maxContourDistance = 200
     
