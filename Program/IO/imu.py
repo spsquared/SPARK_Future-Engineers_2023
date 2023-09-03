@@ -1,8 +1,5 @@
 
 
-fd = open('/home/nano/Documents/a.txt', 'w+')
-fd.write('imu import begin')
-fd.close()
 from IO import io
 from Util import server
 import adafruit_mpu6050
@@ -14,15 +11,7 @@ import time
 
 # wrapper for IMU
 
-fd = open('/home/nano/Documents/a.txt', 'w+')
-fd.write('imu import start')
-fd.close()
-
 __mpu = adafruit_mpu6050.MPU6050(busio.I2C(board.SCL, board.SDA))
-
-fd = open('/home/nano/Documents/a.txt', 'w+')
-fd.write('imu i2c start')
-fd.close()
 
 __angle = 0
 __trim = 0.03414636758096449 # change this to calibrated number
