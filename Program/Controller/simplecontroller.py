@@ -53,7 +53,7 @@ def drive(manual: bool = False):
     start = time.perf_counter()
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
 
-    leftHeights, rightHeights = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
+    leftHeights, rightHeights, leftWallStarts, rightWallStarts = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
     rLeftContours = converter.getContours(rLeftImg)
     gLeftContours = converter.getContours(gLeftImg)
     rRightContours = converter.getContours(rRightImg)
@@ -496,7 +496,7 @@ def drive(manual: bool = False):
                 1
             ],
             'distances': [],
-            'heights': [leftHeights.tolist(), rightHeights.tolist(), converter.undistortedWallStartLeft, converter.undistortedWallStartRight],
+            'heights': [leftHeights.tolist(), rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
             'pos': [150, 150,  carAngle],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],

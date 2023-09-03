@@ -4,6 +4,7 @@ import traceback
 import numpy
 import cv2
 import math
+import time
 
 # converts images into data usable for SLAM and driving
 
@@ -178,14 +179,18 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # left camera is tilted, so 3 different start values are used for different x positions
 
     rawHeightsLeft = []
+    wallStartsLeft = []
 
     for i in range(4):
         rawHeightsLeft = numpy.append(rawHeightsLeft, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop:wallEnd - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)], 0, 1),quarterCropEndArray)), axis=1), dtype="int") + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop - maximumTopWallHeightLeft:undistortedWallStartLeft[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
+        wallStartsLeft = numpy.append(wallStartsLeft, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(leftEdgesIn[undistortedWallStartLeft[i] - undistortCrop - maximumTopWallHeightLeft:undistortedWallStartLeft[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
 
     rawHeightsRight = []
+    wallStartsRight = []
 
     for i in range(4):
         rawHeightsRight = numpy.append(rawHeightsRight, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop:wallEnd - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)], 0, 1),quarterCropEndArray)), axis=1), dtype="int") + numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop - maximumTopWallHeightRight:undistortedWallStartRight[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
+        wallStartsRight = numpy.append(wallStartsRight, numpy.array(numpy.argmax(numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight[i] - undistortCrop - maximumTopWallHeightRight:undistortedWallStartRight[i] - undistortCrop,quarterWidth * i:quarterWidth * (i + 1)],0), 0, 1),quarterCropEndArray)), axis=1), dtype="int"))
 
 
     # croppedRightBottom1 = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight1 - undistortCrop:wallEnd - undistortCrop,:halfWidth], 0, 1),cropEndArray2))
@@ -198,7 +203,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
     # rawHeightsLeft = numpy.append(numpy.append(numpy.array(numpy.argmax(croppedLeftBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedLeftBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop2, axis=1), dtype="int")),numpy.array(numpy.argmax(croppedLeftBottom3, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop3, axis=1), dtype="int"))
     # rawHeightsRight = numpy.append(numpy.array(numpy.argmax(croppedRightBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedRightBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop2, axis=1), dtype="int"))
 
-    return [numpy.array(rawHeightsLeft,dtype="int") + 1, numpy.array(rawHeightsRight,dtype="int") + 1]
+    return [numpy.array(rawHeightsLeft,dtype="int") + 1, numpy.array(rawHeightsRight,dtype="int") + 1, wallStartsLeft, wallStartsRight]
 def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
     return 'oof'
 def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
