@@ -12,3 +12,5 @@ app.use('/', (req, res, next) => {
     static(req, res, next);
 });
 server.listen(8081);
+
+console.log("server Started")
