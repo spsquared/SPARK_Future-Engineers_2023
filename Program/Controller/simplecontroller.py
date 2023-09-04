@@ -76,11 +76,22 @@ def drive(manual: bool = False):
         leftDifferences = numpy.diff(leftHeights, 3)
         rightDifferences = numpy.diff(numpy.flip(rightHeights), 3)
         leftJump = numpy.argmax(numpy.append(leftDifferences[:threeFourths] < -6, True))
+        leftJumpPillar = numpy.argmax(numpy.append(leftDifferences[:threeFourths] > 6, True))
         rightJump = numpy.argmax(numpy.append(rightDifferences[:threeFourths] < -6, True))
+        rightJumpPillar = numpy.argmax(numpy.append(rightDifferences[:threeFourths] > 6, True))
         leftJump2 = numpy.argmax(numpy.append(numpy.flip(leftDifferences[threeFourths:]) < -6, True))
+        leftJump2Pillar = numpy.argmax(numpy.append(numpy.flip(leftDifferences[threeFourths:]) > 6, True))
         rightJump2 = numpy.argmax(numpy.append(numpy.flip(rightDifferences[threeFourths:]) < -6, True))
+        rightJump2Pillar = numpy.argmax(numpy.append(numpy.flip(rightDifferences[threeFourths:]) > 6, True))
         slam.carDirectionGuesses += 1
-        slam.carDirectionGuess += leftJump + rightJump2 - rightJump - leftJump2
+        if (leftJumpPillar > leftJump):
+            slam.carDirectionGuess += leftJump
+        if (rightJumpPillar > rightJump):
+            slam.carDirectionGuess -= rightJump
+        if (leftJump2Pillar > leftJump2):
+            slam.carDirectionGuess -= leftJump2
+        if (rightJump2Pillar > rightJump2):
+            slam.carDirectionGuess += rightJump2
         if slam.carDirectionGuess > 0:
             slam.carDirection = 1
         else:
@@ -110,55 +121,59 @@ def drive(manual: bool = False):
     LEFT = 0
     CENTER = 1
     RIGHT = 2
+    BACK = 3
 
     sin = math.sin(slam.carAngle)
     cos = math.cos(slam.carAngle)
 
     for wall in walls:
+
         x1 = wall[0][X]
         y1 = wall[0][Y]
         x2 = wall[1][X]
         y2 = wall[1][Y]
 
-        wall[0][X] = x1 * cos + y1 * sin
-        wall[0][Y] = x1 * -sin + y1 * cos
-        wall[1][X] = x2 * cos + y2 * sin
-        wall[1][Y] = x2 * -sin + y2 * cos
+        wall[2][X] = x1 * cos + y1 * sin
+        wall[2][Y] = x1 * -sin + y1 * cos
+        wall[3][X] = x2 * cos + y2 * sin
+        wall[3][Y] = x2 * -sin + y2 * cos
 
         wallType = 0
         
-        if wall[0][X] - wall[1][X] != 0 and wall[0][Y] - wall[1][Y] != 0:
-            slope = (wall[0][Y] - wall[1][Y]) / (wall[0][X] - wall[1][X])
-            yIntercept = -wall[0][Y] + slope * wall[0][X]
+        if wall[2][X] - wall[3][X] != 0 and wall[2][Y] - wall[3][Y] != 0:
+            slope = (wall[2][Y] - wall[3][Y]) / (wall[2][X] - wall[3][X])
+            yIntercept = -wall[2][Y] + slope * wall[2][X]
             
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(slope, 1)
 
-            if abs(angle) < 30 / 180 * math.pi and wall[0][Y] - wall[0][X] * slope > 10:
+            if abs(angle) < 30 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
                 wallType = CENTER
+            elif abs(angle) < 30 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope < -10:
+                wallType = BACK
             else:
                 if abs(angle) < 30 / 180 * math.pi:
                     wallType = UNKNOWN
-                elif wall[0][X] - wall[0][Y] / slope < 0:
+                elif wall[2][X] - wall[2][Y] / slope < 0:
                     wallType = LEFT
                 else:
                     wallType = RIGHT
                 # else:
                 #     if slam.carDirection == CLOCKWISE:
-                #         if abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                #         if abs(slope) > 4 and (wall[2][X] > 0 and wall[3][X] > 0):
                 #             wallType = RIGHT
-                #         elif abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                #         elif abs(slope) > 4 and (wall[2][X] < 0 and wall[3][X] < 0):
                 #             wallType = LEFT
-                #         elif wall[0][Y] - wall[0][X] / slope < 0:
+                #         elif wall[2][Y] - wall[2][X] / slope < 0:
                 #             wallType = LEFT
                 #         else:
                 #             wallType = RIGHT
                 #     else:
-                #         if abs(slope) > 4 and (wall[0][X] < 0 and wall[1][X] < 0):
+                #         if abs(slope) > 4 and (wall[2][X] < 0 and wall[3][X] < 0):
                 #             wallType = LEFT
-                #         elif abs(slope) > 4 and (wall[0][X] > 0 and wall[1][X] > 0):
+                #         elif abs(slope) > 4 and (wall[2][X] > 0 and wall[3][X] > 0):
                 #             wallType = RIGHT
-                #         elif wall[0][Y] - wall[0][X] / slope < 0:
+                #         elif wall[2][Y] - wall[2][X] / slope < 0:
                 #             wallType = LEFT
                 #         else:
                 #             wallType = RIGHT
@@ -166,26 +181,26 @@ def drive(manual: bool = False):
                 #     wallType = LEFT
                 # else:
                 #     wallType = RIGHT
-                # if wall[0][X] > 0 and wall[1][X] > 0:
+                # if wall[2][X] > 0 and wall[3][X] > 0:
                 #     wallType = RIGHT
-                # elif wall[0][X] < 0 and wall[1][X] < 0:
+                # elif wall[2][X] < 0 and wall[3][X] < 0:
                 #     wallType = LEFT
                 # else:
                     # wallType = UNKNOWN
-        elif wall[0][Y] - wall[1][Y] != 0:
+        elif wall[2][Y] - wall[3][Y] != 0:
             # vertical wall
-            distance = abs(wall[0][X])
-            if wall[0][X] > 0 and wall[1][X] > 0:
+            distance = abs(wall[2][X])
+            if wall[2][X] > 0 and wall[3][X] > 0:
                 wallType = RIGHT
                 angle = math.pi / 2
-            elif wall[0][X] < 0 and wall[1][X] < 0:
+            elif wall[2][X] < 0 and wall[3][X] < 0:
                 wallType = LEFT
                 angle = -math.pi / 2
             else:
                 wallType = UNKNOWN
         else:
             #horizontal wall
-            distance = abs(wall[0][Y])
+            distance = abs(wall[2][Y])
             angle = 0
             wallType = CENTER
 
@@ -194,7 +209,7 @@ def drive(manual: bool = False):
         if distance > 200:
             processedWalls.append([UNKNOWN, distance, angle])
             continue
-        if abs(wall[0][X]) > 100 and abs(wall[1][X]) > 100 and abs(wall[0][Y]) < 50 and abs(wall[1][Y]) < 50:
+        if abs(wall[2][X]) > 100 and abs(wall[3][X]) > 100 and abs(wall[2][Y]) < 50 and abs(wall[3][Y]) < 50:
             processedWalls.append([UNKNOWN, distance, angle])
             continue
         
