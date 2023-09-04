@@ -189,7 +189,7 @@ def drive(manual: bool = False):
             angle = 0
             wallType = CENTER
 
-        angle += slam.carAngle
+        angle += slam.carAngle % (math.pi / 2)
         
         if distance > 200:
             processedWalls.append([UNKNOWN, distance, angle])
@@ -496,8 +496,8 @@ def drive(manual: bool = False):
                 1
             ],
             'distances': [],
-            'heights': [leftHeights.tolist(), rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
-            'pos': [150, 150,  carAngle],
+            'heights': [leftHeights.tolist()        , rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
+            'pos': [150, 150       ,  0],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
