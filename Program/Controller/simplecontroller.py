@@ -133,6 +133,9 @@ def drive(manual: bool = False):
         x2 = wall[1][X]
         y2 = wall[1][Y]
 
+        wall[2] = [0, 0]
+        wall[3] = [0, 0]
+
         wall[2][X] = x1 * cos + y1 * sin
         wall[2][Y] = x1 * -sin + y1 * cos
         wall[3][X] = x2 * cos + y2 * sin
