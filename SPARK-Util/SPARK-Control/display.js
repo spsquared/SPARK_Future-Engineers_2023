@@ -275,15 +275,17 @@ function drawWalls(walls, pos) {
     mctx.textAlign = 'center';
     mctx.textBaseline = 'middle';
     mctx.beginPath();
-    let labels = ['?', 'L', 'C', 'R'];
+    let labels = ['?', 'L', 'C', 'R', 'B'];
     for (let i in walls[1]) {
         mctx.moveTo(walls[1][i][0], walls[1][i][1]);
         mctx.lineTo(walls[1][i][2], walls[1][i][3]);
+    }
+    mctx.stroke();
+    for (let i in walls[1]) {
         if (walls[2][i] != undefined) {
             mctx.fillText(labels[walls[2][i] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
         }
     }
-    mctx.stroke();
     mctx.fillStyle = 'rgb(255, 255, 0)';
     for (let corner of walls[0]) {
         mctx.fillRect(corner[0] - 1, corner[1] - 1, 2, 2);
