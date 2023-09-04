@@ -29,6 +29,9 @@ const io = new SocketIO(server2, {
 });
 const authIds = require('./auth.json');
 
+// no input validation to be found here!!!!
+// what could go wrong??
+
 let hostConnectionCount = 0;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
