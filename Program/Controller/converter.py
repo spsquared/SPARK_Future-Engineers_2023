@@ -270,9 +270,9 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=40, # Min number of votes for valid line
+                threshold=50, # Min number of votes for valid line
                 minLineLength=10, # Min allowed length of line
-                maxLineGap=20 # Max allowed gap between line for joining them
+                maxLineGap=5 # Max allowed gap between line for joining them
                 )
     if lines is not None:
         lines = list(lines)

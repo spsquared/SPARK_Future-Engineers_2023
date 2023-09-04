@@ -72,6 +72,7 @@ def drive(manual: bool = False):
     # slam.carAngle = io.imu.angle()
 
     if slam.carDirectionGuesses < 9:
+        oneFourths = int((converter.imageWidth - 3) / 4)
         threeFourths = int((converter.imageWidth - 3) * 3 / 4)
         leftDifferences = numpy.diff(leftHeights, 3)
         rightDifferences = numpy.diff(numpy.flip(rightHeights), 3)
@@ -86,12 +87,20 @@ def drive(manual: bool = False):
         slam.carDirectionGuesses += 1
         if (leftJumpPillar > leftJump):
             slam.carDirectionGuess += leftJump
+        else:
+            slam.carDirectionGuess += threeFourths
         if (rightJumpPillar > rightJump):
             slam.carDirectionGuess -= rightJump
+        else:
+            slam.carDirectionGuess -= threeFourths
         if (leftJump2Pillar > leftJump2):
             slam.carDirectionGuess -= leftJump2
+        else:
+            slam.carDirectionGuess -= oneFourths
         if (rightJump2Pillar > rightJump2):
             slam.carDirectionGuess += rightJump2
+        else:
+            slam.carDirectionGuess += oneFourths
         if slam.carDirectionGuess > 0:
             slam.carDirection = 1
         else:
@@ -360,7 +369,6 @@ def drive(manual: bool = False):
         if slam.carSectionsCooldown <= 0 and slam.carSectionsExited <= 0:
             slam.carSectionsTimer += 2
             if slam.carSectionsTimer > 3:
-                slam.carAngle -= slam.carDirection * math.pi / 2
                 slam.carSections += 1
                 slam.carSectionsCooldown = 3000
                 slam.carSectionsExited = 3
@@ -377,6 +385,7 @@ def drive(manual: bool = False):
     if centerWalls == 0 or centerWallDistance > 200:
         slam.carSectionsExited -= 1
         if slam.carSectionsExited == 0:
+            slam.carAngle -= slam.carDirection * math.pi / 2
             slam.carSectionsCooldown = 20
     
     if slam.carSections == 12 and slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14)):
