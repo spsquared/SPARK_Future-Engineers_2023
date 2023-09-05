@@ -379,7 +379,7 @@ document.getElementById('disconnect').onclick = async () => {
     animateAll();
     let rickrolls = [];
     let ready = 0;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 1; i++) {
         let rickroll = new Audio('./assets/null.mp3');
         // let rickroll = new Audio('./assets/SPARK.mp3');
         // let rickroll = new Audio('./assets/RUSH E.mp3');
@@ -473,7 +473,10 @@ async function animate(slider, backwards) {
 async function animateAll() {
     let lsd = 0;
     setInterval(() => {
-        document.body.style.backgroundColor = `hsl(${lsd = (lsd + 5) % 360}, 100%, 50%)`;
+        document.body.style.backgroundColor = `hsl(${lsd = (lsd + 20) % 360}, 100%, 50%)`;
+        log.style.backgroundColor = `hsl(${(lsd + 50) % 360}, 100%, 50%)`;
+        map.style.backgroundColor = `hsl(${(lsd + 100) % 360}, 100%, 50%)`;
+        document.getElementById('dropdown').style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
     }, 50);
     for (let slider of sliders) {
         setTimeout(() => {
