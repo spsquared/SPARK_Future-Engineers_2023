@@ -6,7 +6,7 @@ import sys
 import traceback
 
 running = True
-actuallyRunning = False
+actuallyRunning = True
 def main():
     global running, actuallyRunning
     try:
