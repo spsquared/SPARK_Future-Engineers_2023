@@ -91,7 +91,7 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = [169, 169, 166, 165]
+undistortedWallStartLeft = [170, 169, 166, 165]
 undistortedWallStartRight = [158, 160, 160, 160]
 
 maximumTopWallHeightLeft = 4
@@ -270,9 +270,9 @@ def getWalls(heights: numpy.ndarray, rContours: list, gContours: list):
                 img, # Input edge image
                 1, # Distance resolution in pixels
                 numpy.pi/180, # Angle resolution in radians
-                threshold=50, # Min number of votes for valid line
+                threshold=70, # Min number of votes for valid line
                 minLineLength=10, # Min allowed length of line
-                maxLineGap=5 # Max allowed gap between line for joining them
+                maxLineGap=4 # Max allowed gap between line for joining them
                 )
     if lines is not None:
         lines = list(lines)

@@ -159,13 +159,13 @@ def drive(manual: bool = False):
             distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
             angle = math.atan2(slope, 1)
 
-            if abs(angle) < 30 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
+            if abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
                 wallType = CENTER
-            elif abs(angle) < 30 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope < -10:
+            elif abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope < -10:
                 wallType = BACK
             else:
                 if abs(angle) < 30 / 180 * math.pi:
-                    wallType = UNKNOWN
+                    wallType = UNKNOWN - 1
                 elif wall[2][X] - wall[2][Y] / slope < 0:
                     wallType = LEFT
                 else:
@@ -216,7 +216,7 @@ def drive(manual: bool = False):
             angle = 0
             wallType = CENTER
 
-        angle += slam.carAngle % (math.pi / 2)
+        angle += slam.carAngle
         
         if distance > 200:
             processedWalls.append([UNKNOWN, distance, angle])
@@ -261,7 +261,7 @@ def drive(manual: bool = False):
     
     if centerWalls + leftWalls + rightWalls != 0:
         carAngle /= centerWalls + leftWalls + rightWalls
-    d = 0.2
+    d = 0.5
     slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
 
     maxContourDistance = 200
@@ -385,8 +385,10 @@ def drive(manual: bool = False):
     if centerWalls == 0 or centerWallDistance > 200:
         slam.carSectionsExited -= 1
         if slam.carSectionsExited == 0:
-            slam.carAngle -= slam.carDirection * math.pi / 2
             slam.carSectionsCooldown = 20
+    
+    if slam.carSectionsExited > 0 and slam.carAngle * slam.carDirection > 60 / 180 * math.pi:
+        slam.carAngle -= slam.carDirection * math.pi / 2
     
     if slam.carSections == 12 and slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14)):
         io.drive.steer(0)
@@ -397,6 +399,7 @@ def drive(manual: bool = False):
         slam.uTurnPillar = pillar[4]
     if slam.carSections > 7:
         slam.uTurnPillar = 0
+    
     
     if slam.uTurning:
         # print("uturn")
@@ -509,6 +512,7 @@ def drive(manual: bool = False):
                 steering = -carAngle * 40
         else:
             steerPillar()
+    
 
     # print("driving: ", time.perf_counter() - start)
     start = time.perf_counter()
@@ -524,7 +528,7 @@ def drive(manual: bool = False):
             ],
             'distances': [],
             'heights': [leftHeights.tolist(), rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
-            'pos': [150, 150,  0],
+            'pos': [150, 150,  slam.carAngle],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],
@@ -532,7 +536,7 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': [slam.carAngle, int(slam.carDirectionGuess)]
+            'raw': [slam.carAngle / math.pi * 180, carAngle / math.pi * 180, int(slam.carDirectionGuess)]
             # 'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, slam.uTurnStage, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
