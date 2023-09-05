@@ -401,7 +401,7 @@ historyControls.previousButton.onclick = (e) => {
     display();
 };
 async function startPlayback() {
-    if (historyControls.playing) return;
+    if (historyControls.playing || history.length == 0) return;
     historyControls.playing = true;
     let start = performance.now();
     while (historyControls.index > 0 && historyControls.playing) {
