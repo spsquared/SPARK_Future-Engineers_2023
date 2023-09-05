@@ -369,14 +369,16 @@ document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey && !e.shiftKey) socket.emit('stop');
 });
 
-document.getElementById('disconnect').onclick = () => animateRickroll();
+document.getElementById('disconnect').onclick = () => {
+    socket.disconnect();
+    toReconnect = false;
+    autoReconnect = false;
+    animateRickroll();
+};
 
 async function animateRickroll(widetanmu = true) {
     if (window.bdnmteuwuiufds) return;
     window.bdnmteuwuiufds = true;
-    socket.disconnect();
-    toReconnect = false;
-    autoReconnect = false;
     animateAll();
     let eeeeeeeeee = [];
     let oof = 0;
