@@ -6,8 +6,9 @@ import sys
 import traceback
 
 running = True
+actuallyRunning = False
 def main():
-    global running
+    global running, actuallyRunning
     try:
         io.setStatusBlink(0)
         infinite = False
@@ -36,8 +37,8 @@ def main():
             time.sleep(1)
         io.setStatusBlink(2)
         def stop(data):
-            global running
-            running = False
+            global actuallyRunning
+            actuallyRunning = False
             io.setStatusBlink(0)
             io.close()
             print('stopped by emergency stop button')
@@ -46,7 +47,7 @@ def main():
         io.drive.throttle(controller.speed)
         io.imu.setAngle(0)
         waitForStop = False
-        while running:
+        while running and actuallyRunning:
             running = controller.drive()
             if infinite: running = True
         print('Stopped by driver command')
