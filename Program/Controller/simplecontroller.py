@@ -527,8 +527,8 @@ def drive(manual: bool = False):
                 1
             ],
             'distances': [],
-            'heights': [leftHeights.tolist()        , rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
-            'pos': [150, 150       ,  slam.carAngle],
+            'heights': [leftHeights.tolist(), rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
+            'pos': [150, 150,  slam.carAngle],
             'landmarks': slam.storedLandmarks,
             'rawLandmarks': [rContours, gContours, walls],
             'contours': [[rLeftContours, gLeftContours], [rRightContours, gRightContours]],

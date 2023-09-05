@@ -369,68 +369,77 @@ document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey && !e.shiftKey) socket.emit('stop');
 });
 
-let rickrolled = false;
-document.getElementById('disconnect').onclick = async () => {
+document.getElementById('disconnect').onclick = () => animateRickroll();
+
+async function animateRickroll(widetanmu = true) {
+    if (window.bdnmteuwuiufds) return;
+    window.bdnmteuwuiufds = true;
     socket.disconnect();
     toReconnect = false;
     autoReconnect = false;
-    if (rickrolled) return;
-    rickrolled = true;
     animateAll();
-    let rickrolls = [];
-    let ready = 0;
-    for (let i = 0; i < 100; i++) {
-        let rickroll = new Audio('./assets/null.mp3');
-        // let rickroll = new Audio('./assets/SPARK.mp3');
-        // let rickroll = new Audio('./assets/RUSH E.mp3');
-        // let rickroll = new Audio('./assets/Kitsune2 - Rainbow Tylenol.mp3');
-        // let rickroll = new Audio('./assets/Rainbow Trololol.mp3');
-        // let rickroll = new Audio('./assets/Minecraft_ Villager Sound Effect.mp3');
-        // let rickroll = new Audio('./assets/Dramatic Vine_Instagram Boom - Sound Effect (HD).mp3');
-        // let rickroll = new Audio('./assets/07-The Magus.mp3');
-        // let rickroll = new Audio('./assets/127 - Official Meadow Guarder Song.mp3');
-        // let rickroll = new Audio('./assets/The Meadow - Official Meadow Guarder Song.mp3');
-        // let rickroll = new Audio('./assets/The Oasis - Official Meadow Guarder Song.mp3');
-        rickroll.preload = true;
-        rickroll.addEventListener('loadeddata', () => {
-            ready++;
+    let eeeeeeeeee = [];
+    let oof = 0;
+    for (let i = 0; i < 50; i++) {
+        let vbuh = new Audio('./assets/null.mp3');
+        // let vbuh = new Audio('./assets/SPARK.mp3');
+        // let vbuh = new Audio('./assets/RUSH E.mp3');
+        // let vbuh = new Audio('./assets/EEEEEEEEEEEEEEEEEEEEEEEEEELECTROMAN ADVENTURES FULL VERSION GEOMETRY DASH 2.11 ADSFADSFDSA FDSAFDSAFDSA FFSAFDSAF DSAF AS FDSA FDSA FDSA.mp3');
+        // let vbuh = new Audio('./assets/Kitsune2 - Rainbow Tylenol.mp3');
+        // let vbuh = new Audio('./assets/Rainbow Trololol.mp3');
+        // let vbuh = new Audio('./assets/Minecraft_ Villager Sound Effect.mp3');
+        // let vbuh = new Audio('./assets/Dramatic Vine_Instagram Boom - Sound Effect (HD).mp3');
+        // let vbuh = new Audio('./assets/07-The Magus.mp3');
+        // let vbuh = new Audio('./assets/corruption pixel sound effects.mp3');
+        // let vbuh = new Audio('./assets/percussion.mp3');
+        // let vbuh = new Audio('./assets/200 - Pixl\'d.mp3');
+        // let vbuh = new Audio('./assets/400 - Corruption.mp3');
+        // let vbuh = new Audio('./assets/404 - Pixel Not Found.mp3');
+        // let vbuh = new Audio('./assets/127 - Official Meadow Guarder Song.mp3');
+        // let vbuh = new Audio('./assets/The Meadow - Official Meadow Guarder Song.mp3');
+        // let vbuh = new Audio('./assets/The Oasis - Official Meadow Guarder Song.mp3');
+        vbuh.preload = true;
+        vbuh.addEventListener('loadeddata', () => {
+            oof++;
         });
-        rickrolls.push(rickroll);
+        eeeeeeeeee.push(vbuh);
     }
     let wait = setInterval(() => {
-        if (ready == rickrolls.length) {
+        if (oof == eeeeeeeeee.length) {
             clearInterval(wait);
-            for (let rickroll of rickrolls) {
+            for (let rickroll of eeeeeeeeee) {
                 rickroll.play();
             }
         }
     }, 10);
     let aaaaaaaaaaaa = [];
     let weird = 0;
-    let dumb = setInterval(() => {
-        weird++;
-        if (weird > 5) {
-            clearInterval(dumb);
-            return;
-        }
-        let stupid = window.open('about:blank', '_blank', 'width=250; height=242');
-        stupid.document.write('<style>body { overflow: hidden; }</style><img src="./assets/rickastley.png" style="position: absolute; top: 0; left: 0; width: 100vw;">');
-        if (stupid != null) {
-            aaaaaaaaaaaa.push(stupid);
-            let bad = setInterval(() => {
-                if (stupid.closed) {
-                    clearInterval(bad);
-                    return;
-                }
-                try {
-                    stupid.moveTo(Math.random() * (window.screen.availWidth - 250), Math.random() * (window.screen.availHeight - 242));
-                    stupid.resizeTo(250, 242);
-                } catch (err) {
-                    clearInterval(bad);
-                }
-            }, 100);
-        }
-    }, 1500);
+    if (widetanmu) {
+        let dumb = setInterval(() => {
+            weird++;
+            if (weird > 5) {
+                clearInterval(dumb);
+                return;
+            }
+            let stupid = window.open('about:blank', '_blank', 'width=250; height=242');
+            stupid.document.write('<style>body { overflow: hidden; }</style><img src="./assets/rickastley.png" style="position: absolute; top: 0; left: 0; width: 100vw;">');
+            if (stupid != null) {
+                aaaaaaaaaaaa.push(stupid);
+                let bad = setInterval(() => {
+                    if (stupid.closed) {
+                        clearInterval(bad);
+                        return;
+                    }
+                    try {
+                        stupid.moveTo(Math.random() * (window.screen.availWidth - 250), Math.random() * (window.screen.availHeight - 242));
+                        stupid.resizeTo(250, 242);
+                    } catch (err) {
+                        clearInterval(bad);
+                    }
+                }, 100);
+            }
+        }, 1500);
+    }
     let badidea = setInterval(() => {
         display0Img.src = './assets/rickastley.png';
         display1Img.src = './assets/rickastley.png';
@@ -443,16 +452,15 @@ document.getElementById('disconnect').onclick = async () => {
             appendLog(random, `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`);
         }
     }, 2);
-    rickrolls[0].onended = () => {
+    eeeeeeeeee[0].onended = () => {
         for (let asdfasdf of aaaaaaaaaaaa) {
             asdfasdf.close();
         }
         clearInterval(badidea);
-        rickrolled = false;
-        document.getElementById('disconnect').click();
+        window.bdnmteuwuiufds = false;
+        animateRickroll(widetanmu);
     };
 };
-
 async function animate(slider, backwards) {
     if (backwards) {
         for (let i = parseInt(slider.min); i <= parseInt(slider.max); i++) {
@@ -471,9 +479,15 @@ async function animate(slider, backwards) {
     }
 };
 async function animateAll() {
+    if (window.djfhnmkhuehfklkd) return;
+    window.djfhnmkhuehfklkd = true;
     let lsd = 0;
     setInterval(() => {
-        document.body.style.backgroundColor = `hsl(${lsd = (lsd + 5) % 360}, 100%, 50%)`;
+        document.body.style.filter = `hue-rotate(${lsd % 360}deg)`;
+        document.body.style.backgroundColor = `hsl(${lsd = (lsd + 20) % 360}, 100%, 50%)`;
+        log.style.backgroundColor = `hsl(${(lsd + 50) % 360}, 100%, 50%)`;
+        map.style.backgroundColor = `hsl(${(lsd + 100) % 360}, 100%, 50%)`;
+        document.getElementById('dropdown').style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
     }, 50);
     for (let slider of sliders) {
         setTimeout(() => {
@@ -494,6 +508,8 @@ async function animateAll() {
     }, 1);
 };
 async function animateAll2() {
+    if (window.dutjkremvfdsdf) return;
+    window.dutjkremvfdsdf = true;
     animateAll();
     var hue = 0;
     var brightness = 1;
