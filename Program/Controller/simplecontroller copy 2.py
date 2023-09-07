@@ -170,6 +170,35 @@ def drive(manual: bool = False):
                     wallType = LEFT
                 else:
                     wallType = RIGHT
+                # else:
+                #     if slam.carDirection == CLOCKWISE:
+                #         if abs(slope) > 4 and (wall[2][X] > 0 and wall[3][X] > 0):
+                #             wallType = RIGHT
+                #         elif abs(slope) > 4 and (wall[2][X] < 0 and wall[3][X] < 0):
+                #             wallType = LEFT
+                #         elif wall[2][Y] - wall[2][X] / slope < 0:
+                #             wallType = LEFT
+                #         else:
+                #             wallType = RIGHT
+                #     else:
+                #         if abs(slope) > 4 and (wall[2][X] < 0 and wall[3][X] < 0):
+                #             wallType = LEFT
+                #         elif abs(slope) > 4 and (wall[2][X] > 0 and wall[3][X] > 0):
+                #             wallType = RIGHT
+                #         elif wall[2][Y] - wall[2][X] / slope < 0:
+                #             wallType = LEFT
+                #         else:
+                #             wallType = RIGHT
+                # if slope > 0:
+                #     wallType = LEFT
+                # else:
+                #     wallType = RIGHT
+                # if wall[2][X] > 0 and wall[3][X] > 0:
+                #     wallType = RIGHT
+                # elif wall[2][X] < 0 and wall[3][X] < 0:
+                #     wallType = LEFT
+                # else:
+                    # wallType = UNKNOWN
         elif wall[2][Y] - wall[3][Y] != 0:
             # vertical wall
             distance = abs(wall[2][X])
@@ -281,7 +310,7 @@ def drive(manual: bool = False):
         pillarDirection = 1
         if pillar[4] == GREEN_PILLAR:
             pillarDirection = -1
-        if pillar[1] > 20:
+        if pillar[2] < 25:
             if pillar[4] == RED_PILLAR and pillar[0] != 0 and pillar[1] / pillar[0] < 1:
                 tangentX = 0
                 tangentY = 20
