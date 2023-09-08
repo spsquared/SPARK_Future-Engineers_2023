@@ -2,6 +2,8 @@ body {
     overflow: hidden;
     margin: 0px 0px;
     --min-sidebar-width: 40vw;
+    --rawdump-width: 0vw;
+    transition: 200ms ease --rawdump-width;
 }
 div {
     font-family: sans-serif;
@@ -122,14 +124,14 @@ canvas {
     align-items: stretch;
     container-type: size;
     border-right: 4px solid grey;
-    --sidebar-width: calc(100vw - min(calc(100vw - var(--min-sidebar-width)), 100vh) - 4px);
+    --sidebar-width: calc(100vw - min(calc(100vw - var(--min-sidebar-width) + var(--rawdump-width)), calc(100vh + var(--rawdump-width))) - 4px);
     z-index: 1;
 }
 #rightPane {
     position: absolute;
     top: 0px;
     right: 0px;
-    width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
+    width: min(calc(100vw - var(--min-sidebar-width) + var(--rawdump-width)), calc(100vh + var(--rawdump-width)));
     height: 100vh;
     background-color: #444;
     z-index: 0;
@@ -142,7 +144,7 @@ canvas {
 }
 #logo {
     display: inline-block;
-    width: min(81px, calc(var(--min-sidebar-width) - 20px));
+    width: min(81px, calc(var(--min-sidebar-width) - var(--rawdump-width) - 20px));
     margin: 8px;
     margin-bottom: 0px;
 }
@@ -352,7 +354,10 @@ canvas {
     }
     #slideout {
         width: unset;
+        margin-top: -4px;
         margin-bottom: -4px;
+        border-top: 4px solid black;
+        border-bottom: 4px solid black;
         transform: translateX(-100%);
         transition: 200ms ease transform;
     }
@@ -365,8 +370,9 @@ canvas {
     }
     #slideoutBody {
         height: unset;
+        min-height: calc(100% - 16px);
         max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
-        border-bottom: 4px solid black;
+        border-top: 4px;
         background-color: lightgray;
     }
 
@@ -474,7 +480,7 @@ canvas {
 #map {
     position: absolute;
     bottom: 0px;
-    right: 0px;
+    left: 0px;
     width: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     height: min(calc(100vw - var(--min-sidebar-width)), 100vh);
     background-color: black;
@@ -525,6 +531,24 @@ canvas {
     margin-top: 4px;
     background-color: lime;
     border-color: limegreen;
+}
+
+#rawDumpContainer {
+    display: grid;
+    grid-template-rows: min-content 1fr;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: var(--rawdump-width);
+    height: 100vh;
+    background-color: white;
+}
+#rawDumpTitle {
+    font-weight: bold;
+}
+#rawDumpContents {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
 #disconnect {

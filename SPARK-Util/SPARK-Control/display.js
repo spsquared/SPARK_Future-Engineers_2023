@@ -33,6 +33,7 @@ const map = document.getElementById('map');
 const mctx = map.getContext('2d');
 const carImg = new Image();
 carImg.src = './assets/car.png';
+const rawDumpContents = document.getElementById('rawDumpContents');
 window.onresize = () => {
     map.width = 620;
     map.height = 620;
@@ -127,7 +128,7 @@ function display() {
         }
         if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
         drawCar(data.pos, data.steering);
-        if (historyControls.rawDump) appendLog(JSON.stringify(data.rawDump), 'skyblue');
+        if (historyControls.rawDump) appendRawDump(data.rawDump);
     } else {
         ctx0.clearRect(0, 0, 544, 308);
         ctx1.clearRect(0, 0, 544, 308);
@@ -341,6 +342,15 @@ function drawWaypoints(waypoints, pos) {
         mctx.restore();
     }
 };
+// raw dump
+function appendRawDump(data) {
+    rawDumpContents.innerHTML = '';
+    for (let i in data) {
+        const div = document.createElement('div');
+        div.innerText = data[i];
+        rawDumpContents.appendChild(div);
+    }
+};
 setInterval(() => {
     while (performance.now() - fpsTimes[0] > 1000) fpsTimes.shift();
     fps = fpsTimes.length;
@@ -375,6 +385,8 @@ hcDrawWaypoints.addEventListener('click', (e) => {
 const hcRawDump = document.getElementById('hcRawDump');
 hcRawDump.addEventListener('click', (e) => {
     historyControls.rawDump = hcRawDump.checked;
+    if (historyControls.rawDump) document.body.style.setProperty('--rawdump-width', '20vw');
+    else document.body.style.setProperty('--rawdump-width', '0vw');
     display();
 });
 hcDrawOverlays.checked = historyControls.drawOverlays;
