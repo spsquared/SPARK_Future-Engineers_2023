@@ -392,8 +392,7 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': "<table>"
-            # 'raw': [slam.carAngle / math.pi * 180, carAngle / math.pi * 180, int(slam.carDirectionGuess), centerWallDistance]
+            'raw': ["Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "Angle", slam.carAngle / math.pi * 180, carAngle / math.pi * 180, "Direction", int(slam.carDirectionGuess)]
             # 'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, slam.uTurnStage, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
