@@ -483,13 +483,15 @@ async function animate(slider, backwards) {
 async function animateAll() {
     if (window.djfhnmkhuehfklkd) return;
     window.djfhnmkhuehfklkd = true;
+    const dropdown = document.getElementById('dropdown');
     let lsd = 0;
     setInterval(() => {
         document.body.style.filter = `hue-rotate(${lsd % 360}deg)`;
         document.body.style.backgroundColor = `hsl(${lsd = (lsd + 20) % 360}, 100%, 50%)`;
         log.style.backgroundColor = `hsl(${(lsd + 50) % 360}, 100%, 50%)`;
         map.style.backgroundColor = `hsl(${(lsd + 100) % 360}, 100%, 50%)`;
-        document.getElementById('dropdown').style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
+        rawDumpContents.style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
+        dropdown.style.backgroundColor = `hsl(${(200 + 150) % 360}, 100%, 50%)`;
     }, 50);
     for (let slider of sliders) {
         setTimeout(() => {

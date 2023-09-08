@@ -494,12 +494,15 @@ canvas {
 }
 #filterAdjustLabels {
     display: grid;
-    width: 100%;
     grid-template-columns: repeat(2, auto);
     grid-template-rows: 24px;
+    width: 100%;
+    margin-top: -8px;
+    margin-bottom: 8px;
 }
 #filterAdjustLabels span {
     font-weight: bold;
+    font-size: 20px;
     width: 100%;
     padding-left: 8px;
 }
@@ -534,21 +537,38 @@ canvas {
 }
 
 #rawDumpContainer {
-    display: grid;
-    grid-template-rows: min-content 1fr;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: 0px;
     right: 0px;
     width: var(--rawdump-width);
     height: 100vh;
+    border-left: 4px solid grey;
     background-color: white;
+    transform: translateX(4px);
 }
 #rawDumpTitle {
     font-weight: bold;
+    font-size: 20px;
+    padding: 4px 8px;
+    border-bottom: 4px solid black;
 }
 #rawDumpContents {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    margin-right: 4px;
+    overflow-y: auto;
+}
+#rawDumpContents div {
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+    padding: 4px 4px;
+    text-align: right;
+}
+#rawDumpContents div:nth-child(2n) {
+    border-right: none;
+    text-align: left;
 }
 
 #disconnect {
