@@ -276,22 +276,25 @@ def drive(manual: bool = False):
         elif slam.carDirection == COUNTER_CLOCKWISE and leftWalls > 0 and leftWallDistance < 35:
             steering = carAngleSteering - leftWallAngle * 40
         else:
-            steering = -carAngle * carAngleSteering
+            steering = 100 * slam.carDirection
     def steerPillar():
         nonlocal steering, waypointX, waypointY, carAngleSteering
         
         pillarDirection = 1
         if pillar[4] == GREEN_PILLAR:
             pillarDirection = -1
-        if pillar[0] * pillarDirection > -5 and pillar[1] > 20:
-            waypointX = pillar[0] + 5 * pillarDirection
-            waypointY = pillar[1] - 10
-            steering = math.atan2(waypointX, waypointY) * 200
+        if pillar[0] * pillarDirection > -15:
+            if pillar[1] > 10:
+                waypointX = pillar[0] + 15 * pillarDirection
+                waypointY = pillar[1] - 10
+                steering = math.atan2(waypointX, waypointY) * 100
+            else:
+                steering = 40 * pillarDirection
         else:
             steering = -carAngle * carAngleSteering
 
     slam.carSectionsEnd -= 1
-    if (centerWalls != 0 and centerWallDistance < 140):
+    if (centerWalls != 0 and centerWallDistance < 110):
         if slam.carSectionsCooldown <= 0 and slam.carSectionsExited <= 0:
             slam.carSectionsTimer += 2
             if slam.carSectionsTimer > 3:
@@ -326,10 +329,9 @@ def drive(manual: bool = False):
     if slam.carSections > 7:
         slam.uTurnPillar = 0
     
-    
     if slam.uTurning:
         print("oof no u turn code")
-    elif (centerWalls != 0 and centerWallDistance < 100) or slam.uTurning:
+    if centerWalls != 0 and centerWallDistance < 100:
         if pillar[0] == None:
             if NO_PILLARS:
                 if centerWallDistance < 75:
@@ -338,12 +340,12 @@ def drive(manual: bool = False):
                 if centerWallDistance < 70:
                     steerCenter()
         elif pillar[4] == RED_PILLAR:
-            if pillar[1] < 45 + 25 * slam.carDirection:
+            if pillar[1] < 50 + 25 * slam.carDirection:
                 steerCenter()
             elif centerWallDistance < 35:
                 steerCenter()
         elif pillar[4] == GREEN_PILLAR:
-            if pillar[1] < 45 - 25 * slam.carDirection:
+            if pillar[1] < 50 - 25 * slam.carDirection:
                 steerCenter()
             elif centerWallDistance < 35:
                 steerCenter()
@@ -390,7 +392,8 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': [slam.carAngle / math.pi * 180, carAngle / math.pi * 180, int(slam.carDirectionGuess)]
+            'raw': "<table>"
+            # 'raw': [slam.carAngle / math.pi * 180, carAngle / math.pi * 180, int(slam.carDirectionGuess), centerWallDistance]
             # 'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, slam.uTurnStage, int(slam.carSections), carAngle]
         }
         server.emit('data', data)
