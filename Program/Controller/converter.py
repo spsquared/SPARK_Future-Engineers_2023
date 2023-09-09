@@ -91,7 +91,7 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = [170, 169, 166, 165]
+undistortedWallStartLeft = [171, 169, 166, 165]
 undistortedWallStartRight = [158, 160, 160, 160]
 
 maximumTopWallHeightLeft = 4
