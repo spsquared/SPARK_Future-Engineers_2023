@@ -556,7 +556,7 @@ canvas {
 }
 #rawDumpContents {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: min-content 1fr;
     margin-right: 4px;
     overflow-y: auto;
 }
