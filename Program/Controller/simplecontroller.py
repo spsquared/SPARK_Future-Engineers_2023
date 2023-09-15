@@ -287,7 +287,7 @@ def drive(manual: bool = False):
             if pillar[1] > 10:
                 waypointX = pillar[0] + 15 * pillarDirection
                 waypointY = pillar[1] - 10
-                steering = math.atan2(waypointX, waypointY) * 150
+                steering = math.atan2(waypointX, waypointY) * 200
             else:
                 steering = 40 * pillarDirection
         else:
