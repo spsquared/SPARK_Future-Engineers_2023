@@ -301,16 +301,6 @@ def drive(manual: bool = False):
                 slam.carSections += 1
                 slam.carSectionsCooldown = 3000
                 slam.carSectionsExited = 3
-                if slam.uTurnPillar == RED_PILLAR:
-                    print("UTURN ! ! ! ! ! ! ! !")
-                    if slam.uTurning == False:
-                        slam.uTurnStage = 0
-                        slam.uTurnGyroAngle = io.imu.angle() - carAngle
-                        if slam.carDirection == CLOCKWISE:
-                            slam.uTurnWallDistance = leftWallDistance
-                        else:
-                            slam.uTurnWallDistance = rightWallDistance
-                    slam.uTurning = True
     if centerWalls == 0 or centerWallDistance > 200:
         slam.carSectionsExited -= 1
         if slam.carSectionsExited == 0:
@@ -319,7 +309,9 @@ def drive(manual: bool = False):
     if slam.carSectionsExited > 0 and slam.carAngle * slam.carDirection > 60 / 180 * math.pi:
         slam.carAngle -= slam.carDirection * math.pi / 2
     
-    if slam.carSections == 12 and slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14)):
+    inMiddleSection = slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14))
+    
+    if slam.carSections == 12 and inMiddleSection:
         io.drive.steer(0)
         io.drive.throttle(0)
         return False
@@ -329,11 +321,22 @@ def drive(manual: bool = False):
     if slam.carSections > 7:
         slam.uTurnPillar = 0
 
+    if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR and inMiddleSection:
+        if slam.uTurning == False:
+            print("UTURN ! ! ! ! ! ! ! !")
+            slam.uTurnStage = 0
+            slam.uTurnGyroAngle = io.imu.angle() - carAngle
+            if slam.carDirection == CLOCKWISE:
+                slam.uTurnWallDistance = leftWallDistance
+            else:
+                slam.uTurnWallDistance = rightWallDistance
+        slam.uTurning = True
     buh = 0
     
     if slam.uTurning:
+        steering = 100 * slam.carDirection
         print("oof no u turn code")
-    if centerWalls != 0 and centerWallDistance < 100:
+    elif centerWalls != 0 and centerWallDistance < 100:
         if pillar[0] == None:
             if NO_PILLARS:
                 if centerWallDistance < 75:
