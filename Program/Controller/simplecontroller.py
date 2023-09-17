@@ -259,7 +259,7 @@ def drive(manual: bool = False):
     else:
         slam.carAngle = d / 2 * carAngle + slam.carAngle * (1 - d / 2)
 
-    maxContourDistance = 200
+    maxContourDistance = 150
     
     pillar = [None]
     if not NO_PILLARS:
@@ -269,7 +269,7 @@ def drive(manual: bool = False):
                     pillar[0] = (pillar[0] + contour[0]) / 2
                     pillar[1] = (pillar[1] + contour[1]) / 2
                 elif pillar[0] == None or contour[2] < pillar[2]:
-                    pillar = contour
+                    pillar = contour[:]
                     pillar.append(RED_PILLAR)
         for contour in gContours:
             if contour[2] < maxContourDistance:
@@ -277,17 +277,17 @@ def drive(manual: bool = False):
                     pillar[0] = (pillar[0] + contour[0]) / 2
                     pillar[1] = (pillar[1] + contour[1]) / 2
                 elif pillar[0] == None or contour[2] < pillar[2]:
-                    pillar = contour
+                    pillar = contour[:]
                     pillar.append(GREEN_PILLAR)
     
-    if pillar[0] == None:
-        if slam.lastPillar[0] != None:
-            pillar = slam.lastPillar
-        slam.lastPillar = [None]
-    else:
-        slam.lastPillar = pillar
+    # if pillar[0] == None:
+    #     if slam.lastPillar[0] != None:
+    #         pillar = slam.lastPillar
+    #     slam.lastPillar = [None]
+    # else:
+    #     slam.lastPillar = pillar
     
-    transformedPillar = pillar
+    transformedPillar = pillar[:]
 
     sin = math.sin(slam.carAngle)
     cos = math.cos(slam.carAngle)
@@ -322,10 +322,10 @@ def drive(manual: bool = False):
         pillarDirection = 1
         if transformedPillar[4] == GREEN_PILLAR:
             pillarDirection = -1
-        if transformedPillar[0] * pillarDirection - slam.carAngle * 20 > -15:
+        if transformedPillar[0] * pillarDirection > -15:
             if transformedPillar[1] > 10:
                 waypointX = transformedPillar[0] + 15 * pillarDirection
-                waypointY = transformedPillar[1]
+                waypointY = transformedPillar[1] - 10
                 # atan2 is X, Y
                 # do not change
                 steering = (math.atan2(waypointX, waypointY) - slam.carAngle) * 200
