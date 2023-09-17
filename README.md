@@ -34,6 +34,9 @@
 
 TODO
 
+include diagram of hardware and relationships (what communicates with what to do what)
+quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)
+
 ***
 
 # Hardware Documentation
@@ -53,7 +56,7 @@ Shortened assembly instructions:
 
 Here is a simple schematic for how the electronics are wired:
 
-![Schematic](./img/docs/schematic.png)
+![Wiring schematic](./img/docs/wiring-schematic.png)
 
 ## Photos
 |                                |                                  |
