@@ -372,7 +372,7 @@ def drive(manual: bool = False):
             else:
                 slam.uTurnWallDistance = rightWallDistance
         slam.uTurning = True
-    buh = 0
+    buh = None
     
     if slam.uTurning:
         # steering = 100 * slam.carDirection
@@ -451,8 +451,7 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "Angle", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "Left Jump", int(leftJump), "Left Jump Pillar", int(leftJumpPillar), "Right Jump", int(rightJump), "Right Jump Pillar", int(rightJumpPillar), "Left Jump 2", int(leftJump2), "Left Jump 2 Pillar", int(leftJump2Pillar), "Right Jump 2", int(rightJump2), "Right Jump 2 Pillar", int(rightJump2Pillar), buh]
-            # 'raw': [steering, centerWallDistance, leftWallDistance, rightWallDistance, slam.carDirection, slam.uTurnPillar, slam.uTurnStage, int(slam.carSections), carAngle]
+            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "ANGLE", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "L Jump", int(leftJump), "L Jump P", int(leftJumpPillar), "R Jump", int(rightJump), "R Jump P", int(rightJumpPillar), "L Jump 2", int(leftJump2), "L Jump 2 P", int(leftJump2Pillar), "R Jump 2", int(rightJump2), "R Jump 2 P", int(rightJump2Pillar)]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)

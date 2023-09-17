@@ -114,7 +114,7 @@ def main():
         def stop(data):
             global running
             running = False
-            print('stopped by emergency stop button')
+            print('\n STOPPING PROGRAM. DO NOT INTERRUPT.')
             io.close()
             server.close()
             exit()

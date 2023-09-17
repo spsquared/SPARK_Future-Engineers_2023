@@ -39,9 +39,10 @@ def main():
         def stop(data):
             global actuallyRunning
             actuallyRunning = False
+            print('Stopped by stop button')
             io.setStatusBlink(0)
             io.close()
-            print('stopped by emergency stop button')
+            server.close()
             exit(0)
         server.on('stop', stop)
         io.drive.throttle(controller.speed)
@@ -54,7 +55,6 @@ def main():
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
-        print('oof!!!11!!!!!')
         print('---------------------- AN ERROR OCCURED ----------------------')
         traceback.print_exc()
         io.error()

@@ -58,7 +58,7 @@ let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
     connected = true;
-    appendLog('Connected, Waiting for program start...', 'lime');
+    appendLog('Connected, waiting for program start...', 'lime');
 });
 socket.on('#programRunning', () => {
     appendLog('Program starting', 'lime');
