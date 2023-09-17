@@ -57,27 +57,28 @@ let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
 socket.on('connect', () => {
-    appendLog('Waiting for remote...');
-    let num = Math.random();
-    socket.on('pong', function confirm(n) {
-        if (n == num) {
-            socket.off('pong', confirm);
-            clearInterval(pingspam)
-            connected = true;
-            appendLog('Connected!', 'lime');
-            stream.disabled = false;
-            capture.disabled = false;
-            predict.disabled = false;
-            resetPredictor.disabled = false;
-            filterApply.disabled = false;
-            socket.emit('getStreamState');
-            socket.emit('getColors');
-            sounds.connect();
-        }
-    });
-    let pingspam = setInterval(() => {
-        socket.emit('ping', num);
-    }, 500);
+    connected = true;
+    appendLog('Connected, Waiting for program start...', 'lime');
+});
+socket.on('#programRunning', () => {
+    appendLog('Program starting', 'lime');
+    stream.disabled = false;
+    capture.disabled = false;
+    predict.disabled = false;
+    resetPredictor.disabled = false;
+    filterApply.disabled = false;
+    socket.emit('getStreamState');
+    socket.emit('getColors');
+    sounds.connect();
+});
+socket.on('#programStop', () => {
+    appendLog('Program stopped', 'red');
+    stream.disabled = true;
+    capture.disabled = true;
+    predict.disabled = true;
+    resetPredictor.disabled = true;
+    filterApply.disabled = true;
+    sounds.disconnect();
 });
 let ondisconnect = () => {
     connected = false;
@@ -94,8 +95,8 @@ let ondisconnect = () => {
 socket.on('disconnect', ondisconnect);
 socket.on('timeout', ondisconnect);
 socket.on('error', ondisconnect);
-socket.on('authenticate', () => {
-    socket.emit('authenticateResponse', auth_uuid);
+socket.on('#authenticate', () => {
+    socket.emit('#authenticateResponse', auth_uuid);
 });
 function reconnect(force) {
     if (toReconnect || force) {

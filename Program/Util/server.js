@@ -12,6 +12,8 @@ const limiter = rateLimit({
         console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }
 });
+const subprocess = require('node:child_process');
+const path = require('node:path');
 
 app.use(cors({
     origin: '*',
@@ -32,7 +34,7 @@ const authIds = require('./auth.json');
 // no input validation to be found here!!!!
 // what could go wrong??
 
-let hostConnectionCount = 0;
+let hostConnected = false;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
     if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) {
@@ -42,35 +44,40 @@ hostio.on('connection', (socket) => {
         return;
     }
     console.info('Connection from server');
-    hostConnectionCount++;
+    if (hostConnected) {
+        console.warn('Multiple hosts attempted to connect!');
+        socket.disconnect();
+        return;
+    }
+    hostConnected = true;
     let handleDisconnect = () => {
-        hostConnectionCount--;
-        io.sockets.sockets.forEach((socket) => socket.disconnect());
+        hostConnected = false;
+        io.emit('#programStopped');
     };
     socket.on('disconnect', handleDisconnect);
     socket.on('timeout', handleDisconnect);
     socket.on('error', handleDisconnect);
-    if (hostConnectionCount > 1) {
-        console.error('More than one host server connected!')
-    }
     socket.onAny((event, ...args) => { // python socketio only allows 1 argument but sure
         io.emit(event, ...args);
     });
+    io.emit('#programRunning');
 });
 io.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'unknown';
-    socket.emit('authenticate');
-    socket.once('authenticateResponse', (id) => {
+    socket.emit('#authenticate');
+    socket.once('#authenticateResponse', (id) => {
         if (!authIds.includes(id)) {
             console.info(`Kicked ${ip} from client connection`);
             socket.disconnect();
             socket.onevent = (packet) => {};
             return;
         }
-        console.info('Connection from client');
-        socket.on('error', (err) => console.error(err));
+        console.log('Connection from client');
+        socket.on('error', () => {});
+        socket.on('#runProgram', (type) => runProgram(type == 'manual' ? 'manualdrive.py' : 'autodrive.py')); 
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
+            if (packet.data[0] === '#runProgram') return;
             if (packet.data[0] == null) {
                 socket.disconnect();
                 return;
@@ -82,6 +89,25 @@ io.on('connection', (socket) => {
         });
     });
 });
+
+function runProgram(file) {
+    // check if is already running
+    let cmd;
+    switch (process.platform) {
+        case 'win32': cmd = 'taskList'; break;
+        case 'darwin': cmd = 'ps -ax | grep '
+        case 'linux': cmd = 'ps -A'; break;
+        default: break;
+    }
+    if (cmd != undefined) {
+        let stdout = subprocess.execSync(cmd);
+        if (stdout.toString('utf8').toLowerCase().includes(file)) return;
+    }
+    console.info('Running ' + file);
+    const program = subprocess.spawn('python3', [path.resolve(file)]);
+    program.stdout.pipe(process.stdout);
+    program.stderr.pipe(process.stderr);
+};
 
 server.listen(4041);
 server2.listen(4040);
