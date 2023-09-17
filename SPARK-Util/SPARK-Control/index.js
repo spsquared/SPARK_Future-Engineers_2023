@@ -71,7 +71,7 @@ socket.on('#programRunning', () => {
     socket.emit('getColors');
     sounds.connect();
 });
-socket.on('#programStop', () => {
+socket.on('#programStopped', () => {
     appendLog('Program stopped', 'red');
     stream.disabled = true;
     capture.disabled = true;
