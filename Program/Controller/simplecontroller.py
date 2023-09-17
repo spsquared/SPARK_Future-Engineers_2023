@@ -322,11 +322,13 @@ def drive(manual: bool = False):
         pillarDirection = 1
         if transformedPillar[4] == GREEN_PILLAR:
             pillarDirection = -1
-        if transformedPillar[0] * pillarDirection > -15:
+        if transformedPillar[0] * pillarDirection - slam.carAngle * 20 > -15:
             if transformedPillar[1] > 10:
-                waypointX = transformedPillar[0] + 20 * pillarDirection
-                waypointY = transformedPillar[1] - 10
-                steering = (math.atan2(waypointY, waypointX) - slam.carAngle) * 200
+                waypointX = transformedPillar[0] + 15 * pillarDirection
+                waypointY = transformedPillar[1]
+                # atan2 is X, Y
+                # do not change
+                steering = (math.atan2(waypointX, waypointY) - slam.carAngle) * 200
             else:
                 steering = 40 * pillarDirection
         else:
