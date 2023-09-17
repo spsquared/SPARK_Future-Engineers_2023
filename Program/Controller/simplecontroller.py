@@ -269,7 +269,7 @@ def drive(manual: bool = False):
                     pillar[0] = (pillar[0] + contour[0]) / 2
                     pillar[1] = (pillar[1] + contour[1]) / 2
                 elif pillar[0] == None or contour[2] < pillar[2]:
-                    pillar = contour
+                    pillar = contour[:]
                     pillar.append(RED_PILLAR)
         for contour in gContours:
             if contour[2] < maxContourDistance:
@@ -277,7 +277,7 @@ def drive(manual: bool = False):
                     pillar[0] = (pillar[0] + contour[0]) / 2
                     pillar[1] = (pillar[1] + contour[1]) / 2
                 elif pillar[0] == None or contour[2] < pillar[2]:
-                    pillar = contour
+                    pillar = contour[:]
                     pillar.append(GREEN_PILLAR)
     
     # if pillar[0] == None:
@@ -287,7 +287,7 @@ def drive(manual: bool = False):
     # else:
     #     slam.lastPillar = pillar
     
-    transformedPillar = pillar
+    transformedPillar = pillar[:]
 
     sin = math.sin(slam.carAngle)
     cos = math.cos(slam.carAngle)
