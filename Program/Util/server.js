@@ -12,8 +12,8 @@ const limiter = rateLimit({
         console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }
 });
-const subprocess = require('node:child_process');
-const path = require('node:path');
+const subprocess = require('child_process');
+const path = require('path');
 
 app.use(cors({
     origin: '*',
@@ -91,7 +91,8 @@ io.on('connection', (socket) => {
 });
 
 function runProgram(file) {
-    // check if is already running
+    console.info('Running ' + file);
+    // check if already running
     let cmd;
     switch (process.platform) {
         case 'win32': cmd = 'taskList'; break;
@@ -101,9 +102,11 @@ function runProgram(file) {
     }
     if (cmd != undefined) {
         let stdout = subprocess.execSync(cmd);
-        if (stdout.toString('utf8').toLowerCase().includes(file)) return;
+        if (stdout.toString('utf8').toLowerCase().includes(file)) {
+            console.info(file + ' is already running!');
+            return;
+        }
     }
-    console.info('Running ' + file);
     const program = subprocess.spawn('python3', [path.resolve(file)]);
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
