@@ -38,12 +38,12 @@ let hostConnected = false;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
     if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) {
-        console.log(`Kicked ${ip} from server connection`);
+        console.info(`Kicked ${ip} from server connection`);
         socket.disconnect();
         socket.onevent = (packet) => {};
         return;
     }
-    console.log('Connection from server');
+    console.info('Connection from server');
     if (hostConnected) {
         console.warn('Multiple hosts attempted to connect!');
         socket.disconnect();
@@ -67,13 +67,13 @@ io.on('connection', (socket) => {
     socket.emit('#authenticate');
     socket.once('#authenticateResponse', (id) => {
         if (!authIds.includes(id)) {
-            console.log(`Kicked ${ip} from client connection`);
+            console.info(`Kicked ${ip} from client connection`);
             socket.disconnect();
             socket.onevent = (packet) => {};
             return;
         }
         console.log('Connection from client');
-        socket.on('error', (err) => console.log(err));
+        socket.on('error', () => {});
         socket.on('#runProgram', (type) => runProgram(type == 'manual' ? 'manualdrive.py' : 'autodrive.py')); 
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
@@ -103,6 +103,7 @@ function runProgram(file) {
         let stdout = subprocess.execSync(cmd);
         if (stdout.toString('utf8').toLowerCase().includes(file)) return;
     }
+    console.info('Running ' + file);
     const program = subprocess.spawn('python3', [path.resolve(file)]);
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
