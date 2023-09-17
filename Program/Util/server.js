@@ -36,12 +36,12 @@ let hostConnectionCount = 0;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
     if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) {
-        console.log(`Kicked ${ip} from server connection`);
+        console.info(`Kicked ${ip} from server connection`);
         socket.disconnect();
         socket.onevent = (packet) => {};
         return;
     }
-    console.log('Connection from server');
+    console.info('Connection from server');
     hostConnectionCount++;
     let handleDisconnect = () => {
         hostConnectionCount--;
@@ -62,13 +62,13 @@ io.on('connection', (socket) => {
     socket.emit('authenticate');
     socket.once('authenticateResponse', (id) => {
         if (!authIds.includes(id)) {
-            console.log(`Kicked ${ip} from client connection`);
+            console.info(`Kicked ${ip} from client connection`);
             socket.disconnect();
             socket.onevent = (packet) => {};
             return;
         }
-        console.log('Connection from client');
-        socket.on('error', (err) => console.log(err));
+        console.info('Connection from client');
+        socket.on('error', (err) => console.error(err));
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
             if (packet.data[0] == null) {
