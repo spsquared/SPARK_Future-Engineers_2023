@@ -120,6 +120,8 @@ uTurnGyroAngle = 0
 uTurnWallDistance = 0
 # carAngle = math.pi / 2
 
+lastPillar = [None]
+
 maxErrorDistance = 20
 
 def updateUnknownLandmarks(landmarkData, possibleLandmarks, possibleLandmarkStride, index, maxLandmarks, landmarkType):
