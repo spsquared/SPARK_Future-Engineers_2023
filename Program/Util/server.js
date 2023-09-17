@@ -12,8 +12,8 @@ const limiter = rateLimit({
         console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }
 });
-const subprocess = require('node:child_process');
-const path = require('node:path');
+const subprocess = require('child_process');
+const path = require('path');
 
 app.use(cors({
     origin: '*',
@@ -74,10 +74,9 @@ io.on('connection', (socket) => {
         }
         console.log('Connection from client');
         socket.on('error', () => {});
-        socket.on('#runProgram', (type) => runProgram(type == 'manual' ? 'manualdrive.py' : 'autodrive.py')); 
+        socket.on('#runProgram', (mode) => runProgram(mode)); 
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
-            if (packet.data[0] === '#runProgram') return;
             if (packet.data[0] == null) {
                 socket.disconnect();
                 return;
@@ -85,13 +84,15 @@ io.on('connection', (socket) => {
             onevent.call(socket, packet);
         };
         socket.onAny((event, ...args) => {
+            if (event == '#runProgram') return;
             hostio.emit(event, args); // arguments are condensed into one array for python socketio
         });
     });
 });
 
-function runProgram(file) {
-    // check if is already running
+function runProgram(mode) {
+    console.info(`[RUN] Running program - ${mode} mode`);
+    // check if already running
     let cmd;
     switch (process.platform) {
         case 'win32': cmd = 'taskList'; break;
@@ -100,11 +101,13 @@ function runProgram(file) {
         default: break;
     }
     if (cmd != undefined) {
-        let stdout = subprocess.execSync(cmd);
-        if (stdout.toString('utf8').toLowerCase().includes(file)) return;
+        let stdout = subprocess.execSync(cmd).toString('utf8');
+        if (stdout.includes('manualdrive.py') || stdout.includes('autodrive.py')) {
+            console.info('[RUN] Could not run: a program is already running!');
+            return;
+        }
     }
-    console.info('Running ' + file);
-    const program = subprocess.spawn('python3', [path.resolve(file)]);
+    const program = subprocess.spawn('python3', [path.resolve(mode == 'manual' ? 'manualdrive.py' : 'autodrive.py')]);
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
 };
