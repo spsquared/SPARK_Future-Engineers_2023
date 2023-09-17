@@ -291,9 +291,9 @@ def drive(manual: bool = False):
 
     sin = math.sin(slam.carAngle)
     cos = math.cos(slam.carAngle)
-    # if (pillar[0] != None):
-        # transformedPillar[X] = pillar[X] * cos + pillar[Y] * sin
-        # transformedPillar[Y] = pillar[X] * -sin + pillar[Y] * cos
+    if (pillar[0] != None):
+        transformedPillar[X] = pillar[X] * cos + pillar[Y] * sin
+        transformedPillar[Y] = pillar[X] * -sin + pillar[Y] * cos
     
     steering = 0
     throttle = None
