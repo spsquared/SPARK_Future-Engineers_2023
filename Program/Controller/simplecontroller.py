@@ -35,7 +35,7 @@ speed = 90
 # speed = 100
 lastSteering = 0
 
-# slam.carSections = 7
+slam.carSections = 7
 
 useServer = True
 def setMode(sendServer: bool = None):
@@ -88,37 +88,39 @@ def drive(manual: bool = False):
         #majority vote
         oneFourths = int((converter.imageWidth - 3) / 4)
         threeFourths = int((converter.imageWidth - 3) * 3 / 4)
-        leftDifferences = numpy.diff(leftHeights, 3)
-        rightDifferences = numpy.diff(numpy.flip(rightHeights), 3)
-        leftJump = numpy.argmax(numpy.append(leftDifferences[:threeFourths] < -7, True))
-        leftJumpPillar = numpy.argmax(numpy.append(leftDifferences[:threeFourths] > 7, True))
-        rightJump = numpy.argmax(numpy.append(rightDifferences[:threeFourths] < -7, True))
-        rightJumpPillar = numpy.argmax(numpy.append(rightDifferences[:threeFourths] > 7, True))
-        leftJump2 = numpy.argmax(numpy.append(numpy.flip(leftDifferences[threeFourths:]) < -7, True))
-        leftJump2Pillar = numpy.argmax(numpy.append(numpy.flip(leftDifferences[threeFourths:]) > 7, True))
-        rightJump2 = numpy.argmax(numpy.append(numpy.flip(rightDifferences[threeFourths:]) < -7, True))
-        rightJump2Pillar = numpy.argmax(numpy.append(numpy.flip(rightDifferences[threeFourths:]) > 7, True))
+        leftDifferences = numpy.diff(leftHeights)
+        rightDifferences = numpy.diff(numpy.flip(rightHeights))
+        leftDifferences2 = leftDifferences + numpy.r_[leftDifferences[1:],leftDifferences[0]]
+        rightDifferences2 = rightDifferences + numpy.r_[rightDifferences[1:],rightDifferences[0]]
+        leftJump = numpy.argmax(numpy.append(leftDifferences2[:threeFourths] < -7, True))
+        leftJumpPillar = numpy.argmax(numpy.append(leftDifferences2[:threeFourths] > 7, True))
+        rightJump = numpy.argmax(numpy.append(rightDifferences2[:threeFourths] < -7, True))
+        rightJumpPillar = numpy.argmax(numpy.append(rightDifferences2[:threeFourths] > 7, True))
+        leftJump2 = numpy.argmax(numpy.append(numpy.flip(leftDifferences2[threeFourths:]) < -7, True))
+        leftJump2Pillar = numpy.argmax(numpy.append(numpy.flip(leftDifferences2[threeFourths:]) > 7, True))
+        rightJump2 = numpy.argmax(numpy.append(numpy.flip(rightDifferences2[threeFourths:]) < -7, True))
+        rightJump2Pillar = numpy.argmax(numpy.append(numpy.flip(rightDifferences2[threeFourths:]) > 7, True))
         slam.carDirectionGuesses += 1
         carDirectionGuess = 0
-        if (leftJumpPillar > leftJump):
+        if (leftJumpPillar - 5 > leftJump):
             carDirectionGuess += leftJump
         else:
             carDirectionGuess += threeFourths
-        if (rightJumpPillar > rightJump):
+        if (rightJumpPillar - 5 > rightJump):
             carDirectionGuess -= rightJump
         else:
             carDirectionGuess -= threeFourths
-        if (leftJump2Pillar > leftJump2):
+        if (leftJump2Pillar - 5 > leftJump2):
             carDirectionGuess -= leftJump2
         else:
             carDirectionGuess -= oneFourths
-        if (rightJump2Pillar > rightJump2):
+        if (rightJump2Pillar - 5 > rightJump2):
             carDirectionGuess += rightJump2
         else:
             carDirectionGuess += oneFourths
         if carDirectionGuess > 0:
             slam.carDirectionGuess += 1
-        else:
+        elif carDirectionGuess < 0:
             slam.carDirectionGuess += -1
         if slam.carDirectionGuess > 0:
             slam.carDirection = 1
@@ -357,8 +359,10 @@ def drive(manual: bool = False):
         io.drive.throttle(0)
         return False
     
-    if slam.carSections == 7 and (slam.carSectionsCooldown > 0 or slam.carSectionsExited <= 0) and transformedPillar[0] != None and transformedPillar[2] < 40:
+    if slam.carSections == 7 and (slam.carSectionsCooldown > 0 or slam.carSectionsExited <= 0) and transformedPillar[0] != None and transformedPillar[2] < 60:
         slam.uTurnPillar = transformedPillar[4]
+    if slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 40:
+        slam.uTurnAroundPillar = transformedPillar[4]
     if slam.carSections > 7:
         slam.uTurnPillar = 0
 
@@ -375,15 +379,21 @@ def drive(manual: bool = False):
     buh = None
     
     if slam.uTurning:
-        # steering = 100 * slam.carDirection
-        print("oof no u turn code")
+        if slam.uTurnAroundPillar == 0:
+            steering = 100
+        else:
+            steering = -100 * slam.uTurnAroundPillar
+        if abs(slam.carAngle - math.pi) < 20 / 180 * math.pi:
+            slam.uTurning = False
+            slam.carAngle += math.pi
+        # print("oof no u turn code")
     if centerWalls != 0 and centerWallDistance < 100:
         if transformedPillar[0] == None:
             if NO_PILLARS:
-                if centerWallDistance < 80:
+                if centerWallDistance < 75:
                     steerCenter()
             else:
-                if centerWallDistance < 90:
+                if centerWallDistance < 80:
                     steerCenter()
         elif transformedPillar[4] == RED_PILLAR:
             if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR:
@@ -392,7 +402,7 @@ def drive(manual: bool = False):
                 elif slam.carDirection == COUNTER_CLOCKWISE:
                     if centerWallDistance < 35:
                         steerCenter()
-            elif transformedPillar[1] < 50 + 25 * slam.carDirection:
+            elif transformedPillar[1] < 55 + 30 * slam.carDirection:
             # if centerWallDistance < 45 + 45 * slam.carDirection:
                 steerCenter()
             elif centerWallDistance < 35:
@@ -404,7 +414,7 @@ def drive(manual: bool = False):
                 elif slam.carDirection == CLOCKWISE:
                     if centerWallDistance < 35:
                         steerCenter()
-            elif transformedPillar[1] < 50 - 25 * slam.carDirection:
+            elif transformedPillar[1] < 55 - 30 * slam.carDirection:
             # if centerWallDistance < 45 - 45 * slam.carDirection:
                 steerCenter()
             elif centerWallDistance < 35:
