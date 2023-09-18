@@ -617,3 +617,4 @@ stream.disabled = true;
 capture.disabled = true;
 predict.disabled = true;
 resetPredictor.disabled = true;
+filterApply.disabled = true;

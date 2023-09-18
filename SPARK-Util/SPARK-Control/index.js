@@ -20,7 +20,14 @@ let toggleGens = document.querySelectorAll('.generateToggle');
 for (const div of toggleGens) {
     if (div.hasAttribute('toggleLabel')) {
         const label = document.createElement('label');
+        label.classList.add('toggleLabel');
         label.innerHTML = div.getAttribute('toggleLabel');
+        if (div.hasAttribute('toggleTooltip')) {
+            const toggleTooltip = document.createElement('div');
+            toggleTooltip.classList.add('toggleTooltip');
+            toggleTooltip.innerText = div.getAttribute('toggleTooltip');
+            label.appendChild(toggleTooltip);
+        }
         div.appendChild(label);
     }
     const toggleLabel = document.createElement('label');
@@ -59,16 +66,29 @@ let autoReconnect = true;
 socket.on('connect', () => {
     connected = true;
     appendLog('Connected, waiting for program start...', 'lime');
+    runManual.disabled = false;
+    runAuto.disabled = false;
+    runStop.disabled = true;
 });
-socket.on('#programRunning', () => {
-    appendLog('Program starting', 'lime');
+socket.on('idManual', () => {
     stream.disabled = false;
     capture.disabled = false;
     predict.disabled = false;
     resetPredictor.disabled = false;
     filterApply.disabled = false;
+});
+socket.on('#programStarting', () => {
+    runManual.disabled = true;
+    runAuto.disabled = true;
+});
+socket.on('#programRunning', () => {
+    appendLog('Program starting', 'lime');
+    runManual.disabled = true;
+    runAuto.disabled = true;
+    runStop.disabled = false;
     socket.emit('getStreamState');
     socket.emit('getColors');
+    socket.emit('idManual');
     sounds.connect();
 });
 socket.on('#programStopped', () => {
@@ -78,6 +98,9 @@ socket.on('#programStopped', () => {
     predict.disabled = true;
     resetPredictor.disabled = true;
     filterApply.disabled = true;
+    runManual.disabled = false;
+    runAuto.disabled = false;
+    runStop.disabled = true;
     sounds.disconnect();
 });
 let ondisconnect = () => {
@@ -90,6 +113,9 @@ let ondisconnect = () => {
     predict.disabled = true;
     resetPredictor.disabled = true;
     filterApply.disabled = true;
+    runManual.disabled = true;
+    runAuto.disabled = true;
+    runStop.disabled = true;
     sounds.disconnect();
 };
 socket.on('disconnect', ondisconnect);
@@ -362,13 +388,25 @@ filterApply.onclick = (e) => {
 filterApply.disabled = true;
 socket.on('colors', setColors);
 
-// stop
-// document.getElementById('emergencyStop').onclick = () => {
-//     send('stop', {});
-// };
+// start/stop
+const runManual = document.getElementById('runManual');
+const runAuto = document.getElementById('runAuto');
+const runStop = document.getElementById('runStop');
+runManual.onclick = (e) => {
+    socket.emit('#runProgram', 'manual');
+};
+runAuto.onclick = (e) => {
+    socket.emit('#runProgram', 'auto');
+};
+runStop.onclick = (e) => {
+    socket.emit('stop');
+};
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() == 'c' && e.ctrlKey && !e.shiftKey) socket.emit('stop');
 });
+runManual.disabled = true;
+runAuto.disabled = true;
+runStop.disabled = true;
 
 document.getElementById('disconnect').onclick = () => {
     socket.disconnect();

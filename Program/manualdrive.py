@@ -17,6 +17,8 @@ def main():
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         streaming = False
         predictStreaming = False
+        def idManual(data):
+            server.emit('idManual')
         def drive(data):
             io.drive.throttle(data[0]['throttle'])
             io.drive.steer(data[0]['steering'])
@@ -101,6 +103,7 @@ def main():
             nonlocal predictStreaming
             server.emit('streamState', io.camera.streamState())
             server.emit('predictStreamState', [predictStreaming])
+        server.on('idManual', idManual)
         server.on('drive', drive)
         server.on('capture', capture)
         server.on('stream', stream)

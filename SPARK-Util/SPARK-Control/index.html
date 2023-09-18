@@ -33,21 +33,27 @@
             <img id="banner" src="./assets/banner.png">
         </div>
         <div id="logButtonsCollapsible">
-            <div id="buttonsContainer">
+            <div id="controlsContainer">
                 <input type="checkbox" id="slideoutTabCheckbox"> <!-- dumb CS​S thing -->
                 <div id="slideout">
                     <div id="slideoutBody">
-                        <div id="buttons">
+                        <div id="controls">
+                            <div id="runButtonContainer">
+                                <button id="runManual" class="largeButton">MANUAL</button>
+                                <button id="runAuto" class="largeButton">AUTO</button>
+                                <button id="runStop" class="largeButton">STOP</button>
+                            </div>
+                            <div class="divider"></div>
                             <div id="streamButtonContainer">
                                 <button id="stream" class="largeButton">START STREAM</button>
                                 <input type="checkbox" id="streamToggle">
-                                <div class="generateToggle" toggleID="streamModSave" toggleLabel="Save:"></div>
-                                <div class="generateToggle" toggleID="streamModFilter" toggleLabel="Filter:"></div>
+                                <div class="generateToggle" toggleID="streamModSave" toggleLabel="S:" toggleTooltip="Save stream to file"></div>
+                                <div class="generateToggle" toggleID="streamModFilter" toggleLabel="F:" toggleTooltip="Filter stream before sending"></div>
                             </div>
                             <div id="captureButtonContainer">
                                 <button id="capture" class="largeButton">CAPTURE</button>
-                                <div class="generateToggle" toggleID="captureModSave" toggleLabel="Save:"></div>
-                                <div class="generateToggle" toggleID="captureModFilter" toggleLabel="Filter:"></div>
+                                <div class="generateToggle" toggleID="captureModSave" toggleLabel="S:" toggleTooltip="Save captures to file"></div>
+                                <div class="generateToggle" toggleID="captureModFilter" toggleLabel="F:" toggleTooltip="Filter captures before sending"></div>
                             </div>
                             <div id="predictButtonContainer">
                                 <button id="predict" class="largeButton">START PREDICTIONS</button>

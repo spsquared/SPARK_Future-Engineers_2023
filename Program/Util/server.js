@@ -9,7 +9,7 @@ const limiter = rateLimit({
     windowMs: 100,
     max: 5,
     handler: function (req, res, options) {
-        console.log('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
+        console.info('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }
 });
 const subprocess = require('child_process');
@@ -72,9 +72,10 @@ io.on('connection', (socket) => {
             socket.onevent = (packet) => {};
             return;
         }
-        console.log('Connection from client');
+        console.info('Connection from client');
         socket.on('error', () => {});
         socket.on('#runProgram', (mode) => runProgram(mode)); 
+        if (hostConnected) socket.emit('#programRunning');
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
             if (packet.data[0] == null) {
@@ -84,7 +85,7 @@ io.on('connection', (socket) => {
             onevent.call(socket, packet);
         };
         socket.onAny((event, ...args) => {
-            if (event == '#runProgram') return;
+            if (event[0] === '#') return;
             hostio.emit(event, args); // arguments are condensed into one array for python socketio
         });
     });
@@ -93,23 +94,18 @@ io.on('connection', (socket) => {
 function runProgram(mode) {
     console.info(`[RUN] Running program - ${mode} mode`);
     // check if already running
-    let cmd;
-    switch (process.platform) {
-        case 'win32': cmd = 'taskList'; break;
-        case 'darwin': cmd = 'ps -ax | grep '
-        case 'linux': cmd = 'ps -A'; break;
-        default: break;
-    }
-    if (cmd != undefined) {
-        let stdout = subprocess.execSync(cmd).toString('utf8');
-        if (stdout.includes('manualdrive.py') || stdout.includes('autodrive.py')) {
+    let processes = subprocess.execSync('ps aux --no-header | grep "python3"').toString('utf8').split('\n');
+    for (let i in processes) {
+        if ((processes[i].includes('manualdrive.py') || processes[i].includes('autodrive.py')) && processes[i].includes('R')) {
             console.info('[RUN] Could not run: a program is already running!');
             return;
         }
     }
+    io.emit('#programStarting');
     const program = subprocess.spawn('python3', [path.resolve(mode == 'manual' ? 'manualdrive.py' : 'autodrive.py')]);
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
+    program.on('close', (code) => console.info('[RUN] Program stopped with exit code ' + code));
 };
 
 server.listen(4041);

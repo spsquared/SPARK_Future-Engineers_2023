@@ -50,6 +50,24 @@ canvas {
     height: 20px;
     margin: 4px 4px;
 }
+.toggleLabel {
+    position: relative;
+}
+.toggleTooltip {
+    position: absolute;
+    padding: 4px 4px;
+    background-color: #333;
+    border-radius: 4px;
+    color: white;
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+.toggleLabel:hover .toggleTooltip {
+    opacity: 1;
+    pointer-events: all;
+}
 .toggleInput {
     opacity: 0px;
     width: 0px;
@@ -175,7 +193,7 @@ canvas {
     border-bottom: 4px solid black;
 }
 
-#buttonsContainer {
+#controlsContainer {
     position: relative;
     height: 100%;
     border-right: 4px solid black;
@@ -216,9 +234,19 @@ canvas {
     overflow-y: auto;
 }
 
-#buttons {
+#controls {
     display: flex;
     flex-direction: column;
+}
+#runButtonContainer {
+    display: flex;
+    width: 100%;
+}
+#runManual, #runAuto, #runStop {
+    flex-grow: 1;
+    background-color: lime;
+    border-color: limegreen;
+    margin: 0px 2px;
 }
 #buttonModifiers {
     width: 100%;
@@ -344,7 +372,7 @@ canvas {
         grid-template-columns: 28px 1fr;
     }
 
-    #buttonsContainer {
+    #controlsContainer {
         position: absolute;
         top: 0px;
         left: 0px;
