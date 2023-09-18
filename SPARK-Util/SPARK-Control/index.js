@@ -23,7 +23,6 @@ for (const div of toggleGens) {
         label.innerHTML = div.getAttribute('toggleLabel');
         div.appendChild(label);
     }
-    if (div.hasAttribute('toggleTooltip')) div.title = div.getAttribute('toggleTooltip');
     const toggleLabel = document.createElement('label');
     toggleLabel.classList.add('toggle');
     const toggleInput = document.createElement('input');
@@ -362,6 +361,7 @@ function updateSlider(i) {
     sliders[hueSlider + 2].style.setProperty('--saturation', hslS + '%');
     sliders[hueSlider + 4].style.setProperty('--saturation', hslS + '%');
     sliders[hueSlider + 4].style.setProperty('--value', hslL + '%');
+    sliders[i].title = sliders[i].value;
 };
 function getColors() {
     let colors = [];

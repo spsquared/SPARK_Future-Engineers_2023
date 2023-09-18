@@ -135,6 +135,7 @@ function display() {
         mctx.resetTransform();
         mctx.clearRect(0, 0, 620, 620);
     }
+    historyControls.slider.title = `Frame ${history.length - historyControls.index} / ${history.length}`;
 };
 // screen-space overlays
 function drawOverlays(data) {

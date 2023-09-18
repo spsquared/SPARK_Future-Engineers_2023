@@ -45,40 +45,40 @@
                             </div>
                             <div class="divider"></div>
                             <div id="runButtonContainer">
-                                <button id="runManual" class="largeButton">MANUAL</button>
-                                <button id="runAuto" class="largeButton">AUTO</button>
-                                <button id="runStop" class="largeButton">STOP</button>
+                                <button id="runManual" class="largeButton" title="Run manual control mode">MANUAL</button>
+                                <button id="runAuto" class="largeButton" title="Run autodrive mode">AUTO</button>
+                                <button id="runStop" class="largeButton" title="Stop the running program">STOP</button>
                             </div>
                             <div class="divider"></div>
                             <div id="streamButtonContainer">
-                                <button id="stream" class="largeButton">START STREAM</button>
+                                <button id="stream" class="largeButton" title="Stream images from cameras">START STREAM</button>
                                 <input type="checkbox" id="streamToggle">
-                                <div class="generateToggle" toggleID="streamModSave" toggleLabel="S:" toggleTooltip="Save stream to file"></div>
-                                <div class="generateToggle" toggleID="streamModFilter" toggleLabel="F:" toggleTooltip="Filter stream before sending"></div>
+                                <div class="generateToggle" toggleID="streamModSave" toggleLabel="S:" title="Save stream to file"></div>
+                                <div class="generateToggle" toggleID="streamModFilter" toggleLabel="F:" title="Filter stream before sending"></div>
                             </div>
                             <div id="captureButtonContainer">
-                                <button id="capture" class="largeButton">CAPTURE</button>
-                                <div class="generateToggle" toggleID="captureModSave" toggleLabel="S:" toggleTooltip="Save captures to file"></div>
-                                <div class="generateToggle" toggleID="captureModFilter" toggleLabel="F:" toggleTooltip="Filter captures before sending"></div>
+                                <button id="capture" class="largeButton" title="Capture an image from cameras">CAPTURE</button>
+                                <div class="generateToggle" toggleID="captureModSave" toggleLabel="S:" title="Save captures to file"></div>
+                                <div class="generateToggle" toggleID="captureModFilter" toggleLabel="F:" title="Filter captures before sending"></div>
                             </div>
                             <div id="predictButtonContainer">
-                                <button id="predict" class="largeButton">START PREDICTIONS</button>
+                                <button id="predict" class="largeButton" title="Toggle algorithm-processed stream">START PREDICTIONS</button>
                                 <input type="checkbox" id="predictToggle">
-                                <button id="resetPredictor" class="largeButton">RESET</button>
+                                <button id="resetPredictor" class="largeButton" title="Reset the algorithm's history">RESET</button>
                             </div>
                             <div class="divider"></div>
                             <div id="mapControls">
-                                <div class="generateToggle" toggleID="hcDrawOverlays" toggleLabel="Overlays:"></div>
-                                <div class="generateToggle" toggleID="hcDrawRaw" toggleLabel="Raw Landmarks:"></div>
-                                <div class="generateToggle" toggleID="hcDrawDistances" toggleLabel="Walls & Distances:"></div>
-                                <div class="generateToggle" toggleID="hcDrawWaypoints" toggleLabel="Waypoints:"></div>
-                                <div class="generateToggle" toggleID="hcRawDump" toggleLabel="Raw Dump:"></div>
+                                <div class="generateToggle" toggleID="hcDrawOverlays" toggleLabel="Overlays:" title="Show overlays on images"></div>
+                                <div class="generateToggle" toggleID="hcDrawRaw" toggleLabel="Raw Landmarks:" title="Show unsnapped landmarks/all landmarks in simple controller"></div>
+                                <div class="generateToggle" toggleID="hcDrawDistances" toggleLabel="Walls & Distances:" title="Show unsnapped walls and distances"></div>
+                                <div class="generateToggle" toggleID="hcDrawWaypoints" toggleLabel="Waypoints:" title="Show waypoints"></div>
+                                <div class="generateToggle" toggleID="hcRawDump" toggleLabel="Raw Dump:" title="Show additional data in a table"></div>
                             </div>
                             <div class="divider"></div>
                             <div id="sessionFileControls">
-                                <button id="downloadFrame" class="largeButton"></button>
-                                <button id="importSession" class="largeButton"></button>
-                                <button id="exportSession" class="largeButton"></button>
+                                <button id="downloadFrame" class="largeButton" title="Download current images"></button>
+                                <button id="importSession" class="largeButton" title="Import a past session"></button>
+                                <button id="exportSession" class="largeButton" title="Export current session"></button>
                             </div>
                         </div>
                     </div>
@@ -101,9 +101,9 @@
         <div id="historyControlsWrapper">
             <div id="historyControls">
                 <div id="historyControlsBody">
-                    <button id="historyPrevious">&#60;</button>
+                    <button id="historyPrevious" title="Previous frame">&#60;</button>
                     <input type="range" id="historySlider" class="slider" min="1" max="1" step="1">
-                    <button id="historyNext">&#62;</button>
+                    <button id="historyNext" title="Next frame">&#62;</button>
                 </div>
             </div>
         </div>
@@ -123,7 +123,7 @@
                 </div>
                 <div id="filterAdjustSliders"></div>
                 <div id="filterAdjustIndicators"></div>
-                <button id="filterApply" class="largeButton">APPLY</button>
+                <button id="filterApply" class="largeButton" title="Send filter values to algorithm">APPLY</button>
             </div>
             <label id="dropdownTab" for="dropdownTabCheckbox"></label>
         </div>
