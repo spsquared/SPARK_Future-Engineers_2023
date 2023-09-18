@@ -50,24 +50,6 @@ canvas {
     height: 20px;
     margin: 4px 4px;
 }
-.toggleLabel {
-    position: relative;
-}
-.toggleTooltip {
-    position: absolute;
-    padding: 4px 4px;
-    background-color: #333;
-    border-radius: 4px;
-    color: white;
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1000;
-}
-.toggleLabel:hover .toggleTooltip {
-    opacity: 1;
-    pointer-events: all;
-}
 .toggleInput {
     opacity: 0px;
     width: 0px;
@@ -237,6 +219,76 @@ canvas {
 #controls {
     display: flex;
     flex-direction: column;
+}
+#statusContainer {
+    text-align: center;
+    margin-bottom: -12px;
+}
+#statusConnected, #statusRunning, #statusError {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    filter: brightness(0.5);
+    animation-iteration-count: infinite;
+}
+#statusConnected {
+    background-color: #08F;
+}
+#statusRunning {
+    background-color: #0F0;
+    animation-duration: 1s;
+}
+#statusError {
+    background-color: #F00;
+    animation-duration: 750ms;
+}
+@keyframes blink {
+    0% {
+        filter: brightness(1);
+    }
+    49% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(0.5);
+    }
+    100% {
+        filter: brightness(0.5);
+    }
+}
+@keyframes flash {
+    /*
+    0.1 H
+    0.1 L
+    0.1 H
+    0.45 L
+    total 0.75
+    */
+    0% {
+        filter: brightness(1);
+    }
+    13% {
+        filter: brightness(1);
+    }
+    14% {
+        filter: brightness(0.5);
+    }
+    26% {
+        filter: brightness(0.5);
+    }
+    27% {
+        filter: brightness(1);
+    }
+    39% {
+        filter: brightness(1);
+    }
+    40% {
+        filter: brightness(0.5);
+    }
+    100% {
+        filter: brightness(0.5);
+    }
 }
 #runButtonContainer {
     display: flex;

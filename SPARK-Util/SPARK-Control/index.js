@@ -20,16 +20,10 @@ let toggleGens = document.querySelectorAll('.generateToggle');
 for (const div of toggleGens) {
     if (div.hasAttribute('toggleLabel')) {
         const label = document.createElement('label');
-        label.classList.add('toggleLabel');
         label.innerHTML = div.getAttribute('toggleLabel');
-        if (div.hasAttribute('toggleTooltip')) {
-            const toggleTooltip = document.createElement('div');
-            toggleTooltip.classList.add('toggleTooltip');
-            toggleTooltip.innerText = div.getAttribute('toggleTooltip');
-            label.appendChild(toggleTooltip);
-        }
         div.appendChild(label);
     }
+    if (div.hasAttribute('toggleTooltip')) div.title = div.getAttribute('toggleTooltip');
     const toggleLabel = document.createElement('label');
     toggleLabel.classList.add('toggle');
     const toggleInput = document.createElement('input');
@@ -63,12 +57,16 @@ const socket = io(ip + ':4040', {
 let connected = false;
 let toReconnect = false;
 let autoReconnect = true;
+const statusConnected = document.getElementById('statusConnected');
+const statusRunning = document.getElementById('statusRunning');
+const statusError = document.getElementById('statusError');
 socket.on('connect', () => {
     connected = true;
     appendLog('Connected, waiting for program start...', 'lime');
     runManual.disabled = false;
     runAuto.disabled = false;
     runStop.disabled = true;
+    statusConnected.style.filter = 'brightness(1)';
 });
 socket.on('idManual', () => {
     stream.disabled = false;
@@ -80,12 +78,14 @@ socket.on('idManual', () => {
 socket.on('#programStarting', () => {
     runManual.disabled = true;
     runAuto.disabled = true;
+    statusRunning.style.animationName = 'blink';
 });
 socket.on('#programRunning', () => {
     appendLog('Program starting', 'lime');
     runManual.disabled = true;
     runAuto.disabled = true;
     runStop.disabled = false;
+    statusRunning.style.animationName = 'blink';
     socket.emit('getStreamState');
     socket.emit('getColors');
     socket.emit('idManual');
@@ -101,9 +101,11 @@ socket.on('#programStopped', () => {
     runManual.disabled = false;
     runAuto.disabled = false;
     runStop.disabled = true;
+    statusRunning.style.animationName = '';
+    statusError.style.animationName = '';
     sounds.disconnect();
 });
-let ondisconnect = () => {
+let onDisconnect = () => {
     connected = false;
     if (autoReconnect) toReconnect = true;
     appendLog('Connection closed<button class="connectNow" onclick="reconnect(true);">RECONNECT NOW</button>', 'red');
@@ -116,11 +118,14 @@ let ondisconnect = () => {
     runManual.disabled = true;
     runAuto.disabled = true;
     runStop.disabled = true;
+    statusConnected.style.filter = 'brightness(0.5)';
+    statusRunning.style.animationName = '';
+    statusError.style.animationName = '';
     sounds.disconnect();
 };
-socket.on('disconnect', ondisconnect);
-socket.on('timeout', ondisconnect);
-socket.on('error', ondisconnect);
+socket.on('disconnect', onDisconnect);
+socket.on('timeout', onDisconnect);
+socket.on('error', onDisconnect);
 socket.on('#authenticate', () => {
     socket.emit('#authenticateResponse', auth_uuid);
 });
@@ -164,6 +169,7 @@ socket.on('unsafemessage', (msg) => {
 });
 socket.on('programError', (err) => {
     appendLog(`<strong>[REMOTE]</strong> An error occured:<br>${err}`, 'red');
+    statusError.style.animationName = 'flash';
     sounds.ping();
 });
 

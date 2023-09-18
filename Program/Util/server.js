@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
 function runProgram(mode) {
     console.info(`[RUN] Running program - ${mode} mode`);
     // check if already running
-    let processes = subprocess.execSync('ps aux --no-header | grep "python3"').toString('utf8').split('\n');
+    let processes = subprocess.execSync('ps ax --no-header | grep "python3"').toString('utf8').split('\n');
     for (let i in processes) {
         if ((processes[i].includes('manualdrive.py') || processes[i].includes('autodrive.py')) && processes[i].includes('R')) {
             console.info('[RUN] Could not run: a program is already running!');
