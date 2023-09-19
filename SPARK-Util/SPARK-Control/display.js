@@ -16,7 +16,7 @@ const historyControls = {
     drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
     drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true,
     drawWaypoints: window.localStorage.getItem('hc-drawWaypoints') ?? true,
-    rawDump: false
+    rawDump: window.localStorage.getItem('hc-rawDump') ?? false
 };
 const fpsTimes = [];
 let lastFrame = performance.now();
@@ -360,41 +360,42 @@ setInterval(() => {
 
 // controls 0
 const hcDrawOverlays = document.getElementById('hcDrawOverlays');
+const hcDrawRaw = document.getElementById('hcDrawRaw');
+const hcDrawDistances = document.getElementById('hcDrawDistances');
+const hcDrawWaypoints = document.getElementById('hcDrawWaypoints');
+const hcRawDump = document.getElementById('hcRawDump');
 hcDrawOverlays.addEventListener('click', (e) => {
     historyControls.drawOverlays = hcDrawOverlays.checked;
     window.localStorage.setItem('hc-drawOverlays', historyControls.drawOverlays);
     display();
 });
-const hcDrawRaw = document.getElementById('hcDrawRaw');
 hcDrawRaw.addEventListener('click', (e) => {
     historyControls.drawRaw = hcDrawRaw.checked;
     window.localStorage.setItem('hc-drawRaw', historyControls.drawRaw);
     display();
 });
-const hcDrawDistances = document.getElementById('hcDrawDistances');
 hcDrawDistances.addEventListener('click', (e) => {
     historyControls.drawDistances = hcDrawDistances.checked;
     window.localStorage.setItem('hc-drawDistances', historyControls.drawDistances);
     display();
 });
-const hcDrawWaypoints = document.getElementById('hcDrawWaypoints');
 hcDrawWaypoints.addEventListener('click', (e) => {
     historyControls.drawWaypoints = hcDrawWaypoints.checked;
     window.localStorage.setItem('hc-drawWaypoints', historyControls.drawWaypoints);
     display();
 });
-const hcRawDump = document.getElementById('hcRawDump');
 hcRawDump.addEventListener('click', (e) => {
     historyControls.rawDump = hcRawDump.checked;
     if (historyControls.rawDump) document.body.style.setProperty('--rawdump-width', '20vw');
     else document.body.style.setProperty('--rawdump-width', '0vw');
+    window.localStorage.setItem('hc-rawDump', historyControls.rawDump);
     display();
 });
 hcDrawOverlays.checked = historyControls.drawOverlays;
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
 hcDrawWaypoints.checked = historyControls.drawWaypoints;
-hcRawDump.checked = historyControls.rawDump;
+if (historyControls.rawDump) hcRawDump.click();
 
 // controls
 historyControls.slider.oninput = (e) => {
