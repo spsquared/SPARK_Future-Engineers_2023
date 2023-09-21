@@ -12,11 +12,11 @@ const historyControls = {
     quickmode: false,
     playing: false,
     maxSize: 5000,
-    drawOverlays: window.localStorage.getItem('hc-drawOverlays') ?? true,
-    drawRaw: window.localStorage.getItem('hc-drawRaw') ?? true,
-    drawDistances: window.localStorage.getItem('hc-drawDistances') ?? true,
-    drawWaypoints: window.localStorage.getItem('hc-drawWaypoints') ?? true,
-    rawDump: window.localStorage.getItem('hc-rawDump') ?? false
+    drawOverlays: (window.localStorage.getItem('hc-drawOverlays') ?? true) === 'true',
+    drawRaw: (window.localStorage.getItem('hc-drawRaw') ?? true) === 'true',
+    drawDistances: (window.localStorage.getItem('hc-drawDistances') ?? true) === 'true',
+    drawWaypoints: (window.localStorage.getItem('hc-drawWaypoints') ?? true) === 'true',
+    rawDump: (window.localStorage.getItem('hc-rawDump') ?? false) === 'true'
 };
 const fpsTimes = [];
 let lastFrame = performance.now();

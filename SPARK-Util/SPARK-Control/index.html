@@ -33,23 +33,24 @@
             <img id="banner" src="./assets/banner.png">
         </div>
         <div id="logButtonsCollapsible">
-            <div id="controlsContainer">
+            <div id="slideoutContainer">
                 <input type="checkbox" id="slideoutTabCheckbox"> <!-- dumb CS​S thing -->
                 <div id="slideout">
                     <div id="slideoutBody">
-                        <div id="controls">
+                        <!-- non scrollable top with scrollable bottom -->
+                        <div id="controlsHeader">
                             <div id="statusContainer">
                                 <div id="statusConnected"></div>
                                 <div id="statusRunning"></div>
                                 <div id="statusError"></div>
                             </div>
-                            <div class="divider"></div>
                             <div id="runButtonContainer">
                                 <button id="runManual" class="largeButton" title="Run manual control mode">MANUAL</button>
                                 <button id="runAuto" class="largeButton" title="Run autodrive mode">AUTO</button>
                                 <button id="runStop" class="largeButton" title="Stop the running program">STOP</button>
                             </div>
-                            <div class="divider"></div>
+                        </div>
+                        <div id="controls">
                             <div id="streamButtonContainer">
                                 <button id="stream" class="largeButton" title="Stream images from cameras">START STREAM</button>
                                 <input type="checkbox" id="streamToggle">

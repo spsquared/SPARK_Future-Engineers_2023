@@ -175,7 +175,7 @@ canvas {
     border-bottom: 4px solid black;
 }
 
-#controlsContainer {
+#slideoutContainer {
     position: relative;
     height: 100%;
     border-right: 4px solid black;
@@ -209,20 +209,23 @@ canvas {
     opacity: 0;
 }
 #slideoutBody {
-    height: calc(100% - 16px);
-    padding: 8px 8px;
-    margin-right: -4px;
-    border-right: 4px solid black;
-    overflow-y: auto;
-}
-
-#controls {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    margin-right: -4px;
+    border-right: 4px solid black;
 }
+
+#controlsHeader {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    padding: 8px 8px;
+    border-bottom: 2px solid black;
+}
+
 #statusContainer {
     text-align: center;
-    margin-bottom: -12px;
 }
 #statusConnected, #statusRunning, #statusError {
     display: inline-block;
@@ -290,6 +293,7 @@ canvas {
         filter: brightness(0.5);
     }
 }
+
 #runButtonContainer {
     display: flex;
     width: 100%;
@@ -300,6 +304,15 @@ canvas {
     border-color: limegreen;
     margin: 0px 2px;
 }
+
+#controls {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    padding: 8px 8px;
+    overflow-y: auto;
+}
+
 #buttonModifiers {
     width: 100%;
     margin-top: 8px;
@@ -329,7 +342,8 @@ canvas {
 #mapControls {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: end;
+    padding-right: 10%;
 }
 
 #sessionFileControls {
@@ -424,7 +438,7 @@ canvas {
         grid-template-columns: 28px 1fr;
     }
 
-    #controlsContainer {
+    #slideoutContainer {
         position: absolute;
         top: 0px;
         left: 0px;
