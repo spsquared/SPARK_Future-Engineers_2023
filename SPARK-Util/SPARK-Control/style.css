@@ -233,11 +233,11 @@ canvas {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    filter: brightness(0.5);
+    filter: brightness(0.25);
     animation-iteration-count: infinite;
 }
 #statusConnected {
-    background-color: #08F;
+    background-color: #05F;
 }
 #statusRunning {
     background-color: #0F0;
@@ -255,10 +255,10 @@ canvas {
         filter: brightness(1);
     }
     50% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
     100% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
 }
 @keyframes flash {
@@ -276,10 +276,10 @@ canvas {
         filter: brightness(1);
     }
     14% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
     26% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
     27% {
         filter: brightness(1);
@@ -288,10 +288,10 @@ canvas {
         filter: brightness(1);
     }
     40% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
     100% {
-        filter: brightness(0.5);
+        filter: brightness(0.25);
     }
 }
 

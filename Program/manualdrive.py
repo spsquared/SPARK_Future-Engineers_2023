@@ -121,7 +121,7 @@ def main():
             print('\n STOPPING PROGRAM. DO NOT INTERRUPT.')
             io.close()
             server.close()
-            sys.exit()
+            sys.exit(0)
         io.imu.setAngle(0)
         server.on('stop', stop)
         while running:
@@ -144,7 +144,7 @@ def main():
     running = False
     io.close()
     server.close()
-    sys.exit()
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
