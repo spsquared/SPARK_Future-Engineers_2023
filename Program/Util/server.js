@@ -96,7 +96,7 @@ function runProgram(mode) {
     // check if already running
     let processes = subprocess.execSync('ps ax --no-header | grep "python3"').toString('utf8').split('\n');
     for (let i in processes) {
-        if ((processes[i].includes('manualdrive.py') || processes[i].includes('autodrive.py')) && processes[i].includes('R')) {
+        if ((processes[i].includes('manualdrive.py') || processes[i].includes('autodrive.py'))) {
             console.info('[RUN] Could not run: a program is already running!');
             return;
         }

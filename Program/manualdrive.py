@@ -7,6 +7,7 @@ import cv2
 import base64
 import time
 from threading import Thread
+import sys
 
 running = True
 def main():
@@ -120,7 +121,7 @@ def main():
             print('\n STOPPING PROGRAM. DO NOT INTERRUPT.')
             io.close()
             server.close()
-            exit()
+            sys.exit(0)
         io.imu.setAngle(0)
         server.on('stop', stop)
         while running:
@@ -143,6 +144,7 @@ def main():
     running = False
     io.close()
     server.close()
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

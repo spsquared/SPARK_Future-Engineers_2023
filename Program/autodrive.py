@@ -43,11 +43,10 @@ def main():
             io.setStatusBlink(0)
             io.close()
             server.close()
-            exit(0)
+            sys.exit(0)
         server.on('stop', stop)
         io.drive.throttle(controller.speed)
         io.imu.setAngle(0)
-        waitForStop = False
         while running and actuallyRunning:
             running = controller.drive()
             if infinite: running = True
@@ -59,16 +58,11 @@ def main():
         traceback.print_exc()
         io.error()
         server.emit('programError', str(err))
-        waitForStop = True
     running = False
     io.drive.throttle(0)
-    try:
-        while True and waitForStop:
-            time.sleep(99)
-    except KeyboardInterrupt:
-        pass
     io.close()
     server.close()
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

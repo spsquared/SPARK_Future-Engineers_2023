@@ -61,7 +61,7 @@ const statusRunning = document.getElementById('statusRunning');
 const statusError = document.getElementById('statusError');
 socket.on('connect', () => {
     connected = true;
-    appendLog('Connected, waiting for program start...', 'lime');
+    appendLog('Connected!', 'lime');
     runManual.disabled = false;
     runAuto.disabled = false;
     runStop.disabled = true;
@@ -74,13 +74,14 @@ socket.on('idManual', () => {
     resetPredictor.disabled = false;
     filterApply.disabled = false;
 });
-socket.on('#programStarting', () => {
+socket.on('#programStarting', (mode) => {
+    appendLog('Running program - ' + mode);
     runManual.disabled = true;
     runAuto.disabled = true;
     statusRunning.style.animationName = 'blink';
 });
 socket.on('#programRunning', () => {
-    appendLog('Program starting', 'lime');
+    appendLog('Program running', 'lime');
     runManual.disabled = true;
     runAuto.disabled = true;
     runStop.disabled = false;
