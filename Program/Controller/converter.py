@@ -9,7 +9,7 @@ import time
 # converts images into data usable for SLAM and driving
 
 # colors
-rm = redMin = (0, 110, 70)
+rm = redMin = (0, 90, 70)
 rM = redMax = (20, 255, 255)
 gm = greenMin = (50, 50, 50)
 gM = greenMax = (105, 255, 255)
@@ -42,6 +42,7 @@ RIGHT = 1
 contourSizeConstant = 0.6
 
 minContourSize = 90
+minContourSize = 0
 
 def filter(imgIn: numpy.ndarray):
     try:
@@ -358,15 +359,18 @@ def getContours(imgIn: numpy.ndarray):
             x = int(moment["m10"] / moment["m00"])
             y = int(moment["m01"] / moment["m00"])
             # if y > 9:
-            processedContours.append([x, math.ceil(math.sqrt(size) * contourSizeConstant)])
+            width = math.ceil(math.sqrt(size) * contourSizeConstant)
+            processedContours.append([x - width, width])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):
     contours = []
     for contour in leftContours:
-        contours.append(getRawDistance(contour[0], leftHeights[contour[0]], -1))
+        if contour[1] * 4 > leftHeights[contour[0]]:
+            contours.append(getRawDistance(contour[0], leftHeights[contour[0]], -1))
     for contour in rightContours:
-        contours.append(getRawDistance(contour[0], rightHeights[contour[0]], 1))
+        if contour[1] * 4 > rightHeights[contour[0]]:
+            contours.append(getRawDistance(contour[0], rightHeights[contour[0]], 1))
     # keep angle and distance instead of x and size
     return contours
 
