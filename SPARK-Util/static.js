@@ -13,4 +13,4 @@ app.use('/', (req, res, next) => {
 });
 server.listen(8081);
 
-console.log("server Started")
+console.log("server started")
