@@ -108,6 +108,7 @@ canvas {
 .divider {
     width: 80%;
     height: 2px;
+    min-height: 2px;
     background-color: gray;
     margin: 16px 0px;
     align-self: center;
