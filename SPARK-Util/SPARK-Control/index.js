@@ -105,6 +105,14 @@ socket.on('#programStopped', () => {
     statusError.style.animationName = '';
     sounds.disconnect();
 });
+socket.on('#programAlreadyRunning', () => {
+    document.querySelectorAll('.killPrograms').forEach(button => button.remove());
+    appendLog('Program already running!<button class="killPrograms" onclick="socket.emit(\'#killPrograms\');">KILL</button>');
+});
+socket.on('#killedPrograms', () => {
+    document.querySelectorAll('.killPrograms').forEach(button => button.remove());
+    appendLog('Programs killed');
+});
 let onDisconnect = () => {
     connected = false;
     if (autoReconnect) toReconnect = true;
