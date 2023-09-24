@@ -9,7 +9,7 @@ const limiter = rateLimit({
     windowMs: 100,
     max: 5,
     handler: function (req, res, options) {
-        console.info('[SERVER] Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
+        console.info('Rate limiting triggered by ' + req.ip ?? req.socket.remoteAddress);
     }
 });
 const subprocess = require('child_process');
@@ -38,21 +38,20 @@ let hostConnected = false;
 hostio.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address ?? socket.request.socket.remoteAddress ?? socket.client.conn.remoteAddress ?? 'un-ip';
     if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) {
-        console.info(`[SERVER] Kicked ${ip} from server connection`);
+        console.info(`Kicked ${ip} from server connection`);
         socket.disconnect();
         socket.onevent = (packet) => {};
         return;
     }
-    console.info('[SERVER] Connection from server');
+    console.info('Connection from server');
     if (hostConnected) {
-        console.warn('[SERVER] Multiple hosts attempted to connect!');
+        console.warn('Multiple hosts attempted to connect!');
         socket.disconnect();
         return;
     }
     hostConnected = true;
     let handleDisconnect = () => {
         hostConnected = false;
-        console.info('[SERVER] Server disconnected');
         io.emit('#programStopped');
     };
     socket.on('disconnect', handleDisconnect);
@@ -68,15 +67,14 @@ io.on('connection', (socket) => {
     socket.emit('#authenticate');
     socket.once('#authenticateResponse', (id) => {
         if (!authIds.includes(id)) {
-            console.info(`[SERVER] Kicked ${ip} from client connection`);
+            console.info(`Kicked ${ip} from client connection`);
             socket.disconnect();
             socket.onevent = (packet) => {};
             return;
         }
-        console.info('[SERVER] Connection from client');
+        console.info('Connection from client');
         socket.on('error', () => {});
         socket.on('#runProgram', (mode) => runProgram(mode)); 
-        socket.on('#killPrograms', () => killPrograms()); 
         if (hostConnected) socket.emit('#programRunning');
         const onevent = socket.onevent;
         socket.onevent = (packet) => {
@@ -100,27 +98,14 @@ function runProgram(mode) {
     for (let i in processes) {
         if ((processes[i].includes('manualdrive.py') || processes[i].includes('autodrive.py'))) {
             console.info('[RUN] Could not run: a program is already running!');
-            io.emit('#programAlreadyRunning');
             return;
         }
     }
-    io.emit('#programStarting', mode);
+    io.emit('#programStarting');
     const program = subprocess.spawn('python3', [path.resolve(mode == 'manual' ? 'manualdrive.py' : 'autodrive.py')]);
-    program.stdout.setEncoding('utf8');    
-    program.stderr.setEncoding('utf8');
-    program.stdout.on('data', (chunk) => {
-        process.stdout.write(chunk.replaceAll('\n', '\n[RUN] '));
-    });
-    program.stderr.on('data', (chunk) => {
-        process.stderr.write(chunk.replaceAll('\n', '\n[RUN] '));
-    });
+    program.stdout.pipe(process.stdout);
+    program.stderr.pipe(process.stderr);
     program.on('close', (code) => console.info('[RUN] Program stopped with exit code ' + code));
-};
-function killPrograms() {
-    console.info('[RUN] Killing all programs!');
-    subprocess.exec('pkill -9 -f autodrive.py');
-    subprocess.exec('pkill -9 -f manualdrive.py');
-    io.emit('#killedPrograms');
 };
 
 server.listen(4041);
