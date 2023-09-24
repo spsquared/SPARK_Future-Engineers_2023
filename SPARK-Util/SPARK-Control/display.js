@@ -348,7 +348,7 @@ function drawWaypoints(waypoints, pos) {
 };
 // raw dump
 function appendRawDump(data) {
-    rawDumpContents.innerHTML = '';
+    rawDumpContents.innerHTML = 'oof oof oof oof oof oof oooooooof OOF';
     for (let i in data) {
         const div = document.createElement('div');
         div.innerText = data[i];

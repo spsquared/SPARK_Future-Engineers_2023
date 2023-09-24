@@ -140,6 +140,8 @@ It contains a dropdown to [modify the filter items on-the-fly](#using-spark-cont
 
 *Note: SPARK Control Panel is not necessary and competition runs have this feature turned off to reduce latency.*
 
+We recently added a feature that allows us to remotely run the program from the Control Panel, meaning no SSH is required to run the program.
+
 #### Using SPARK Control Panel to Change Parameters
 
 It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply change the HSV sliders and click the "Capture" button with the "Filter" option on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
