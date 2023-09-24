@@ -384,7 +384,7 @@ canvas {
     margin-bottom: 2px;
     line-break: anywhere;
 }
-.connectNow {
+.connectNow, .killPrograms {
     float: right;
     height: 24px;
     margin-left: 16px;
@@ -467,7 +467,7 @@ canvas {
         height: unset;
         min-height: calc(100% - 16px);
         max-height: calc(100vh - min(97px, var(--min-sidebar-width)) - 24px);
-        border-top: 4px;
+        border-bottom: 4px solid black;
         background-color: lightgray;
     }
 
