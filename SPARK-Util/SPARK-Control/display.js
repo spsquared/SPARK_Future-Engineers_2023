@@ -348,7 +348,7 @@ function drawWaypoints(waypoints, pos) {
 };
 // raw dump
 function appendRawDump(data) {
-    rawDumpContents.innerHTML = 'oof oof oof oof oof oof oooooooof OOF';
+    rawDumpContents.innerHTML = '';
     for (let i in data) {
         const div = document.createElement('div');
         div.innerText = data[i];
@@ -486,7 +486,7 @@ document.addEventListener('keydown', (e) => {
         historyControls.back = true;
     } else if (e.key == 'ArrowRight') {
         historyControls.forward = true;
-    } else if (e.key == 'Control') {
+    } else if (e.key == 'Control' || e.key == 'Meta') {
         historyControls.quickmode = true;
     } else if (e.key == 'Shift') {
         historyControls.slowmode = true;
@@ -500,13 +500,16 @@ document.addEventListener('keydown', (e) => {
         importSession();
         e.preventDefault();
     }
+    if (e.metaKey) {
+        e.preventDefault();
+    }
 });
 document.addEventListener('keyup', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = false;
     } else if (e.key == 'ArrowRight') {
         historyControls.forward = false;
-    } else if (e.key == 'Control') {
+    } else if (e.key == 'Control' || e.key == 'Meta') {
         historyControls.quickmode = false;
     } else if (e.key == 'Shift') {
         historyControls.slowmode = false;

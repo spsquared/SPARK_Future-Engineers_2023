@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
+const os = require('os');
 
 const static = express.static(__dirname);
 app.get('/', (req, res) => {
@@ -13,4 +14,5 @@ app.use('/', (req, res, next) => {
 });
 server.listen(8081);
 
-console.log("server started")
+// console.log('Spuhrver started' + "" + `${''}`);
+process.stderr.write(os.cpus()[0].model)
