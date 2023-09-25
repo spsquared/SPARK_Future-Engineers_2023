@@ -504,7 +504,7 @@ document.addEventListener('keydown', (e) => {
         historyControls.back = true;
     } else if (e.key == 'ArrowRight') {
         historyControls.forward = true;
-    } else if (e.key == 'Control') {
+    } else if (e.key == 'Control' || e.key == 'Meta') {
         historyControls.quickmode = true;
     } else if (e.key == 'Shift') {
         historyControls.slowmode = true;
@@ -518,13 +518,16 @@ document.addEventListener('keydown', (e) => {
         importSession();
         e.preventDefault();
     }
+    if (e.metaKey) {
+        e.preventDefault();
+    }
 });
 document.addEventListener('keyup', (e) => {
     if (e.key == 'ArrowLeft') {
         historyControls.back = false;
     } else if (e.key == 'ArrowRight') {
         historyControls.forward = false;
-    } else if (e.key == 'Control') {
+    } else if (e.key == 'Control' || e.key == 'Meta') {
         historyControls.quickmode = false;
     } else if (e.key == 'Shift') {
         historyControls.slowmode = false;

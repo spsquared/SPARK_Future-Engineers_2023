@@ -254,12 +254,13 @@ def drive(manual: bool = False):
     if centerWalls + leftWalls + rightWalls != 0:
         carAngle /= centerWalls + leftWalls + rightWalls
     d = 0.75
-    if carAngle > slam.carAngle and lastSteering > 0:
-        slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
-    elif carAngle < slam.carAngle and lastSteering < 0:
-        slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
-    else:
-        slam.carAngle = d / 2 * carAngle + slam.carAngle * (1 - d / 2)
+    slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
+    # if carAngle > slam.carAngle and lastSteering > 0:
+    #     slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
+    # elif carAngle < slam.carAngle and lastSteering < 0:
+    #     slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
+    # else:
+    #     slam.carAngle = d / 2 * carAngle + slam.carAngle * (1 - d / 2)
 
     maxContourDistance = 170
     
@@ -308,7 +309,7 @@ def drive(manual: bool = False):
         slam.carSectionsTimer = 0
     slam.carSectionsCooldown -= 1
 
-    carAngleSteering = 150
+    carAngleSteering = 130
 
     def steerCenter():
         nonlocal steering, carAngleSteering
@@ -332,7 +333,7 @@ def drive(manual: bool = False):
                 # do not change
                 steering = (math.atan2(waypointX, waypointY) - slam.carAngle) * 200
                 if steering * pillarDirection < 0:
-                    steering = 0
+                    steering /= 2   
             else:
                 steering = 40 * pillarDirection
         else:
@@ -351,7 +352,7 @@ def drive(manual: bool = False):
         if slam.carSectionsExited == 0:
             slam.carSectionsCooldown = 10
     
-    if slam.carSectionsExited > 0 and slam.carAngle * slam.carDirection > 45 / 180 * math.pi:
+    if slam.carSectionsExited > 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
         slam.carAngle -= slam.carDirection * math.pi / 2
     
     inMiddleSection = slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14))
@@ -429,7 +430,7 @@ def drive(manual: bool = False):
             # elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[4] == RED_PILLAR and transformedPillar[0] * slam.carDirection < 40:
             #     steering = -75 * slam.carDirection - carAngle * 40
     else:
-        if transformedPillar[0] == None or transformedPillar[1] < 10 or (leftWalls != 0 and transformedPillar[0] < -leftWallDistance) or (rightWalls != 0 and transformedPillar[0] > rightWallDistance):
+        if transformedPillar[0] == None or transformedPillar[1] < 10 or (leftWalls != 0 and transformedPillar[0] < -leftWallDistance + 10) or (rightWalls != 0 and transformedPillar[0] > rightWallDistance - 10):
             # if leftWalls != 0 and rightWalls != 0:
             #     steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 50 - carAngle * 80
             if leftWalls != 0 and leftWallDistance < 25:

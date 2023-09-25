@@ -20,6 +20,7 @@ imageHeight = 308
 focalLength = 100
 focalLength = 80
 focalLength = 100
+focalLength = 105
 # focalLength = 110
 wallHeightOffset = 3
 wallHeight = 10
@@ -92,8 +93,8 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = [170, 168, 167, 166, 165, 165, 164, 164]
-undistortedWallStartRight = [158, 159, 160, 160, 160, 160, 160, 160]
+undistortedWallStartLeft = [171, 169, 167, 166, 165, 165, 164, 164]
+undistortedWallStartRight = [158, 158, 159, 160, 160, 160, 160, 160]
 
 maximumTopWallHeightLeft = 4
 maximumTopWallHeightRight = 4
@@ -360,15 +361,19 @@ def getContours(imgIn: numpy.ndarray):
             y = int(moment["m01"] / moment["m00"])
             # if y > 9:
             width = math.ceil(math.sqrt(size) * contourSizeConstant)
-            processedContours.append([x - width, width])
+            processedContours.append([x, width])
     return processedContours
 
 def mergeContours(leftContours: list, rightContours: list, leftHeights: numpy.ndarray, rightHeights: numpy.ndarray):
     contours = []
     for contour in leftContours:
+        if contour[0] == imageWidth:
+            contour[0] -= 1
         if contour[1] * 4 > leftHeights[contour[0]]:
             contours.append(getRawDistance(contour[0], leftHeights[contour[0]], -1))
     for contour in rightContours:
+        if contour[0] == imageWidth:
+            contour[0] -= 1
         if contour[1] * 4 > rightHeights[contour[0]]:
             contours.append(getRawDistance(contour[0], rightHeights[contour[0]], 1))
     # keep angle and distance instead of x and size
