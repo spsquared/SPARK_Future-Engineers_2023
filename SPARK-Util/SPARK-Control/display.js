@@ -16,6 +16,7 @@ const historyControls = {
     drawRaw: (window.localStorage.getItem('hc-drawRaw') ?? true) === 'true',
     drawDistances: (window.localStorage.getItem('hc-drawDistances') ?? true) === 'true',
     drawWaypoints: (window.localStorage.getItem('hc-drawWaypoints') ?? true) === 'true',
+    drawCoordinates: (window.localStorage.getItem('hc-drawCoordinates') ?? false) === 'true',
     rawDump: (window.localStorage.getItem('hc-rawDump') ?? false) === 'true'
 };
 const fpsTimes = [];
@@ -243,37 +244,44 @@ function drawCar(pos, steering) {
 function drawRawLandmarks(rawLandmarks, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[2]);
+    // mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
-    // draw wall things
+    mctx.font = '6px monospace';
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'bottom';
+    // draw wall corner things
     mctx.fillStyle = 'rgb(100, 100, 255)';
     for (let landmark of rawLandmarks[2]) {
         mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
     }
     // draw red pillars
     mctx.strokeStyle = 'rgb(255, 0, 0)';
+    mctx.fillStyle = 'rgb(255, 0, 0)';
     for (let landmark of rawLandmarks[0]) {
         mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${Math.round(landmark[1])})`, landmark[0], landmark[1] - 4);
     }
     // draw green pillars
     mctx.strokeStyle = 'rgb(0, 255, 0)';
+    mctx.fillStyle = 'rgb(0, 255, 0)';
     for (let landmark of rawLandmarks[1]) {
         mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${Math.round(landmark[1])})`, landmark[0], landmark[1] - 4);
     }
     mctx.restore();
 };
 function drawWalls(walls, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    mctx.rotate(pos[2]);
+    // mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(255, 160, 0)';
     mctx.lineWidth = 1;
-    mctx.font = '12px monospace';
-    mctx.fillStyle = 'rgb(255, 255, 255';
+    mctx.font = '6px monospace';
+    mctx.fillStyle = 'rgb(255, 160, 0)';
     mctx.textAlign = 'center';
     mctx.textBaseline = 'middle';
     mctx.beginPath();
@@ -281,8 +289,14 @@ function drawWalls(walls, pos) {
     for (let i in walls[1]) {
         mctx.moveTo(walls[1][i][0], walls[1][i][1]);
         mctx.lineTo(walls[1][i][2], walls[1][i][3]);
+        if (historyControls.drawCoordinates) {
+            mctx.fillText(`(${Math.round(walls[1][i][0])}, ${Math.round(walls[1][i][1])})`, walls[1][i][0], walls[1][i][1] - 4);
+            mctx.fillText(`(${Math.round(walls[1][i][2])}, ${Math.round(walls[1][i][3])})`, walls[1][i][2], walls[1][i][3] - 4);
+        }
     }
     mctx.stroke();
+    mctx.font = '12px monospace';
+    mctx.fillStyle = 'rgb(255, 255, 255)';
     for (let i in walls[1]) {
         if (walls[2][i] != undefined) {
             mctx.fillText(labels[walls[2][i] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
@@ -363,6 +377,7 @@ const hcDrawOverlays = document.getElementById('hcDrawOverlays');
 const hcDrawRaw = document.getElementById('hcDrawRaw');
 const hcDrawDistances = document.getElementById('hcDrawDistances');
 const hcDrawWaypoints = document.getElementById('hcDrawWaypoints');
+const hcDrawCoordinates = document.getElementById('hcDrawCoordinates');
 const hcRawDump = document.getElementById('hcRawDump');
 hcDrawOverlays.addEventListener('click', (e) => {
     historyControls.drawOverlays = hcDrawOverlays.checked;
@@ -384,6 +399,11 @@ hcDrawWaypoints.addEventListener('click', (e) => {
     window.localStorage.setItem('hc-drawWaypoints', historyControls.drawWaypoints);
     display();
 });
+hcDrawCoordinates.addEventListener('click', (e) => {
+    historyControls.drawCoordinates = hcDrawCoordinates.checked;
+    window.localStorage.setItem('hc-drawCoordinates', historyControls.drawCoordinates);
+    display();
+});
 hcRawDump.addEventListener('click', (e) => {
     historyControls.rawDump = hcRawDump.checked;
     if (historyControls.rawDump) document.body.style.setProperty('--rawdump-width', '20vw');
@@ -395,6 +415,7 @@ hcDrawOverlays.checked = historyControls.drawOverlays;
 hcDrawRaw.checked = historyControls.drawRaw;
 hcDrawDistances.checked = historyControls.drawDistances;
 hcDrawWaypoints.checked = historyControls.drawWaypoints;
+hcDrawCoordinates.checked = historyControls.drawCoordinates;
 if (historyControls.rawDump) hcRawDump.click();
 
 // controls
