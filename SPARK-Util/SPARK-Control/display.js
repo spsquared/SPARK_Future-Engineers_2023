@@ -319,10 +319,7 @@ function drawWaypoints(waypoints, pos) {
     if (waypoints[2]) {
         mctx.save();
         mctx.translate(pos[0], pos[1]);
-// <<<<<<< HEAD
         // mctx.rotate(pos[2]);
-// =======
-// >>>>>>> d589a883aec4b85a402bcbaaaf50617300ac3d28
     }
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);

@@ -66,6 +66,7 @@ socket.on('connect', () => {
     runAuto.disabled = false;
     runStop.disabled = true;
     statusConnected.style.filter = 'brightness(1)';
+    sounds.connect();
 });
 socket.on('idManual', () => {
     stream.disabled = false;
@@ -111,7 +112,18 @@ socket.on('#programAlreadyRunning', () => {
 });
 socket.on('#killedPrograms', () => {
     document.querySelectorAll('.killPrograms').forEach(button => button.remove());
-    appendLog('Programs killed');
+    appendLog('Programs killed', 'red');
+    stream.disabled = true;
+    capture.disabled = true;
+    predict.disabled = true;
+    resetPredictor.disabled = true;
+    filterApply.disabled = true;
+    runManual.disabled = false;
+    runAuto.disabled = false;
+    runStop.disabled = true;
+    statusRunning.style.animationName = '';
+    statusError.style.animationName = '';
+    sounds.stop();
 });
 let onDisconnect = () => {
     connected = false;
