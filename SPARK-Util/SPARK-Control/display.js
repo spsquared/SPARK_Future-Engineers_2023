@@ -340,18 +340,25 @@ function drawWaypoints(waypoints, pos) {
     mctx.strokeStyle = 'rgb(0, 255, 255)';
     mctx.fillStyle = 'rgb(0, 255, 255)';
     mctx.lineWidth = 0.5;
+    mctx.font = '6px monospace';
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'bottom';
     mctx.beginPath();
     if (waypoints[0].length > 0) {
         mctx.moveTo(waypoints[0][0], waypoints[0][1]);
         for (let waypoint of waypoints[0]) {
             mctx.lineTo(waypoint[0], waypoint[1]);
             mctx.fillRect(waypoint[0] - 1, waypoint[1] - 1, 2, 2);
+            if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoint[0])}, ${Math.round(waypoint[1])})`, waypoint[0], waypoint[1] - 4);
         }
     }
-    mctx.fillRect(waypoints[1][0] - 2, waypoints[1][1] - 2, 4, 4);
-    mctx.moveTo(waypoints[1][0], waypoints[1][1]);
-    if (waypoints[2]) mctx.lineTo(0, 0);
-    else mctx.lineTo(pos[0], pos[1]);
+    if (waypoints[1][0] != 0 && waypoints[1][1] != 0) {
+        mctx.fillRect(waypoints[1][0] - 2, waypoints[1][1] - 2, 4, 4);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoints[1][0])}, ${Math.round(waypoints[1][1])})`, waypoints[1][0], waypoints[1][1] - 4);
+        mctx.moveTo(waypoints[1][0], waypoints[1][1]);
+        if (waypoints[2]) mctx.lineTo(0, 0);
+        else mctx.lineTo(pos[0], pos[1]);
+    }
     mctx.stroke();
     if (waypoints[2]) {
         mctx.restore();

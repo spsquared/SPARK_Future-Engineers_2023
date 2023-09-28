@@ -63,6 +63,12 @@ img {
     left: 0px;
 }
 
+#bottom {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+}
+
 #canvas {
     position: absolute;
     top: 0px;
