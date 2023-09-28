@@ -31,11 +31,11 @@ if NO_PILLARS:
     print("[!] [!] [!] [!] No pillar mode is on! [!] [!] [!] [!]") # oh noes no pillar mode is on
 
 # speed !!!!
-speed = 90
+speed = 80
 # speed = 100
 lastSteering = 0
 
-# slam.carSections = 7
+slam.carSections = 7
 
 useServer = True
 def setMode(sendServer: bool = None):
@@ -304,13 +304,20 @@ def drive(manual: bool = False):
     waypointX = 0
     waypointY = 0
     
-    slam.carSectionsTimer -= 1
-    if slam.carSectionsTimer < 0:
-        slam.carSectionsTimer = 0
-    slam.carSectionsCooldown -= 1
+    slam.carSectionTimer -= 1
+    if slam.carSectionTimer < 0:
+        slam.carSectionTimer = 0
+    slam.carSectionCooldown -= 1
 
     carAngleSteering = 130
 
+    def steerNormal():
+        nonlocal steering, carAngleSteering
+        steering += -slam.carAngle * carAngleSteering
+        if leftWalls != 0 and leftWallDistance < 40:
+            steering = max(steering, 35)
+        elif rightWalls != 0 and rightWallDistance < 40:
+            steering = min(steering, -35)
     def steerCenter():
         nonlocal steering, carAngleSteering
         if slam.carDirection == CLOCKWISE and rightWalls > 0 and rightWallDistance < 35:
@@ -337,40 +344,45 @@ def drive(manual: bool = False):
             else:
                 steering = 40 * pillarDirection
         else:
-            steering = -slam.carAngle * carAngleSteering
+            steerNormal()
 
-    slam.carSectionsEnd -= 1
     if (centerWalls != 0 and centerWallDistance < 110):
-        if slam.carSectionsCooldown <= 0 and slam.carSectionsExited <= 0:
-            slam.carSectionsTimer += 2
-            if slam.carSectionsTimer > 3:
-                slam.carSections += 1
-                slam.carSectionsCooldown = 3000
-                slam.carSectionsExited = 3
+        if slam.carSectionCooldown <= 0 and slam.carSectionExited <= 0:
+            slam.carSectionTimer += 2
+            if slam.carSectionTimer > 3:
+                slam.carSectionEntered = True
+                slam.carSectionCooldown = 3000
+                slam.carSectionExited = 7
     if centerWalls == 0 or centerWallDistance > 200:
-        slam.carSectionsExited -= 1
-        if slam.carSectionsExited == 0:
-            slam.carSectionsCooldown = 10
+        slam.carSectionExited -= 1
+        if slam.carSectionExited == 0:
+            if (slam.carSectionEntered):
+                slam.carSections += 1
+                slam.carSectionEntered = False
+            slam.carSectionEntered = False
+            slam.carSectionCooldown = 10
     
-    if slam.carSectionsExited > 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
+    if slam.carSectionExited > 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
         slam.carAngle -= slam.carDirection * math.pi / 2
+        slam.carSections += 1
+        slam.carSectionEntered = False
     
-    inMiddleSection = slam.carSectionsExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionsCooldown <= 14))
+    inMiddleSection = slam.carSectionExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionCooldown <= 14))
     
     if slam.carSections == 12 and inMiddleSection:
         io.drive.steer(0)
         io.drive.throttle(0)
         return False
     
-    if slam.carSections == 7 and (slam.carSectionsCooldown > 0 or slam.carSectionsExited <= 0) and transformedPillar[0] != None and transformedPillar[2] < 60:
+    if slam.carSections == 7 and (slam.carSectionCooldown > 0 or slam.carSectionExited <= 0) and transformedPillar[0] != None and transformedPillar[2] < 100:
         slam.uTurnPillar = transformedPillar[4]
         slam.uTurnPillar = 2;
     if slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 40:
         slam.uTurnAroundPillar = transformedPillar[4]
-    if slam.carSections > 7:
-        slam.uTurnPillar = 0
+    # if slam.carSections > 7:
+    #     slam.uTurnPillar = 0
 
-    if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR and abs(slam.carAngle / math.pi * 180) < 15:
+    if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR and slam.carSectionExited < 3 and abs(slam.carAngle / math.pi * 180) < 15:
         if slam.uTurning == False:
             print("UTURN ! ! ! ! ! ! ! !")
             slam.uTurnStage = 0
@@ -433,11 +445,7 @@ def drive(manual: bool = False):
         if transformedPillar[0] == None or transformedPillar[1] < 10 or (leftWalls != 0 and transformedPillar[0] < -leftWallDistance + 10) or (rightWalls != 0 and transformedPillar[0] > rightWallDistance - 10):
             # if leftWalls != 0 and rightWalls != 0:
             #     steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 50 - carAngle * 80
-            if leftWalls != 0 and leftWallDistance < 25:
-                steering = 50
-            elif rightWalls != 0 and rightWallDistance < 25:
-                steering = -50
-            steering += -slam.carAngle * carAngleSteering
+            steerNormal()
         else:
             steerPillar()
     
@@ -464,7 +472,7 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "ANGLE", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "UTURN PILLAR", slam.uTurnPillar, "L Jump", int(leftJump), "L Jump P", int(leftJumpPillar), "R Jump", int(rightJump), "R Jump P", int(rightJumpPillar), "L Jump 2", int(leftJump2), "L Jump 2 P", int(leftJump2Pillar), "R Jump 2", int(rightJump2), "R Jump 2 P", int(rightJump2Pillar)]
+            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "ANGLE", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Car Sections", int(slam.carSections), "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "UTURN PILLAR", slam.uTurnPillar, "L Jump", int(leftJump), "L Jump P", int(leftJumpPillar), "R Jump", int(rightJump), "R Jump P", int(rightJumpPillar), "L Jump 2", int(leftJump2), "L Jump 2 P", int(leftJump2Pillar), "R Jump 2", int(rightJump2), "R Jump 2 P", int(rightJump2Pillar)]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
