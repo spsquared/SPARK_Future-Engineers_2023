@@ -458,6 +458,7 @@ async function animateRickroll(widetanmu = true) {
         // let vbuh = new Audio('./assets/Minecraft_ Villager Sound Effect.mp3');
         // let vbuh = new Audio('./assets/Dramatic Vine_Instagram Boom - Sound Effect (HD).mp3');
         // let vbuh = new Audio('./assets/07-The Magus.mp3');
+        // let vbuh = new Audio('./assets/Askerad - Home (KSP2 FanMade attempt at a menu theme).mp3');
         // let vbuh = new Audio('./assets/corruption pixel sound effects.mp3');
         // let vbuh = new Audio('./assets/percussion.mp3');
         // let vbuh = new Audio('./assets/200 - Pixl\'d.mp3');

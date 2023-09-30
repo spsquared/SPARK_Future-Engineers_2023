@@ -18,7 +18,7 @@ __throttleFwd = 0.08
 __throttleRev = -0.15
 __steeringCenter = 90
 __steeringRange = 45
-__steeringTrim = 8
+__steeringTrim = 12
 __smoothFactor = 0
 __thread = None
 __running = True
@@ -31,7 +31,6 @@ def __update():
             angle = round((__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim)
             if angle != lastAngle: __pwm.servo[1].angle = angle
             lastAngle = angle
-            print(__currStr)
             time.sleep(0.02)
     except Exception as err:
         traceback.print_exc()
