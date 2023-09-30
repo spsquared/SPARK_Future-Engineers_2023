@@ -462,7 +462,6 @@ def drive(manual: bool = False):
                 1,
                 1
             ],
-            'distances': [],
             'heights': [leftHeights.tolist(), rightHeights.tolist(), leftWallStarts.tolist(), rightWallStarts.tolist()],
             'pos': [150, 150,  slam.carAngle],
             'landmarks': slam.storedLandmarks,

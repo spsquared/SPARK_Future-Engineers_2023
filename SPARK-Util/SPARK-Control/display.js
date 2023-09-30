@@ -14,6 +14,7 @@ const historyControls = {
     maxSize: 5000,
     drawOverlays: (window.localStorage.getItem('hc-drawOverlays') ?? true) === 'true',
     drawRaw: (window.localStorage.getItem('hc-drawRaw') ?? true) === 'true',
+    drawWalls: (window.localStorage.getItem('hc-drawWalls') ?? true) === 'true',
     drawDistances: (window.localStorage.getItem('hc-drawDistances') ?? true) === 'true',
     drawWaypoints: (window.localStorage.getItem('hc-drawWaypoints') ?? true) === 'true',
     drawCoordinates: (window.localStorage.getItem('hc-drawCoordinates') ?? false) === 'true',
@@ -77,16 +78,26 @@ function addData(data) {
             encoding + data.images[1],
             data.images[3]
         ],
-        distances: data.distances,
         heights: data.heights,
         pos: [data.pos[0], 300 - data.pos[1], data.pos[2]],
         landmarks: data.landmarks.map((([x, y, t, f, d]) => [x, 300 - y, f])),
-        rawLandmarks: [data.rawLandmarks[0].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[1].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[2].map(([l, h, c]) => [l[0], -l[1]])],
+        rawLandmarks: [
+            data.rawLandmarks[0].map(([x, y, d, a]) => [x, -y, d]),
+            data.rawLandmarks[1].map(([x, y, d, a]) => [x, -y, d]),
+            data.rawLandmarks[2].map(([l, h]) => [l[0], -l[1]])
+        ],
         contours: data.contours,
         wallLines: data.wallLines,
-        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
+        walls: [
+            data.walls[0].map(([x, y, d, a]) => [x, -y]),
+            data.walls[1].map(([l0, l1, l2, l3]) => [l2[0], -l2[1], l3[0], -l3[1]]),
+            (data.walls[2] ?? []).map(([t, d, a]) => [t, d])
+        ],
         steering: Math.min(100, Math.max(-100, data.steering)),
-        waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
+        waypoints: [
+            data.waypoints[0].map(([x, y]) => [x, -y]),
+            [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]
+        ],
         rawDump: data.raw,
         frameTime: performance.now() - lastFrame,
         fps: fps
@@ -123,10 +134,8 @@ function display() {
         mctx.globalAlpha = 1;
         drawLandmarks(data.landmarks);
         if (historyControls.drawRaw) drawRawLandmarks(data.rawLandmarks, data.pos);
-        if (historyControls.drawDistances) {
-            drawDistances(data.distances, data.pos);
-            drawWalls(data.walls, data.pos);
-        }
+        if (historyControls.drawWalls) drawWalls(data.walls, data.pos);
+        if (historyControls.drawDistances) drawDistances(data.rawLandmarks, data.walls, data.pos);
         if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
         drawCar(data.pos, data.steering);
         if (historyControls.rawDump) appendRawDump(data.rawDump);
@@ -244,14 +253,14 @@ function drawCar(pos, steering) {
 function drawRawLandmarks(rawLandmarks, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    // mctx.rotate(pos[2]);
+    mctx.rotate(pos[2]);
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.lineWidth = 1;
     mctx.font = '6px monospace';
     mctx.textAlign = 'center';
     mctx.textBaseline = 'bottom';
-    // draw wall corner things
+    // draw wall corner things (which are useless and don't line up oof)
     mctx.fillStyle = 'rgb(100, 100, 255)';
     for (let landmark of rawLandmarks[2]) {
         mctx.fillRect(landmark[0] - 1, landmark[1] - 1, 2, 2);
@@ -260,22 +269,30 @@ function drawRawLandmarks(rawLandmarks, pos) {
     mctx.strokeStyle = 'rgb(255, 0, 0)';
     mctx.fillStyle = 'rgb(255, 0, 0)';
     for (let landmark of rawLandmarks[0]) {
-        mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
-        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${Math.round(landmark[1])})`, landmark[0], landmark[1] - 4);
+        mctx.save();
+        mctx.translate(landmark[0], landmark[1]);
+        mctx.rotate(-pos[2]);
+        mctx.strokeRect(-2.5, -2.5, 5, 5);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${-Math.round(landmark[1])})`, 0, -4);
+        mctx.restore();
     }
     // draw green pillars
     mctx.strokeStyle = 'rgb(0, 255, 0)';
     mctx.fillStyle = 'rgb(0, 255, 0)';
     for (let landmark of rawLandmarks[1]) {
-        mctx.strokeRect(landmark[0] - 2.5, landmark[1] - 2.5, 5, 5);
-        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${Math.round(landmark[1])})`, landmark[0], landmark[1] - 4);
+        mctx.save();
+        mctx.translate(landmark[0], landmark[1]);
+        mctx.rotate(-pos[2]);
+        mctx.strokeRect(-2.5, -2.5, 5, 5);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(landmark[0])}, ${-Math.round(landmark[1])})`, 0, -4);
+        mctx.restore();
     }
     mctx.restore();
 };
 function drawWalls(walls, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
-    // mctx.rotate(pos[2]);
+    // walls are already rotated on car
     mctx.globalAlpha = 1;
     mctx.setLineDash([]);
     mctx.strokeStyle = 'rgb(255, 160, 0)';
@@ -285,22 +302,20 @@ function drawWalls(walls, pos) {
     mctx.textAlign = 'center';
     mctx.textBaseline = 'middle';
     mctx.beginPath();
-    let labels = ['?', 'L', 'C', 'R', 'B'];
-    for (let i in walls[1]) {
-        mctx.moveTo(walls[1][i][0], walls[1][i][1]);
-        mctx.lineTo(walls[1][i][2], walls[1][i][3]);
+    for (let wall of walls[1]) {
+        mctx.moveTo(wall[0], wall[1]);
+        mctx.lineTo(wall[2], wall[3]);
         if (historyControls.drawCoordinates) {
-            mctx.fillText(`(${Math.round(walls[1][i][0])}, ${Math.round(walls[1][i][1])})`, walls[1][i][0], walls[1][i][1] - 4);
-            mctx.fillText(`(${Math.round(walls[1][i][2])}, ${Math.round(walls[1][i][3])})`, walls[1][i][2], walls[1][i][3] - 4);
+            mctx.fillText(`(${Math.round(wall[0])}, ${-Math.round(wall[1])})`, wall[0], wall[1] - 4);
+            mctx.fillText(`(${Math.round(wall[2])}, ${-Math.round(wall[3])})`, wall[2], wall[3] - 4);
         }
     }
     mctx.stroke();
     mctx.font = '12px monospace';
     mctx.fillStyle = 'rgb(255, 255, 255)';
+    let labels = ['?', 'L', 'C', 'R', 'B'];
     for (let i in walls[1]) {
-        if (walls[2][i] != undefined) {
-            mctx.fillText(labels[walls[2][i] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
-        }
+        mctx.fillText(labels[walls[2][i][0] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
     }
     mctx.fillStyle = 'rgb(255, 255, 0)';
     for (let corner of walls[0]) {
@@ -308,23 +323,37 @@ function drawWalls(walls, pos) {
     }
     mctx.restore();
 };
-function drawDistances(distances, pos) {
+function drawDistances(rawLandmarks, walls, pos) {
     mctx.save();
     mctx.translate(pos[0], pos[1]);
     mctx.rotate(pos[2]);
-    mctx.globalAlpha = 0.5;
-    mctx.setLineDash([]);
-    mctx.strokeStyle = 'rgb(255, 255, 255)';
-    mctx.fillStyle = 'rgb(255, 255, 255)';
-    mctx.lineWidth = 1;
-    mctx.beginPath();
-    for (let dist of distances) {
-        mctx.fillRect(Math.round(dist[0] - 1), Math.round(dist[1] - 1), 3, 3);
-        mctx.moveTo(dist[0], dist[1]);
-        mctx.lineTo(0, 0);
-    }
-    mctx.globalAlpha = 0.2;
+    mctx.globalAlpha = 1;
     mctx.setLineDash([2, 2]);
+    mctx.strokeStyle = 'rgb(255, 255, 255)';
+    mctx.lineWidth = 1;
+    mctx.font = '6px monospace';
+    mctx.fillStyle = 'rgb(255, 255, 255)';
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    mctx.beginPath();
+    for (let i = 0; i < 2; i++) {
+        for (let landmark of rawLandmarks[i]) {
+            mctx.moveTo(landmark[0], landmark[1]);
+            mctx.lineTo(0, 0);
+            mctx.save();
+            mctx.translate(landmark[0] / 2, landmark[1] / 2);
+            mctx.rotate(-pos[2])
+            mctx.fillText(Math.round(landmark[2]), 0, 0);
+            mctx.restore();
+        }
+    }
+    mctx.rotate(-pos[2]);
+    for (let wall of walls[1]) {
+        mctx.moveTo((wall[0] + wall[2]) / 2, (wall[1] + wall[3]) / 2);
+        mctx.lineTo(0, 0);
+        mctx.fillText(Math.round(wall[2]), (wall[0] + wall[2]) / 4, (wall[1] + wall[3]) / 4);
+    }
+    mctx.globalAlpha = 0.5;
     mctx.stroke();
     mctx.restore();
 };
@@ -349,12 +378,12 @@ function drawWaypoints(waypoints, pos) {
         for (let waypoint of waypoints[0]) {
             mctx.lineTo(waypoint[0], waypoint[1]);
             mctx.fillRect(waypoint[0] - 1, waypoint[1] - 1, 2, 2);
-            if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoint[0])}, ${Math.round(waypoint[1])})`, waypoint[0], waypoint[1] - 4);
+            if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoint[0])}, ${-Math.round(waypoint[1])})`, waypoint[0], waypoint[1] - 4);
         }
     }
     if (waypoints[1][0] != 0 && waypoints[1][1] != 0) {
         mctx.fillRect(waypoints[1][0] - 2, waypoints[1][1] - 2, 4, 4);
-        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoints[1][0])}, ${Math.round(waypoints[1][1])})`, waypoints[1][0], waypoints[1][1] - 4);
+        if (historyControls.drawCoordinates) mctx.fillText(`(${Math.round(waypoints[1][0])}, ${-Math.round(waypoints[1][1])})`, waypoints[1][0], waypoints[1][1] - 4);
         mctx.moveTo(waypoints[1][0], waypoints[1][1]);
         if (waypoints[2]) mctx.lineTo(0, 0);
         else mctx.lineTo(pos[0], pos[1]);
@@ -382,6 +411,7 @@ setInterval(() => {
 // controls 0
 const hcDrawOverlays = document.getElementById('hcDrawOverlays');
 const hcDrawRaw = document.getElementById('hcDrawRaw');
+const hcDrawWalls = document.getElementById('hcDrawWalls');
 const hcDrawDistances = document.getElementById('hcDrawDistances');
 const hcDrawWaypoints = document.getElementById('hcDrawWaypoints');
 const hcDrawCoordinates = document.getElementById('hcDrawCoordinates');
@@ -394,6 +424,11 @@ hcDrawOverlays.addEventListener('click', (e) => {
 hcDrawRaw.addEventListener('click', (e) => {
     historyControls.drawRaw = hcDrawRaw.checked;
     window.localStorage.setItem('hc-drawRaw', historyControls.drawRaw);
+    display();
+});
+hcDrawWalls.addEventListener('click', (e) => {
+    historyControls.drawWalls = hcDrawWalls.checked;
+    window.localStorage.setItem('hc-drawWalls', historyControls.drawWalls);
     display();
 });
 hcDrawDistances.addEventListener('click', (e) => {
@@ -420,6 +455,7 @@ hcRawDump.addEventListener('click', (e) => {
 });
 hcDrawOverlays.checked = historyControls.drawOverlays;
 hcDrawRaw.checked = historyControls.drawRaw;
+hcDrawWalls.checked = historyControls.drawWalls;
 hcDrawDistances.checked = historyControls.drawDistances;
 hcDrawWaypoints.checked = historyControls.drawWaypoints;
 hcDrawCoordinates.checked = historyControls.drawCoordinates;

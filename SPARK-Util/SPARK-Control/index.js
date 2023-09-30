@@ -448,8 +448,8 @@ async function animateRickroll(widetanmu = true) {
     animateAll();
     let eeeeeeeeee = [];
     let oof = 0;
-    for (let i = 0; i < 50; i++) {
-        let vbuh = new Audio('./assets/null.mp3');
+    for (let i = 0; i < 1; i++) {
+        // let vbuh = new Audio('./assets/null.mp3');
         // let vbuh = new Audio('./assets/SPARK.mp3');
         // let vbuh = new Audio('./assets/RUSH E.mp3');
         // let vbuh = new Audio('./assets/EEEEEEEEEEEEEEEEEEEEEEEEEELECTROMAN ADVENTURES FULL VERSION GEOMETRY DASH 2.11 ADSFADSFDSA FDSAFDSAFDSA FFSAFDSAF DSAF AS FDSA FDSA FDSA.mp3');
@@ -458,7 +458,7 @@ async function animateRickroll(widetanmu = true) {
         // let vbuh = new Audio('./assets/Minecraft_ Villager Sound Effect.mp3');
         // let vbuh = new Audio('./assets/Dramatic Vine_Instagram Boom - Sound Effect (HD).mp3');
         // let vbuh = new Audio('./assets/07-The Magus.mp3');
-        // let vbuh = new Audio('./assets/Askerad - Home (KSP2 FanMade attempt at a menu theme).mp3');
+        let vbuh = new Audio('./assets/Askerad - Home (KSP2 FanMade attempt at a menu theme).mp3');
         // let vbuh = new Audio('./assets/corruption pixel sound effects.mp3');
         // let vbuh = new Audio('./assets/percussion.mp3');
         // let vbuh = new Audio('./assets/200 - Pixl\'d.mp3');
@@ -550,6 +550,7 @@ async function animate(slider, backwards) {
 async function animateAll() {
     if (window.djfhnmkhuehfklkd) return;
     window.djfhnmkhuehfklkd = true;
+    const rawDumpContainer = document.getElementById('rawDumpContainer');
     const dropdown = document.getElementById('dropdown');
     let lsd = 0;
     setInterval(() => {
@@ -557,7 +558,7 @@ async function animateAll() {
         document.body.style.backgroundColor = `hsl(${lsd = (lsd + 20) % 360}, 100%, 50%)`;
         log.style.backgroundColor = `hsl(${(lsd + 50) % 360}, 100%, 50%)`;
         map.style.backgroundColor = `hsl(${(lsd + 100) % 360}, 100%, 50%)`;
-        rawDumpContents.style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
+        rawDumpContainer.style.backgroundColor = `hsl(${(lsd + 150) % 360}, 100%, 50%)`;
         dropdown.style.backgroundColor = `hsl(${(200 + 150) % 360}, 100%, 50%)`;
     }, 50);
     for (let slider of sliders) {
