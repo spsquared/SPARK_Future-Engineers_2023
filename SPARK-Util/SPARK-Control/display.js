@@ -84,7 +84,7 @@ function addData(data) {
         rawLandmarks: [data.rawLandmarks[0].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[1].map(([x, y, d, a, c]) => [x, -y]), data.rawLandmarks[2].map(([l, h, c]) => [l[0], -l[1]])],
         contours: data.contours,
         wallLines: data.wallLines,
-        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
+        walls: [data.walls[0].map(([x, y, d, a]) => [x, -y]), data.walls[1].map(([a, b, l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]), (data.walls[2] ?? []).map(([t, d, a]) => t)],
         steering: Math.min(100, Math.max(-100, data.steering)),
         waypoints: [data.waypoints[0].map(([x, y]) => [x, -y]), [data.waypoints[1][0], -data.waypoints[1][1]], data.waypoints[2]],
         rawDump: data.raw,
