@@ -19,7 +19,7 @@ def main():
         streaming = False
         predictStreaming = False
         def idManual(data):
-            server.emit('idManual')
+            server.emit('idManual', 0)
         def drive(data):
             io.drive.throttle(data[0]['throttle'])
             io.drive.steer(data[0]['steering'])
@@ -125,19 +125,15 @@ def main():
         io.imu.setAngle(0)
         server.on('stop', stop)
         while running:
-            io.drive.steer(-100)
-            time.sleep(0.05)
-            io.drive.steer(100)
-            time.sleep(0.05)
-            # msg = input()
-            # if msg == 'reset':
-            #     server.emit('colors', converter.setDefaultColors())
-            # elif msg == 'calibrate-gyro':
-            #     io.imu.calibrate()
-            # elif msg == 'stop':
-            #     break
-            # elif msg != '':
-            #     server.emit('unsafemessage', msg)
+            msg = input()
+            if msg == 'reset':
+                server.emit('colors', converter.setDefaultColors())
+            elif msg == 'calibrate-gyro':
+                io.imu.calibrate()
+            elif msg == 'stop':
+                break
+            elif msg != '':
+                server.emit('unsafemessage', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
