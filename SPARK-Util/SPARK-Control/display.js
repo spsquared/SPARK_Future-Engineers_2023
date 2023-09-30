@@ -102,6 +102,7 @@ function addData(data) {
         frameTime: performance.now() - lastFrame,
         fps: fps
     });
+    console.log(data.walls[1], data.walls[1].map(([l0, l1]) => [l0[0], -l0[1], l1[0], -l1[1]]))
     lastFrame = performance.now();
     if (data.images[3] == 0) sounds.ding();
     if (history.length > historyControls.maxSize) history.pop();
