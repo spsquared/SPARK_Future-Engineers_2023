@@ -129,6 +129,7 @@ def drive(manual: bool = False):
         # print(leftJump + rightJump2, rightJump + leftJump2)
         # slam.findStartingPosition(leftHeights, rightHeights)
     
+
     processedWalls = []
 
     centerWalls = 0
@@ -147,112 +148,131 @@ def drive(manual: bool = False):
     # drCarX = slam.carX + math.cos(slam.carAngle) * slam.carSpeed
     # drCarY = slam.carY + math.sin(slam.carAngle) * slam.carSpeed
 
-    UNKNOWN = -1
-    LEFT = 0
-    CENTER = 1
-    RIGHT = 2
-    BACK = 3
+    def processWalls():
+        nonlocal processedWalls, centerWalls, leftWalls, rightWalls, centerWallDistance, leftWallDistance, rightWallDistance, centerWallAngle, leftWallAngle, rightWallAngle, carAngle, walls
 
-    sin = math.sin(slam.carAngle)
-    cos = math.cos(slam.carAngle)
+        processedWalls = []
 
-    for wall in walls:
-
-        x1 = wall[0][X]
-        y1 = wall[0][Y]
-        x2 = wall[1][X]
-        y2 = wall[1][Y]
-
-        wall.append([0, 0])
-        wall.append([0, 0])
-
-        wall[2][X] = x1 * cos + y1 * sin
-        wall[2][Y] = x1 * -sin + y1 * cos
-        wall[3][X] = x2 * cos + y2 * sin
-        wall[3][Y] = x2 * -sin + y2 * cos
-
-        wallType = 0
+        centerWalls = 0
+        leftWalls = 0
+        rightWalls = 0
         
-        if wall[2][X] - wall[3][X] != 0 and wall[2][Y] - wall[3][Y] != 0:
-            slope = (wall[2][Y] - wall[3][Y]) / (wall[2][X] - wall[3][X])
-            yIntercept = -wall[2][Y] + slope * wall[2][X]
+        centerWallDistance = 0
+        leftWallDistance = 0
+        rightWallDistance = 0
+
+        centerWallAngle = 0
+        leftWallAngle = 0
+        rightWallAngle = 0
+
+        carAngle = 0
+        sin = math.sin(slam.carAngle)
+        cos = math.cos(slam.carAngle)
+
+        UNKNOWN = -1
+        LEFT = 0
+        CENTER = 1
+        RIGHT = 2
+        BACK = 3
+        
+        for wall in walls:
+
+            x1 = wall[0][X]
+            y1 = wall[0][Y]
+            x2 = wall[1][X]
+            y2 = wall[1][Y]
+
+            wall.append([0, 0])
+            wall.append([0, 0])
+
+            wall[2][X] = x1 * cos + y1 * sin
+            wall[2][Y] = x1 * -sin + y1 * cos
+            wall[3][X] = x2 * cos + y2 * sin
+            wall[3][Y] = x2 * -sin + y2 * cos
+
+            wallType = 0
             
-            distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
-            angle = math.atan2(slope, 1)
+            if wall[2][X] - wall[3][X] != 0 and wall[2][Y] - wall[3][Y] != 0:
+                slope = (wall[2][Y] - wall[3][Y]) / (wall[2][X] - wall[3][X])
+                yIntercept = -wall[2][Y] + slope * wall[2][X]
+                
+                distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
+                angle = math.atan2(slope, 1)
 
-            if abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
-                wallType = CENTER
-            elif abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope < -10:
-                wallType = BACK
-            else:
-                if abs(angle) < 30 / 180 * math.pi:
-                    wallType = UNKNOWN - 1
-                elif wall[2][X] - wall[2][Y] / slope < 0:
-                    wallType = LEFT
+                if abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
+                    wallType = CENTER
+                elif abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope < -10:
+                    wallType = BACK
                 else:
+                    if abs(angle) < 30 / 180 * math.pi:
+                        wallType = UNKNOWN - 1
+                    elif wall[2][X] - wall[2][Y] / slope < 0:
+                        wallType = LEFT
+                    else:
+                        wallType = RIGHT
+            elif wall[2][Y] - wall[3][Y] != 0:
+                # vertical wall
+                distance = abs(wall[2][X])
+                if wall[2][X] > 0 and wall[3][X] > 0:
                     wallType = RIGHT
-        elif wall[2][Y] - wall[3][Y] != 0:
-            # vertical wall
-            distance = abs(wall[2][X])
-            if wall[2][X] > 0 and wall[3][X] > 0:
-                wallType = RIGHT
-                angle = math.pi / 2
-            elif wall[2][X] < 0 and wall[3][X] < 0:
-                wallType = LEFT
-                angle = -math.pi / 2
+                    angle = math.pi / 2
+                elif wall[2][X] < 0 and wall[3][X] < 0:
+                    wallType = LEFT
+                    angle = -math.pi / 2
+                else:
+                    wallType = UNKNOWN
             else:
-                wallType = UNKNOWN
-        else:
-            #horizontal wall
-            distance = abs(wall[2][Y])
-            angle = 0
-            wallType = CENTER
+                #horizontal wall
+                distance = abs(wall[2][Y])
+                angle = 0
+                wallType = CENTER
 
-        angle += slam.carAngle
-        
-        if distance > 200:
-            processedWalls.append([UNKNOWN, distance, angle])
-            continue
-        if abs(wall[2][X]) > 100 and abs(wall[3][X]) > 100 and abs(wall[2][Y]) < 50 and abs(wall[3][Y]) < 50:
-            processedWalls.append([UNKNOWN, distance, angle])
-            continue
-        
-        if wallType == CENTER:
-            centerWalls += 1
-            centerWallDistance += distance
-            centerWallAngle += angle
-            carAngle += angle
-        elif wallType == LEFT:
-            leftWalls += 1
-            leftWallDistance += distance
-            newAngle = angle + math.pi / 2
-            if newAngle > math.pi / 2:
-                newAngle -= math.pi
-            leftWallAngle += newAngle
-            carAngle += newAngle
-        elif wallType == RIGHT:
-            rightWalls += 1
-            rightWallDistance += distance
-            newAngle = angle + math.pi / 2
-            if newAngle > math.pi / 2:
-                newAngle -= math.pi
-            rightWallAngle += newAngle
-            carAngle += newAngle
-        
-        processedWalls.append([wallType, distance, angle])
-        
-    if centerWalls != 0:
-        centerWallDistance /= centerWalls
-        centerWallAngle /= centerWalls
-    if leftWalls != 0:
-        leftWallDistance /= leftWalls
-        leftWallAngle /= leftWalls
-    if rightWalls != 0:
-        rightWallDistance /= rightWalls
-        rightWallAngle /= rightWalls
+            angle += slam.carAngle
+            
+            if distance > 200:
+                processedWalls.append([UNKNOWN, distance, angle])
+                continue
+            if abs(wall[2][X]) > 100 and abs(wall[3][X]) > 100 and abs(wall[2][Y]) < 50 and abs(wall[3][Y]) < 50:
+                processedWalls.append([UNKNOWN, distance, angle])
+                continue
+            
+            if wallType == CENTER:
+                centerWalls += 1
+                centerWallDistance += distance
+                centerWallAngle += angle
+                carAngle += angle
+            elif wallType == LEFT:
+                leftWalls += 1
+                leftWallDistance += distance
+                newAngle = angle + math.pi / 2
+                if newAngle > math.pi / 2:
+                    newAngle -= math.pi
+                leftWallAngle += newAngle
+                carAngle += newAngle
+            elif wallType == RIGHT:
+                rightWalls += 1
+                rightWallDistance += distance
+                newAngle = angle + math.pi / 2
+                if newAngle > math.pi / 2:
+                    newAngle -= math.pi
+                rightWallAngle += newAngle
+                carAngle += newAngle
+            
+            processedWalls.append([wallType, distance, angle])
+            
+        if centerWalls != 0:
+            centerWallDistance /= centerWalls
+            centerWallAngle /= centerWalls
+        if leftWalls != 0:
+            leftWallDistance /= leftWalls
+            leftWallAngle /= leftWalls
+        if rightWalls != 0:
+            rightWallDistance /= rightWalls
+            rightWallAngle /= rightWalls
     
-    if centerWalls + leftWalls + rightWalls != 0:
-        carAngle /= centerWalls + leftWalls + rightWalls
+        if centerWalls + leftWalls + rightWalls != 0:
+            carAngle /= centerWalls + leftWalls + rightWalls
+    processWalls()
     d = 0.75
     slam.carAngle = d * carAngle + slam.carAngle * (1 - d)
     # if carAngle > slam.carAngle and lastSteering > 0:
@@ -314,10 +334,10 @@ def drive(manual: bool = False):
     def steerNormal():
         nonlocal steering, carAngleSteering
         steering += -slam.carAngle * carAngleSteering
-        if leftWalls != 0 and leftWallDistance < 40:
-            steering = max(steering, 35)
-        elif rightWalls != 0 and rightWallDistance < 40:
-            steering = min(steering, -35)
+        if leftWalls != 0 and leftWallDistance < 40 and slam.carAngle < 10 / 180 * math.pi and not (slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR):
+            steering = max(steering, 25)
+        elif rightWalls != 0 and rightWallDistance < 40 and slam.carAngle > -10 / 180 * math.pi and not (slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR):
+            steering = min(steering, -25)
     def steerCenter():
         nonlocal steering, carAngleSteering
         if slam.carDirection == CLOCKWISE and rightWalls > 0 and rightWallDistance < 35:
@@ -362,10 +382,11 @@ def drive(manual: bool = False):
             slam.carSectionEntered = False
             slam.carSectionCooldown = 10
     
-    if slam.carSectionExited > 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
+    if slam.carSectionExited > 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi and not slam.uTurning:
         slam.carAngle -= slam.carDirection * math.pi / 2
         slam.carSections += 1
         slam.carSectionEntered = False
+        processWalls()
     
     inMiddleSection = slam.carSectionExited <= 0 and (centerWalls != 0 or (NO_PILLARS and slam.carSectionCooldown <= 14))
     
@@ -376,8 +397,7 @@ def drive(manual: bool = False):
     
     if slam.carSections == 7 and (slam.carSectionCooldown > 0 or slam.carSectionExited <= 0) and transformedPillar[0] != None and transformedPillar[2] < 100:
         slam.uTurnPillar = transformedPillar[4]
-        slam.uTurnPillar = 2;
-    if slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 100:
+    if not slam.uTurning and slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 100:
         if transformedPillar[4] == RED_PILLAR:
             slam.uTurnAroundPillar = -1
         else:
@@ -385,7 +405,7 @@ def drive(manual: bool = False):
     # if slam.carSections > 7:
     #     slam.uTurnPillar = 0
 
-    if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR and (inMiddleSection or (transformedPillar[0] != None and transformedPillar[1] < 30)):
+    if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR and slam.carSectionExited <= 3 and ((transformedPillar[0] != None and transformedPillar[1] < 15)):
         if slam.uTurning == False:
             print("UTURN ! ! ! ! ! ! ! !")
             slam.uTurnStage = 0
@@ -406,9 +426,12 @@ def drive(manual: bool = False):
                     slam.uTurnAroundPillar = -1
         if slam.uTurnAroundPillar != 0:
             steering = 100 * slam.uTurnAroundPillar
-        if abs(slam.uTurnGyroAngle - io.imu.angle()) > math.pi * 0.7:
+        if abs(slam.uTurnGyroAngle - io.imu.angle()) > math.pi:
             slam.uTurning = False
             slam.carAngle += math.pi
+            slam.carDirection *= -1
+            slam.carSections += 1
+            processWalls()
         # print("oof no u turn code")
     elif centerWalls != 0 and centerWallDistance < 100:
         if transformedPillar[0] == None:
@@ -423,7 +446,7 @@ def drive(manual: bool = False):
                 if slam.carDirection == CLOCKWISE:
                     steerCenter()
                 elif slam.carDirection == COUNTER_CLOCKWISE:
-                    if centerWallDistance < 45:
+                    if centerWallDistance < 55:
                         steerCenter()
             elif transformedPillar[1] < 50 + 30 * slam.carDirection:
             # if centerWallDistance < 45 + 45 * slam.carDirection:
@@ -435,7 +458,7 @@ def drive(manual: bool = False):
                 if slam.carDirection == COUNTER_CLOCKWISE:
                     steerCenter()
                 elif slam.carDirection == CLOCKWISE:
-                    if centerWallDistance < 45:
+                    if centerWallDistance < 55:
                         steerCenter()
             elif transformedPillar[1] < 50 - 30 * slam.carDirection:
             # if centerWallDistance < 45 - 45 * slam.carDirection:
@@ -479,7 +502,7 @@ def drive(manual: bool = False):
             'walls': [corners, walls, processedWalls],
             'steering': steering,
             'waypoints': [[], [waypointX, waypointY], 1],
-            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "ANGLE", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Car Sections", int(slam.carSections), "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "UTURN PILLAR", slam.uTurnPillar, "L Jump", int(leftJump), "L Jump P", int(leftJumpPillar), "R Jump", int(rightJump), "R Jump P", int(rightJumpPillar), "L Jump 2", int(leftJump2), "L Jump 2 P", int(leftJump2Pillar), "R Jump 2", int(rightJump2), "R Jump 2 P", int(rightJump2Pillar), slam.uTurning]
+            'raw': ["steering", steering, "Center", centerWallDistance, "Left", leftWallDistance, "Right", rightWallDistance, "ANGLE", slam.carAngle / math.pi * 180, "Raw ANGLE", carAngle / math.pi * 180, "Car Sections", int(slam.carSections), "Direction", int(slam.carDirectionGuess), "Pillar", transformedPillar[0] != None, "UTURN PILLAR", slam.uTurnPillar, slam.uTurning, slam.uTurnAroundPillar, "L Jump", int(leftJump), "L Jump P", int(leftJumpPillar), "R Jump", int(rightJump), "R Jump P", int(rightJumpPillar), "L Jump 2", int(leftJump2), "L Jump 2 P", int(leftJump2Pillar), "R Jump 2", int(rightJump2), "R Jump 2 P", int(rightJump2Pillar)]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
