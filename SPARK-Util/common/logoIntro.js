@@ -87,6 +87,7 @@ logotext.onload = () => {
                     clearInterval(logodraw);
                     logocanvas.remove();
                     document.removeEventListener('keypress', skip);
+                    disconnect.click();
                     // let zerostring = '';
                     // for (let i = 0; i < (frames.length - 1).toString().length; i++) zerostring += '0';
                     // setTimeout(async () => {

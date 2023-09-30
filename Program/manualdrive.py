@@ -125,15 +125,19 @@ def main():
         io.imu.setAngle(0)
         server.on('stop', stop)
         while running:
-            msg = input()
-            if msg == 'reset':
-                server.emit('colors', converter.setDefaultColors())
-            elif msg == 'calibrate-gyro':
-                io.imu.calibrate()
-            elif msg == 'stop':
-                break
-            elif msg != '':
-                server.emit('unsafemessage', msg)
+            io.drive.steer(-100)
+            time.sleep(0.05)
+            io.drive.steer(100)
+            time.sleep(0.05)
+            # msg = input()
+            # if msg == 'reset':
+            #     server.emit('colors', converter.setDefaultColors())
+            # elif msg == 'calibrate-gyro':
+            #     io.imu.calibrate()
+            # elif msg == 'stop':
+            #     break
+            # elif msg != '':
+            #     server.emit('unsafemessage', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:

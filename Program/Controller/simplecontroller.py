@@ -386,6 +386,7 @@ def drive(manual: bool = False):
         if slam.uTurning == False:
             print("UTURN ! ! ! ! ! ! ! !")
             slam.uTurnStage = 0
+            slam.uTurnPillar = 0
             slam.uTurnGyroAngle = io.imu.angle() - carAngle
             if slam.carDirection == CLOCKWISE:
                 slam.uTurnWallDistance = leftWallDistance
@@ -398,7 +399,7 @@ def drive(manual: bool = False):
             steering = 100
         else:
             steering = -100 * slam.uTurnAroundPillar
-        if abs(slam.carAngle - math.pi) < 20 / 180 * math.pi:
+        if abs(slam.uTurnGyroAngle - io.imu.angle()) > math.pi * 0.7:
             slam.uTurning = False
             slam.carAngle += math.pi
         # print("oof no u turn code")
@@ -411,11 +412,11 @@ def drive(manual: bool = False):
                 if centerWallDistance < 75:
                     steerCenter()
         elif transformedPillar[4] == RED_PILLAR:
-            if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR:
+            if slam.uTurnPillar == RED_PILLAR:
                 if slam.carDirection == CLOCKWISE:
                     steerCenter()
                 elif slam.carDirection == COUNTER_CLOCKWISE:
-                    if centerWallDistance < 35:
+                    if centerWallDistance < 45:
                         steerCenter()
             elif transformedPillar[1] < 50 + 30 * slam.carDirection:
             # if centerWallDistance < 45 + 45 * slam.carDirection:
@@ -423,11 +424,11 @@ def drive(manual: bool = False):
             elif centerWallDistance < 35:
                 steerCenter()
         elif transformedPillar[4] == GREEN_PILLAR:
-            if slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR:
+            if slam.uTurnPillar == RED_PILLAR:
                 if slam.carDirection == COUNTER_CLOCKWISE:
                     steerCenter()
                 elif slam.carDirection == CLOCKWISE:
-                    if centerWallDistance < 35:
+                    if centerWallDistance < 45:
                         steerCenter()
             elif transformedPillar[1] < 50 - 30 * slam.carDirection:
             # if centerWallDistance < 45 - 45 * slam.carDirection:
