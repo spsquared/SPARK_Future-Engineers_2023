@@ -528,7 +528,7 @@ def drive(manual: bool = False):
                 "pillar", transformedPillar[0] != None,
                 "U-turn pillar", slam.uTurnPillar,
                 "U-turning", slam.uTurning,
-                "U-pillaring"slam.uTurnAroundPillar,
+                "U-pillaring", slam.uTurnAroundPillar,
                 "L jump", int(leftJump),
                 "L jump P", int(leftJumpPillar),
                 "R jump", int(rightJump),
