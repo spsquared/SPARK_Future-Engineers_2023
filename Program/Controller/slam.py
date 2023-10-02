@@ -115,6 +115,7 @@ carSectionExited = 0
 carSectionCooldown = 0
 uTurnPillar = 0
 uTurning = False
+uTurnStart = -1
 uTurnStage = 0
 uTurnGyroAngle = 0
 uTurnWallDistance = 0
