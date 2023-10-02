@@ -10,6 +10,10 @@
 
 ***
 
+## For Judges
+
+If you're a judge, we ask that you don't judge our documentation just yet. We've still got some rough edges to smooth out and a bit more detail to add. Thank you!
+
 # Contents
 * [High-Level Overview](#high-level-overview)
 * [Hardware](#hardware-documentation)

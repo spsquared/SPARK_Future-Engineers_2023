@@ -536,7 +536,8 @@ def drive(manual: bool = False):
                 "L jump 2", int(leftJump2),
                 "L jump 2 P", int(leftJump2Pillar),
                 "R jump 2", int(rightJump2),
-                "R jump 2 P", int(rightJump2Pillar)]
+                "R jump 2 P", int(rightJump2Pillar)
+            ]
         }
         server.emit('data', data)
     # print("sendserver: ", time.perf_counter() - start)
