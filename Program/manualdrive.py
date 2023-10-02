@@ -13,6 +13,12 @@ running = True
 def main():
     global running
     try:
+        io.setStatusBlink(0)
+        acceptTerminalInput = True
+        for i, arg in enumerate(sys.argv):
+            if i != 0:
+                if arg == 'no_terminal':
+                    acceptTerminalInput = False
         server.open()
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
@@ -124,16 +130,17 @@ def main():
             sys.exit(0)
         io.imu.setAngle(0)
         server.on('stop', stop)
-        while running:
-            msg = input()
-            if msg == 'reset':
-                server.emit('colors', converter.setDefaultColors())
-            elif msg == 'calibrate-gyro':
-                io.imu.calibrate()
-            elif msg == 'stop':
-                break
-            elif msg != '':
-                server.emit('unsafemessage', msg)
+        if acceptTerminalInput:
+            while running:
+                msg = input()
+                if msg == 'reset':
+                    server.emit('colors', converter.setDefaultColors())
+                elif msg == 'calibrate-gyro':
+                    io.imu.calibrate()
+                elif msg == 'stop':
+                    break
+                elif msg != '':
+                    server.emit('unsafemessage', msg)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:

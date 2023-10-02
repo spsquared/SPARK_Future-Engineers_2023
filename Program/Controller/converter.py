@@ -4,7 +4,6 @@ import traceback
 import numpy
 import cv2
 import math
-import time
 
 # converts images into data usable for SLAM and driving
 
