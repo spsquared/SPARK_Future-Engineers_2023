@@ -4,7 +4,6 @@ from Controller import simplecontroller as controller
 import time
 import sys
 import traceback
-
 running = True
 actuallyRunning = True
 def main():
