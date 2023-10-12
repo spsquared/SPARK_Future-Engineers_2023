@@ -95,8 +95,8 @@ wallStartRight = 154
 undistortedWallStartLeft = [174, 172, 169, 167, 165, 165, 164, 164]
 undistortedWallStartRight = [158, 158, 159, 160, 161, 161, 161, 161]
 
-maximumTopWallHeightLeft = 4
-maximumTopWallHeightRight = 4
+maximumTopWallHeightLeft = 4 - 1
+maximumTopWallHeightRight = 4 - 1
 
 wallEnd = imageHeight
 contourStart = 160
