@@ -456,6 +456,7 @@ def drive(manual: bool = False):
             steering = 100 * slam.uTurnAroundPillar
         if abs(slam.uTurnGyroAngle - io.imu.angle()) * 1.3 > math.pi:
             slam.uTurning = False
+            slam.uTurnPillar = 0
             # slam.carAngle += math.pi
             slam.carDirection *= -1
             slam.carSectionCooldown = 10
