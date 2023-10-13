@@ -3,7 +3,7 @@ const logocanvas = document.createElement('canvas');
 logocanvas.style = `
     position: absolute;
     top: 0px;
-    right: 0px;
+    left: 0px;
     width: 100vw;
     height: 100vh;
     background-color: black;

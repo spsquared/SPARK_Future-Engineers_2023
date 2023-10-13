@@ -19,15 +19,16 @@ __throttleRev = -0.15
 __steeringCenter = 90
 __steeringRange = 45
 __steeringTrim = 12
-__smoothFactor = 0.2
+__steeringMaxDiff = 40
 __thread = None
 __running = True
 def __update():
-    global __currStr, __targetStr, __steeringCenter, __steeringRange, __steeringTrim, __pwm, __running, __smoothFactor
+    global __currStr, __targetStr, __steeringCenter, __steeringRange, __steeringTrim, __pwm, __running, __steeringMaxDiff
     try:
         lastAngle = 0
         while __running:
-            __currStr = (__smoothFactor * __currStr) + ((1 - __smoothFactor) * __targetStr)
+            # __currStr = (__smoothFactor * __currStr) + ((1 - __smoothFactor) * __targetStr)
+            __currStr += max(-__steeringMaxDiff, min(__steeringMaxDiff, __targetStr - __currStr))
             angle = round((__currStr * __steeringRange / 100) + __steeringCenter + __steeringTrim)
             if angle != lastAngle: __pwm.servo[1].angle = angle
             lastAngle = angle
@@ -48,16 +49,16 @@ def trim(trim: int):
     global __steeringTrim
     __steeringTrim = trim
     steer(__currStr)
-def setSmoothFactor(smooth: float):
-    global __smoothFactor
-    __smoothFactor = max(0, min(smooth, 1))
+def setMaxSteerDiff(diff: float):
+    global __steeringMaxDiff
+    __steeringMaxDiff = max(0, min(diff, 1))
 
 def currentSteering():
     global __currStr
     return __currStr
-def getSmoothFactor():
-    global __smoothFactor
-    return __smoothFactor
+def getMaxSteerDiff():
+    global __steeringMaxDiff
+    return __steeringMaxDiff
 
 def stop():
     global __running

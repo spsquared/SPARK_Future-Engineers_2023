@@ -448,7 +448,7 @@ async function animateRickroll(widetanmu = true) {
     animateAll();
     let eeeeeeeeee = [];
     let oof = 0;
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 50; i++) {
         let vbuh = new Audio('./assets/null.mp3');
         // let vbuh = new Audio('./assets/SPARK.mp3');
         // let vbuh = new Audio('./assets/RUSH E.mp3');
