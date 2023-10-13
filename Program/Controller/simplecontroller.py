@@ -458,6 +458,7 @@ def drive(manual: bool = False):
             slam.uTurning = False
             # slam.carAngle += math.pi
             slam.carDirection *= -1
+            slam.carSectionCooldown = 10
             # slam.carSections += 1
             processWalls()
         # print("oof no u turn code")
@@ -541,6 +542,9 @@ def drive(manual: bool = False):
                 "angle", slam.carAngle / math.pi * 180,
                 "raw angle", carAngle / math.pi * 180,
                 "sections", int(slam.carSections),
+                "sections cooldown", int(slam.carSectionsCooldown),
+                "section entered", int(slam.carSectionEntered),
+                "section exited", int(slam.carSectionExited),
                 "direction", int(slam.carDirectionGuess),
                 "pillar", transformedPillar[0] != None,
                 "U-turn pillar", slam.uTurnPillar,
