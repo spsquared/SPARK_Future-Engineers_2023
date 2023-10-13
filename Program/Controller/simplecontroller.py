@@ -378,7 +378,7 @@ def drive(manual: bool = False):
         else:
             steerNormal()
         if not (slam.carSections == 8 and slam.uTurnPillar == RED_PILLAR):
-            if transformedPillar[0] * pillarDirection > -25:
+            if transformedPillar[0] * pillarDirection < -25:
                 if leftWalls != 0 and leftWallDistance < 40 and slam.carAngle < 10 / 180 * math.pi:
                     steering = max(steering, 60 - leftWallDistance)
                 elif rightWalls != 0 and rightWallDistance > 80 and slam.carAngle < 10 / 180 * math.pi:
