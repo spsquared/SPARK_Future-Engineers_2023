@@ -348,10 +348,10 @@ function drawDistances(rawLandmarks, walls, pos) {
         }
     }
     mctx.rotate(-pos[2]);
-    for (let wall of walls[1]) {
-        mctx.moveTo((wall[0] + wall[2]) / 2, (wall[1] + wall[3]) / 2);
+    for (let i in walls[1]) {
+        mctx.moveTo((walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
         mctx.lineTo(0, 0);
-        mctx.fillText(Math.round(wall[2]), (wall[0] + wall[2]) / 4, (wall[1] + wall[3]) / 4);
+        mctx.fillText(Math.round(walls[2][i][1]), (walls[1][i][0] + walls[1][i][2]) / 4, (walls[1][i][1] + walls[1][i][3]) / 4);
     }
     mctx.globalAlpha = 0.5;
     mctx.stroke();
