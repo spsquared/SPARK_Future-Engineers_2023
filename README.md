@@ -36,7 +36,7 @@ If you're a judge, we ask that you don't judge our documentation just yet. We've
 
 # High-Level Overview
 
-TODO
+SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards.
 
 include diagram of hardware and relationships (what communicates with what to do what)
 quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)
