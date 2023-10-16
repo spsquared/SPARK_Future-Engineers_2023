@@ -29,10 +29,12 @@ Our program runs a constant update loop. All controller code can be found in `./
 * [Simple Driver](#simple-driver)
     1. [Find Car Direction](#finding-car-direction)
     2. [Categorize Walls](#categorizing-walls)
-    3. [Filter Traffic Signals](#filtering-traffic-signals)
+    1. [Find Car Orientation](#finding-car-direction)
+    3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
     4. [Calculate Steering](#calculating-steering)
 * SLAM Driver
     1. Non-functional (but if it works it'll be really cool)
+    2. its borken
 
 ***
 
