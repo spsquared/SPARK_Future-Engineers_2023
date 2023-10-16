@@ -118,4 +118,7 @@ In case 3, if there is no pillar detected, the car will keep straight. If there 
 
 # Code Structure
 
+
+Converter.py has all the code for image processing. Converter.py
+simplecontroller.py has all the code for the driver.
 <!-- talk about how the code is segmented, what modules are made to handle what tasks (not too much detail though) -->
