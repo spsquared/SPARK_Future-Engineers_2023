@@ -75,7 +75,7 @@ Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. This is useful because we can find the distance to any point on the wall if we know the height. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
 
-The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value that is 255. If no 255 values are found, `numpy.argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value that is 255. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
 ### Finding Contours
 
@@ -118,6 +118,8 @@ At the start of the program, we need to know if we are going clockwise or counte
 For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counter clockwise.
 
 ### Categorizing Walls
+
+buh we need the orientation stuff
 
 There are 5 possible categories of walls: Left, Center, Right, Back, and Unknown. The slope of the wall relative to the car is calculated. If the slope is relatively small and the wall is in front of the car, the wall gets classified as a center wall. Otherwise, if the slope is small but it is behind the car, the wal gets classified as Back. If the wall is to the left of the car, it is a left wall, if it is to the right, it is a right wall.
 
