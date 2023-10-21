@@ -29,10 +29,12 @@ Our program runs a constant update loop. All controller code can be found in `./
 * [Simple Driver](#simple-driver)
     1. [Find Car Direction](#finding-car-direction)
     2. [Categorize Walls](#categorizing-walls)
-    3. [Filter Traffic Signals](#filtering-traffic-signals)
+    1. [Find Car Orientation](#finding-car-direction)
+    3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
     4. [Calculate Steering](#calculating-steering)
 * SLAM Driver
     1. Non-functional (but if it works it'll be really cool)
+    2. its borken
 
 ***
 
@@ -116,4 +118,7 @@ In case 3, if there is no pillar detected, the car will keep straight. If there 
 
 # Code Structure
 
+
+Converter.py has all the code for image processing. Converter.py
+simplecontroller.py has all the code for the driver.
 <!-- talk about how the code is segmented, what modules are made to handle what tasks (not too much detail though) -->
