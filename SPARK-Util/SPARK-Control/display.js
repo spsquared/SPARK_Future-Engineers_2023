@@ -313,7 +313,7 @@ function drawWalls(walls, pos) {
     mctx.stroke();
     mctx.font = '12px monospace';
     mctx.fillStyle = 'rgb(255, 255, 255)';
-    let labels = ['?', 'L', 'C', 'R', 'B'];
+    let labels = ['?', 'L', 'C', 'R', 'B', 'I'];
     for (let i in walls[1]) {
         mctx.fillText(labels[walls[2][i][0] + 1], (walls[1][i][0] + walls[1][i][2]) / 2, (walls[1][i][1] + walls[1][i][3]) / 2);
     }
