@@ -82,14 +82,12 @@ You will need (at least) the following tools:
 
 ## Chassis Assembly
 
-Sorry! We couldn't get to the assembly instructions in time! Print out the parts located in `/dist/3D Models/`. in their given orientation (they have been oriented for the best print results) Most of the assembly should be fairly simple (the rear axle assembly should be bought from [Schumacher Racing's site](https://www.racing-cars.com/gt12/atom-2/) and NOT PRINTED), and follow the pinout sheet linked below and connect to their corresponding pins on the other boards. Some holes may need to be drilled out to make screws fit.
+Sorry! We couldn't get detailed step-by-step instructions in time! Print out the parts located in `/dist/3D Models/`. in their given orientation (they have been oriented for the best print results) Most of the assembly should be fairly simple (the rear axle assembly should be bought from [Schumacher Racing's site](https://www.racing-cars.com/gt12/atom-2/) and NOT PRINTED), and follow the [pinout sheet](https://docs.google.com/spreadsheets/d/1WAe1DtCbWhLoC4L6yzJYvS99iHG4yAiWakqxsy8os7s/edit?usp=sharing) and connect to their corresponding pins on the other boards. Some holes may need to be drilled out and some crimping may have to be done.
 
 If you need a reference model we have our [OnShape document linked](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590). (The ESC and IMU have not been modeled. The ESC goes in the rear, within the raised rectangle. The IMU should be mounted to the 4 unpopulated holes with M2.5 screws.)
 
 Follow the diagram below to wire the button and indicator LEDs.
 ![Button and indicator LED wiring](./img/docs/led-button-wiring.png)
-
-[Jetson Nano pinout sheet](https://docs.google.com/spreadsheets/d/1WAe1DtCbWhLoC4L6yzJYvS99iHG4yAiWakqxsy8os7s/edit?usp=sharing)
 
 *Note: For I2C connectors, Yellow should be SCL and blue should be SDA; there is no set standard.*
 

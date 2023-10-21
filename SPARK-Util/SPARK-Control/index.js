@@ -435,13 +435,6 @@ runManual.disabled = true;
 runAuto.disabled = true;
 runStop.disabled = true;
 
-document.getElementById('disconnect').onclick = () => {
-    socket.disconnect();
-    toReconnect = false;
-    autoReconnect = false;
-    animateRickroll();
-};
-
 async function animateRickroll(widetanmu = true) {
     if (window.bdnmteuwuiufds) return;
     window.bdnmteuwuiufds = true;

@@ -16,11 +16,12 @@ If you're a judge, we ask that you don't judge our documentation just yet. We've
 
 # Contents
 * [High-Level Overview](#high-level-overview)
-* [Hardware](#hardware-documentation)
+* [Hardware](#hardware)
     * [Assembly Instructions & Diagrams](#assembly)
     * [Photos](#photos)
 * [Uploading Programs](#uploading-programs)
-* [Software](#software-documentation)
+* [Calibration](#calibration)
+* [Software](#software)
     * [Operating System](#operating-system)
     * [Programming Language](#programming-language)
     * [Code Documentation](#code-documentation)
@@ -38,12 +39,15 @@ If you're a judge, we ask that you don't judge our documentation just yet. We've
 
 SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards.
 
+Link to Assembly.md for component list and ALSO ADD PHOTOS
+
 include diagram of hardware and relationships (what communicates with what to do what)
+
 quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)
 
 ***
 
-# Hardware Documentation
+# Hardware
 
 ## ASSEMBLY
 
@@ -75,9 +79,14 @@ Here is a simple schematic for how the electronics are wired:
 
 Make sure you have gone through the [Jetson Nano setup](./ASSEMBLY.md#jetson-nano-setup) steps and set your static IP, have some form of sshfs, and created the program directory. To upload the program, simply copy the contents of the "Program" into the remote directory. **Do not delete the previous directory; you will have to re-install packages!**
 
+# Calibration
+
+@maitian fix the calibration code so it doesn't try to access folders that don't exist
+also which iamges.ipynb is it and why is everything so disorganized
+
 ***
 
-# Software Documentation
+# Software
 
 ## Operating System
 
@@ -148,7 +157,7 @@ We recently added a feature that allows us to remotely run the program from the 
 
 #### Using SPARK Control Panel to Change Parameters
 
-It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply change the HSV sliders and click the "Capture" button with the "Filter" option on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
+It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply open the dropdown menu above the map on the right-hand side of the screen, change the HSV sliders, and click the "Capture" button with the "Filter" option enabled on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
 
 Example:
 
