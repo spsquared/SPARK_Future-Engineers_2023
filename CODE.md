@@ -58,6 +58,8 @@ The undistort function calls `cv2.remap` to use the precalculated remaps to undi
 
 To speed up the undistorting, the top of the image is cropped before undistortion.
 
+*All the results are of the left camera. The same calculations are done on the right camera, it is just not shown.*
+
 Results:
 
 Raw Image:
@@ -96,6 +98,10 @@ Edges:
 
 ![edges](/img/docs/leftEdgesImg.png)
 
+Combined:
+
+![combined](/img/docs/filtered.png)
+
 ### Finding Wall Heights
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. This is useful because we can find the distance to any point on the wall if we know the height. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
@@ -116,6 +122,17 @@ To find wall lines, we create a new image with only the bottom of the wall. For 
 
 Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on the x value, similar slope lines are merged.
 
+
+Results:
+
+Left Camera:
+
+![Left Contours and Wall Lines](/img/docs/filteredAllLeft.png)
+
+Right Camera:
+
+![Right Contours and Wall Lines](/img/docs/filteredAllRight.png)
+
 ### Merge Contours & Wall Lines
 
 We can find the distance to any point on the top of the wall. Diagram 1 is a side view of the camera and the wall. Our cameras are positioned at the same height as the wall, so the top of the wall forms a straight line on the image. In diagram 1, the right line is the wall, which we know is 10cm tall. $d$ is the distance we want to calculate. $newf$ is the new focal length, which we will calculate later. $h$ is the height of the wall in pixels, which we get when we find the wall heights. The two triangles are similar, so $\frac{new f}{h} = \frac{d}{10cm}$. Isolating $d$ gives us $d = \frac{10cm \times newf}{h}$.
@@ -129,6 +146,16 @@ To calculate $new f$, we need to know the base focal length. For our undistorted
 </div>
 
 Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the vehicle. For wall lines, we convert each endpoint and connect them together.
+
+
+*The contours and wall lines are merged from the left and right camera. This is why you see duplicate pillars.*
+
+Results:
+
+
+Mapped Contours and Wall Lines:
+
+![Mapped Contours and Wall Lines](/img/docs/topview.png)
 
 ***
 
