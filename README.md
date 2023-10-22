@@ -37,9 +37,19 @@ If you're a judge, we ask that you don't judge our documentation just yet. We've
 
 # High-Level Overview
 
-SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards.
+SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards. For a full component list, see [ASSEMBLY.md](./ASSEMBLY.md#parts-list). CAD models can be found in `/dist/3d-models/`, and have all been [modeled in Onshape here](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590).
 
-Link to Assembly.md for component list and ALSO ADD PHOTOS
+![SPARK G2 chassis with electronics in CAD software](./img/docs/cad-car.png)
+
+The chassis consists of a lower base with vertical walls to mount the rear axle and upper platforms. It has space for the battery and an ESC (electronic speed controller) bay in the rear, and a compartment in the front for the steering mechanism. The rear axle is sourced from the Atom 2 GT12 pan car kit by Schumacher, and is mounted vertically to save space.
+
+The electronics platforms sit on top of the chassis base, and the main platform is also a structural component that provides rigidity to the chassis. Because the electronics are on top, they are easily accessible and wiring is fairly simple. The only exceptions are the ESC, which is in the rear, and the IMU (inertial measurement unit, used for measuring angles and velocity).
+
+| Chassis base with rear axle and steering           | Chassis base and platforms, without camera tower            |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| ![Lower chassis base](./img/docs/chassis-base.png) | ![Chassis with platforms](./img/docs/chassis-platforms.png) |
+
+One major physical change is the addition of a second IMX219 wide-angle camera to the front of the car. Both cameras are angled 30 degrees to either side, with a field of view of 150 degrees for each camera. The cameras are mounted on a slider to ensure the accuraccy of the [distance calculations in the algorithm](./CODE.md#merge-contours--wall-lines).
 
 include diagram of hardware and relationships (what communicates with what to do what)
 
