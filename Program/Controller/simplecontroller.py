@@ -65,11 +65,17 @@ def drive(manual: bool = False):
     totalStart = time.perf_counter()
     start = time.perf_counter()
     read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+
+    # cv2.imwrite("./raw.png", read[0])
+    # cv2.imwrite("./undistorted.png", converter.undistort(read[0]))
     # print("camera: ", time.perf_counter() - start)
     start = time.perf_counter()
     # read = numpy.split(numpy.array(img), 2, axis=1)
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
+    # cv2.imwrite("./leftEdgesImg.png", leftEdgesImg)
+    # cv2.imwrite("./gLeftImg.png", gLeftImg)
+    # cv2.imwrite("./rLeftImg.png", rLeftImg)
     # print("filter + undistort: ", time.perf_counter() - start)
     start = time.perf_counter()
     # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
@@ -436,7 +442,7 @@ def drive(manual: bool = False):
         io.drive.throttle(0)
         return False
     
-    if slam.carSections == 7 and (centerWalls == 0 or centerWallDistance > 100) and transformedPillar[0] != None and transformedPillar[2] < 60 and transformedPillar[1] < 20:
+    if slam.carSections == 7 and slam.carSectionEntered == 0 and transformedPillar[0] != None and transformedPillar[2] < 60 and transformedPillar[1] < 20:
         slam.uTurnPillar = transformedPillar[4]
     if (not slam.uTurning) and slam.uTurnStart <= 0 and slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 100:
         if transformedPillar[4] == RED_PILLAR:
@@ -446,7 +452,7 @@ def drive(manual: bool = False):
     # if slam.carSections > 7:
     #     slam.uTurnPillar = 0
 
-    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 3 and ((transformedPillar[0] != None and transformedPillar[1] < 20)):
+    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 5 and ((transformedPillar[0] != None and transformedPillar[1] < 25)):
         if slam.uTurning == False and slam.uTurnStart <= 0:
             slam.uTurnStart = 6
     
@@ -485,7 +491,7 @@ def drive(manual: bool = False):
     elif centerWalls != 0 and centerWallDistance < 100 and slam.carSectionEntered != 1:
         if transformedPillar[0] == None or abs(transformedPillar[0] > 120):
             if slam.uTurnPillar == UTURN_PILLAR:
-                if centerWallDistance < 80:
+                if centerWallDistance < 60:
                     steerCenter()
             elif NO_PILLARS:
                 if centerWallDistance < 75:

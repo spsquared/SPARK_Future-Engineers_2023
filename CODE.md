@@ -51,25 +51,50 @@ All code for image processing is in `./Program/Controller/converter.py`.
 Our cameras output a distorted image, so before we can process the image, we must undistort it.
 
 
-insert raw image
-
-insert undistorted image
 
 At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [ASSEMBLY.md](./ASSEMBLY.md#) for instructions on how to get the distortion matrix.
 
 The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image from being cropped out.
 
+To speed up the undistorting, the top of the image is cropped before undistortion.
+
+Results:
+
+Raw Image:
+
+![raw IMAGE](/img/docs/raw.png)
+
+Undistorted Image:
+
+![cooked IMAGE](/img/docs/undistorted.png)
+
+Because undistorting the image stretches out the edges, there are black gaps in the image on the top and bottom.
+
 ### Filtering
 
 We filter the images to isolate the red pillars and green pillars. We also extract the edges of the walls in this step.
 
-insert raw image
-
-insert filtered image
-
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
 Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2.GaussianBlur`. Then, using `cv2.Canny`, edges are detected in the image.
+
+Results:
+
+Undistored Image:
+
+![cooked IMAGE](/img/docs/undistorted.png)
+
+Red Filtered:
+
+![red filtered](/img/docs/rLeftImg.png)
+
+Green Filtered:
+
+![green filtered](/img/docs/gLeftImg.png)
+
+Edges:
+
+![edges](/img/docs/leftEdgesImg.png)
 
 ### Finding Wall Heights
 

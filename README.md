@@ -227,7 +227,7 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 
 While LiPo batteries are the safest form of portable, affordable, high density energy storage, there are still precautions to be taken when working with them. Lithium is a highly volatile element, and will react with the water vapor in the air if exposed to it.
 
-1. **Do not** puncture, deform, short, or heat LiPo batteries above 26° C (80° F)
+1. **Do not** puncture, deform, short, or heat LiPo batteries above 26° C (80° F) (299.15 K)
 2. Store and charge LiPos in a *fireproof container* **away** from flammable materials and water
 3. **NEVER** charge a swollen or damaged battery (e.g. damaged leads, swelling of cells, puncture in wrapping)
 4. **NEVER** leave a charging battery unattended
