@@ -51,6 +51,8 @@ The electronics platforms sit on top of the chassis base, and the main platform 
 
 One major physical change is the addition of a second IMX219 wide-angle camera to the front of the car. Both cameras are angled 30 degrees to either side, with a field of view of 150 degrees for each camera. The cameras are mounted on a slider to ensure the accuraccy of the [distance calculations in the algorithm](./CODE.md#merge-contours--wall-lines).
 
+![Cameras top-down](./img/docs/camera-angles.png)
+
 include diagram of hardware and relationships (what communicates with what to do what)
 
 quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)
@@ -217,6 +219,8 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 ***
 
 # Demonstration Videos
+
+UPDATE!!
 
 [![WRO 2023 Future Engineers US East Coast - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/9aOxgYunco4)
 [![WRO 2023 Future Engineers US East Coast - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/JWf80Lf_OrA)
