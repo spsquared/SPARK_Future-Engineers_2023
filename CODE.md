@@ -60,15 +60,9 @@ To speed up the undistorting, the top of the image is cropped before undistortio
 
 *All the results are of the left camera. The same calculations are done on the right camera, it is just not shown.*
 
-Results:
-
-Raw Image:
-
-![raw IMAGE](/img/docs/raw.png)
-
-Undistorted Image:
-
-![cooked IMAGE](/img/docs/undistorted.png)
+| Raw Image                       | Undistorted Image                          |
+| ------------------------------- | ------------------------------------------ |
+| ![raw IMAGE](/img/docs/raw.png) | ![cooked IMAGE](/img/docs/undistorted.png) |
 
 Because undistorting the image stretches out the edges, there are black gaps in the image on the top and bottom.
 
@@ -81,26 +75,11 @@ Using `cv2.inRange`, a mask for red colors and green colors is created to filter
 Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2.GaussianBlur`. Then, using `cv2.Canny`, edges are detected in the image.
 
 Results:
-
-Undistored Image:
-
-![cooked IMAGE](/img/docs/undistorted.png)
-
-Red Filtered:
-
-![red filtered](/img/docs/rLeftImg.png)
-
-Green Filtered:
-
-![green filtered](/img/docs/gLeftImg.png)
-
-Edges:
-
-![edges](/img/docs/leftEdgesImg.png)
-
-Combined:
-
-![combined](/img/docs/filtered.png)
+|                                                        |                                                                           |                                                    |
+| ------------------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------- |
+|                                                        | Undistorted image from previous![cooked IMAGE](/img/docs/undistorted.png) |                                                    |
+| Red pillar mask![red filtered](/img/docs/rLeftImg.png) | Green pillar mask![green filtered](/img/docs/gLeftImg.png)                | Wall edge mask![edges](/img/docs/leftEdgesImg.png) |
+|                                                        | Combined output to control panel![combined](/img/docs/filtered.png)       |                                                    |
 
 ### Finding Wall Heights
 
@@ -125,13 +104,9 @@ Using `cv2.HoughLinesP`, we can find lines on this newly created image. After so
 
 Results:
 
-Left Camera:
-
-![Left Contours and Wall Lines](/img/docs/filteredAllLeft.png)
-
-Right Camera:
-
-![Right Contours and Wall Lines](/img/docs/filteredAllRight.png)
+| Left camera                                                    | Right camera                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![Left Contours and Wall Lines](/img/docs/filteredAllLeft.png) | ![Right Contours and Wall Lines](/img/docs/filteredAllRight.png) |
 
 ### Merge Contours & Wall Lines
 
@@ -152,10 +127,9 @@ Using this algorithm, which is in `getRawDistance`, we can convert the contours 
 
 Results:
 
-
-Mapped Contours and Wall Lines:
-
-![Mapped Contours and Wall Lines](/img/docs/topview.png)
+| Mapped Contours and Wall Lines                       |
+| ---------------------------------------------------- |
+| ![Mapped Contours and Wall Lines](/img/docs/map.png) |
 
 ***
 
