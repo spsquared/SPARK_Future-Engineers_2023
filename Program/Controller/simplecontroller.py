@@ -489,7 +489,7 @@ def drive(manual: bool = False):
             processWalls()
         # print("oof no u turn code")
     elif centerWalls != 0 and centerWallDistance < 100 and slam.carSectionEntered != 1:
-        if transformedPillar[0] == None or abs(transformedPillar[0] > 120):
+        if transformedPillar[0] == None or abs(transformedPillar[0]) > 120:
             if slam.uTurnPillar == UTURN_PILLAR:
                 if centerWallDistance < 60:
                     steerCenter()
