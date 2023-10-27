@@ -6,7 +6,7 @@
 
 ***
 
-# Build Guide
+# Build & Setup Guide
 
 This is the build guide for SPARK's 2023 WRO Future Engineers solution - SPARK G2. It is segmented into ***TBD*** main steps, with more detailed steps within. It assumes you have necessary tools and miscellaneous materials including but not limited to: M2.5, M3 driver bits; a Dupont connector crimpange kit; a 3D printer; a soldering iron; 20-24 gauge wire; and M2.5, M3 flat/countersunk screws.
 

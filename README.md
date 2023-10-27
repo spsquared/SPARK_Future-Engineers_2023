@@ -37,7 +37,7 @@ If you're a judge, we ask that you don't judge our documentation just yet. We've
 
 # High-Level Overview
 
-SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards. For a full component list, see [ASSEMBLY.md](./ASSEMBLY.md#parts-list). CAD models can be found in `/dist/3d-models/`, and have all been [modeled in Onshape here](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590).
+SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards. For a full component list, see [SETUP.md](./SETUP.md#parts-list). CAD models can be found in `/dist/3d-models/`, and have all been [modeled in Onshape here](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590).
 
 ![SPARK G2 chassis with electronics in CAD software](./img/docs/cad-car.png)
 
@@ -89,7 +89,7 @@ Here is a simple schematic for how the electronics are wired:
 
 # Uploading Programs
 
-Make sure you have gone through the [Jetson Nano setup](./ASSEMBLY.md#jetson-nano-setup) steps and set your static IP, have some form of sshfs, and created the program directory. To upload the program, simply copy the contents of the "Program" into the remote directory. **Do not delete the previous directory; you will have to re-install packages!**
+Make sure you have gone through the [Jetson Nano setup](./SETUP.md#jetson-nano-setup) steps and set your static IP, have some form of sshfs, and created the program directory. To upload the program, simply copy the contents of the "Program" into the remote directory. **Do not delete the previous directory; you will have to re-install packages!**
 
 # Calibration
 
@@ -102,7 +102,7 @@ also which iamges.ipynb is it and why is everything so disorganized
 
 ## Operating System
 
-We used the Jetson Nano's existing operating system, which is Ubuntu 18.04 with Jetpack. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in ASSEMBLY.md](./ASSEMBLY.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
+We used the Jetson Nano's existing operating system, which is Ubuntu 18.04 with Jetpack. It has been changed to text-only mode to remove the unneccesary GUI. We also added a startup script ([see "Board Setup" in SETUP.md](./SETUP.md#board-setup-sshfs-and-static-ip)) to run the program on startup, which waits for a button press before running the program.
 
 ***
 
@@ -153,7 +153,7 @@ SPARK Utilities require a local server to load resources from. The runner can be
 
 #### SPARK Control Panel
 
-SPARK Control Panel is our own testing and debugging software. It allows us to log detailed information about the program's data and present it in a graphical format. SPARK Utilities work wirelessly, so as long as the network is configured correctly (see [ASSEMBLY.md](./ASSEMBLY.md#setup-for-spark-control-panel)) SPARK Control Panel can communicate with the robot.
+SPARK Control Panel is our own testing and debugging software. It allows us to log detailed information about the program's data and present it in a graphical format. SPARK Utilities work wirelessly, so as long as the network is configured correctly (see [SETUP.md](./SETUP.md#setup-for-spark-control-panel)) SPARK Control Panel can communicate with the robot.
 
 <div align=center>
 
