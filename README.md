@@ -143,6 +143,22 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 ***
 
+# Team Photos
+
+![Team photo](./img/team-photo.jpg)
+![Rickroll](./img/rickroll.jpg)
+
+***
+
+# Demonstration Videos
+
+<!-- UPDATE -->
+
+[![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/)
+[![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/)
+
+***
+
 # Build & Setup
 
 **This section is a walkthrough of the build process and setup of the controller, a Jetson Nano.**
@@ -208,22 +224,6 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 ## SPARK Utility Setup
 
 <!-- from old readme, sort of also from setup -->
-
-***
-
-# Team Photos
-
-![Team photo](./img/team-photo.jpg)
-![Rickroll](./img/rickroll.jpg)
-
-***
-
-# Demonstration Videos
-
-<!-- UPDATE -->
-
-[![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/)
-[![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/)
 
 ***
 
