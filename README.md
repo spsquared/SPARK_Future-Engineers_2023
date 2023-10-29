@@ -15,7 +15,7 @@
     * [Hardware Design](#hardware-design)
         * [Chassis](#chassis)
         * [Power & Control](#power--control)
-        * [Motors]
+        * [Motors](#motors)
         * [Sensors](#sensors)
     * [Software Design](#software-design)
     * [Photos](#photos)
