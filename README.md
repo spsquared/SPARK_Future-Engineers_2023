@@ -10,10 +10,6 @@
 
 ***
 
-## For Judges
-
-If you're a judge, we ask that you don't judge our documentation just yet. We've still got some rough edges to smooth out and a bit more detail to add. Thank you!
-
 # Contents
 * [High-Level Overview](#high-level-overview)
 * [Hardware](#hardware)
@@ -53,9 +49,13 @@ One major physical change is the addition of a second IMX219 wide-angle camera t
 
 ![Cameras top-down](./img/docs/camera-angles.png)
 
+SPARK G2 does not use any other sensors to percieve its environment - no LiDAR here!
+
+
+
 include diagram of hardware and relationships (what communicates with what to do what)
 
-quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)
+quick overview of algorithm (scans images, describe what is used to extract data, and generally what it does with that data)image.pngstill have to writ ethis
 
 ***
 

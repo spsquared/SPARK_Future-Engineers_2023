@@ -7,6 +7,9 @@ const static = express.static(__dirname);
 app.get('/', (req, res) => {
     res.writeHead(301, { location: '/SPARK-Control/' }); res.end()
 });
+app.get('/SPARK-Randomizer', (req, res) => {
+    res.writeHead(301, { location: '/SPARK-Randomiser/' }); res.end()
+})
 app.use('/', (req, res, next) => {
     const ip = req.ip ?? req.socket.remoteAddress;
     if (!ip.replace('::ffff:', '').startsWith('127.') && !(ip.endsWith(':1') && ip.replace(/[^0-9]/ig, '').split('').reduce((prev, curr) => prev + parseInt(curr), 0) == 1)) res.sendStatus(403);
