@@ -19,6 +19,8 @@ One  and motion planning. Our code processes the camera image and uses it to fin
 
 The main consideration for our algorithm is to balance localization accuracy and speed. For localization accuracy, our target is to know which section we are in, and how far away the walls and pillars are. We need to know which section we are in to count how many laps we has completed, and to know when to uturn. We need to know how far away the car is from walls and pillars for collision avoidance.
 
+For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer towards the waypoint. The waypoint will be updated every iteration. For the uturn, the car will turn around the first pillar in the section.
+
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
 ## General Outline
@@ -33,7 +35,7 @@ Our program runs a constant update loop. All controller code can be found in `./
 * [Simple Driver](#simple-driver)
     1. [Find Car Direction](#finding-car-direction)
     2. [Categorize Walls](#categorizing-walls)
-    1. [Find Car Orientation](#finding-car-direction)
+    1. [Find Car Orientation](#finding-car-orientation)
     3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
     4. [Calculate Steering](#calculating-steering)
 * SLAM Driver
@@ -143,12 +145,32 @@ At the start of the program, we need to know if we are going clockwise or counte
 
 For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
+### Transforming Walls and Pillars
+
+It is important to know which wall is the center wall, the left wall, and the right wall.
+
+| Wall Classification                       |
+| ---------------------------------------------------- |
+| ![Wall Classification](/img/docs/wallClassification.png) |
+
+When the car is tilted, the walls relative to the car will not be straight.
+
+| Tilted Walls                       |
+| ---------------------------------------------------- |
+| ![Tilted Walls](/img/docs/wallsTilted.png) |
+
+In this image, the car sees the center wall tilted by 45 degrees and the left wall also tilted by 45 degrees. Now, the car doesn't know which wall is the center wall.
+
+To solve this problem, we store the orientation of the car. Before processing the walls, we rotate it based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
+
 ### Categorizing Walls
 
 <!-- UPDATE!!! -->
 buh we need the orientation stuff
 
-There are 5 possible categories of walls: Left, Center, Right, Back, and Unknown. The slope of the wall relative to the car is calculated. If the slope is relatively small and in front of the car, the wall gets classified as a center wall. Otherwise, if the slope is small but behind the car, the wall gets classified as Back. If the wall is to the left, it is a left wall, if it is to the right, it is a right wall.
+We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is horizontal relative to the car, it is categorized as a center or back wall depending on if it is in front or in the back. If the wall is vertical, it is categorized as a left wall or right wall depending on if it is to the left or to the right.
+
+Now, depending on how slanted the wall is, we can calculate our car direction. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees.
 
 ### Filtering Traffic Signals
 
@@ -162,13 +184,13 @@ We calculate the average distance to the left walls, center walls, and right wal
 2. We are Uturning
 3. Default case
 
-In case 1, if there is no pillar detected, SPARK G2 will keep straight and turn when the center wall is less than 70cm away. If there is a pillar detected, SPARK G2 will turn when the pillar is close enough to pass in front or behind it.
+In case 1, if there is no pillar detected, the Car will keep straight and turn when the center wall is less than 70cm away. If there is a pillar detected, the Car will turn when the pillar is close enough to pass in front or behind it.
 
 <!-- NOT 3 POINT TURN ANYMORE!!! -->
 
 In case 2, NOTHING BECAUSE ITS NOT 3 POINT TURN OOF uses a precalculated set of instructions for making the 3 point turn. The gyro is used to determine how far we have turned.
 
-In case 3, if there is no pillar detected, SPARK G2 will keep straight. If there is a pillar, it will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and the right tangent for red pillars. Then, it tries to keep itself pointed towards that tangent point.
+In case 3, if there is no pillar detected, the Car will keep straight. If there is a pillar, it will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and the right tangent for red pillars. Then, it tries to keep itself pointed towards that tangent point.
 
 ***
 
