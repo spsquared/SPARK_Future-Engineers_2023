@@ -5,15 +5,14 @@
 </div>
 
 # Contents
-* [Algorithm](#algorithm)
-    * [Outline](#outline)
-    * [Image Processing](#image-processing)
-    * [Simple Driver](#simple-driver)
-* [Code Structure](#code-structure)
+* [Overview](#algorithm-overview)
+* [Outline](#outline)
+* [Image Processing](#image-processing)
+* [Simple Driver](#simple-driver)
 
 ***
 
-# Algorithm
+# Algorithm Overview
 
 One  and motion planning. Our code processes the camera image and uses it to find the position of the walls relative to the car and the position of the pillars. Using this information, we can figure out where we are supposed to go next and steer accordingly.
 
@@ -25,7 +24,7 @@ Our program runs a constant update loop. All controller code can be found in `./
 
 ## Outline
 * [Image Processing](#image-processing)
-    1. Capture
+    1. Capture images
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
     4. [Find wall heights](#finding-wall-heights)
@@ -33,7 +32,7 @@ Our program runs a constant update loop. All controller code can be found in `./
     6. [Find wall lines](#finding-wall-lines)
     7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
 * [Simple Driver](#simple-driver)
-    1. [Find Car Direction](#finding-car-direction)
+    1. [Find Lap Direction](#finding-lap-direction)
     2. [Categorize Walls](#categorizing-walls)
     1. [Find Car Orientation](#finding-car-orientation)
     3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
@@ -42,11 +41,11 @@ Our program runs a constant update loop. All controller code can be found in `./
     1. Non-functional (but if it works it'll be really cool)
     2. its borken
 
-***
-
-## Image Processing
+# Image Processing
 
 All code for image processing is in `./Program/Controller/converter.py`.
+
+***
 
 ### Undistorting
 
@@ -68,6 +67,8 @@ To speed up the undistorting, the top of the image is cropped before undistortio
 
 Because undistorting the image stretches out the edges, there are black gaps in the image on the top and bottom.
 
+***
+
 ### Filtering
 
 We filter the images to isolate the red pillars and green pillars. We also extract the edges of the walls in this step.
@@ -83,17 +84,23 @@ Results:
 | Red pillar mask![red filtered](/img/docs/rLeftImg.png) | Green pillar mask![green filtered](/img/docs/gLeftImg.png)                | Wall edge mask![edges](/img/docs/leftEdgesImg.png) |
 |                                                        | Combined output to control panel![combined](/img/docs/filtered.png)       |                                                    |
 
+***
+
 ### Finding Wall Heights
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. This is useful because we can find the distance to any point on the wall if we know the height. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
 
 The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value which is 255. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
+***
+
 ### Finding Contours
 
 Right now, we only have two images containing only red pixels and only green pixels. The purpose of this step is to extract the pillars as an x coordinate, image width, and height. Similarly to the walls, we will be able to calculate the distance from the pillar with this information. The image width is used to remove this portion of the wall heights, as we know it is a pillar and not the wall.
 
 Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border is added using `cv2.copyMakeBorder`. The edges are blurred using `cv2.medianBlur`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
+
+***
 
 ### Finding Wall Lines
 
@@ -103,12 +110,13 @@ To find wall lines, we create a new image with only the bottom of the wall. For 
 
 Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on the x value, similar slope lines are merged.
 
-
 Results:
 
 | Left camera                                                    | Right camera                                                     |
 | -------------------------------------------------------------- | ---------------------------------------------------------------- |
 | ![Left Contours and Wall Lines](/img/docs/filteredAllLeft.png) | ![Right Contours and Wall Lines](/img/docs/filteredAllRight.png) |
+
+***
 
 ### Merge Contours & Wall Lines
 
@@ -135,33 +143,33 @@ Results:
 
 ***
 
-## Simple Driver
+# Simple Driver
 
 All code for the simple driver is in `./Program/Controller/simplecontroller.py`.
 
-### Finding Car Direction
+***
+
+### Finding Lap Direction
 
 At the start of the program, we need to know if we are going clockwise or counterclockwise. This is done by searching for a jump in the wall. If a jump is detected, it means there is a gap there, allowing us to find the direction.
 
 For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
+***
+
 ### Transforming Walls and Pillars
 
-It is important to know which wall is the center wall, the left wall, and the right wall.
+It is important to know which wall is the center wall, the left wall, and the right wall. When the car is at an angle, the walls relative to the car will not be straight.
 
-| Wall Classification                       |
-| ---------------------------------------------------- |
-| ![Wall Classification](/img/docs/wallClassification.png) |
+| Wall Classification                                      | Angled Walls                               |
+| -------------------------------------------------------- | ------------------------------------------ |
+| ![Wall Classification](/img/docs/wallClassification.png) | ![Angled Walls](/img/docs/wallsTilted.png) |
 
-When the car is tilted, the walls relative to the car will not be straight.
+In this image, the car sees the center wall at an angle of 45 degrees and the left wall also at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
 
-| Tilted Walls                       |
-| ---------------------------------------------------- |
-| ![Tilted Walls](/img/docs/wallsTilted.png) |
+To solve this problem, we store the orientation of the car (relative to the mat). Before processing the walls, we rotate it based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
 
-In this image, the car sees the center wall tilted by 45 degrees and the left wall also tilted by 45 degrees. Now, the car doesn't know which wall is the center wall.
-
-To solve this problem, we store the orientation of the car. Before processing the walls, we rotate it based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
+***
 
 ### Categorizing Walls
 
@@ -172,9 +180,13 @@ We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. 
 
 Now, depending on how slanted the wall is, we can calculate our car direction. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees.
 
+***
+
 ### Filtering Traffic Signals
 
 We find the largest pillar. If there are multiple pillars around the same spot we take the average of their positions.
+
+***
 
 ### Calculating Steering
 
@@ -193,10 +205,3 @@ In case 2, NOTHING BECAUSE ITS NOT 3 POINT TURN OOF uses a precalculated set of 
 In case 3, if there is no pillar detected, the Car will keep straight. If there is a pillar, it will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and the right tangent for red pillars. Then, it tries to keep itself pointed towards that tangent point.
 
 ***
-
-# Code Structure
-
-
-Converter.py has all the code for image processing. Converter.py
-simplecontroller.py has all the code for the driver.
-<!-- talk about how the code is segmented, what modules are made to handle what tasks (not too much detail though) -->
