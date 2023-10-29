@@ -24,14 +24,15 @@
     * [Important Assembly Notes](#important-assembly-notes)
     * [Jetson Nano Setup](#jetson-nano-setup)
         * [ohno]
+* [**Team Photos**](#team-photos)
+* [**Demonstration Videos**](#demonstration-videos)
 * [**SPARK Utilities**](#spark-utilities)
     * [SPARK Control Panel](#spark-control-panel)
         * [Map View](#map-view)
         * [Changing Parameters](#changing-parameters)
     * [SPARK Randomizer](#spark-randomizer)
     * [Setup](#spark-utility-setup)
-* [**Team Photos**](#team-photos)
-* [**Demonstration Videos**](#demonstration-videos)
+* [**Lessons Learned**](#lessons-learned)
 * [**LiPo Battery Safety Notice**](#lipo-battery-safety-notice)
 
 ***
@@ -242,6 +243,16 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 |                                                                                                                                      |                                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | [![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/) | [![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/) |
+
+***
+
+# Lessons Learned
+
+* We learned that you need to use `numpy` or `cv2` for almost all the image processing, because python for loops are way too slow.
+* We started by trying SLAM (Simultaneous Localization And Mapping) for our car, which turns out to be unneccessary for our purpose. So we instead switched to a simplified version, which keeps only a rough location and orientation of the vehicle. This turns out to be a good balance between speed and accuracy.
+* We learned that sending too many oscillating inputs to the servo will cause it to stop responding, because of a built-in safety protection. We fixed this by adding input smoothing.
+* We learned that the car will scrape paint off of the walls.
+* We learned that keeping an XSS bug is not a good idea.
 
 ***
 

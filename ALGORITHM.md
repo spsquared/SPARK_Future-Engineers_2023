@@ -79,19 +79,17 @@ All code for image processing is in `./Program/Controller/converter.py`.
 
 ### Crop the image
 
-Because our camera is the same height as the walls, the walls appear as a flat line on the image. We crop out top half of the image.
+Because our camera is the same height as the top boundary of the walls, the top of the walls appear as a flat line on the image. We crop out along the top boundary of the wall. This reduces noise in the background, as well as speeding up our processing.
 
 ### Undistorting
 
-Our cameras output a distorted image, so before we can process the image, we must undistort it.
+Because our camera is a fisheye camera (wide angle), our cameras output a distorted image. Before we can process the image, we must undistort it.
 
-At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
+At the start of the program, `cv2.fisheye.initUndistortRectifyMap` is used with precalculated distortion matrices to create the remaps. We used a checkerboard image to calculate the distortion matrices D and K. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
 
-The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image from being cropped out.
+The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. We scaled up the matrix K to partially zoom out the image to prevent too much of the image from being cropped out.
 
-**To speed up the undistorting, the top of the image is cropped before undistortion.**
-
-*All the results are of the left camera. The same calculations are done on the right camera, it is just not shown.*
+We present a few examples to explain the processing steps. All the examples are from the left camera. The same calculations are done on the right camera.
 
 | Raw Image                       | Undistorted Image                          |
 | ------------------------------- | ------------------------------------------ |
@@ -99,11 +97,17 @@ The undistort function calls `cv2.remap` to use the precalculated remaps to undi
 
 Because undistorting the image stretches out the edges, there are black gaps in the image on the top and bottom.
 
+In the following image, the distortion is more obvious.
+
+insert image
+
 ***
 
 ### Filtering
 
 We filter the images to isolate the red pillars and green pillars. We also extract the edges of the walls in this step.
+
+We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue Saturation Value. Hue is the hue of the color, going from 0 to 179. Saturation is is how much of the hue is present, going from 0 to 255. Value is how dark the color is, also going from 0 to 255. The image is converted into HSV mode using `cv2.cvtColor`. https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html
 
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
@@ -118,31 +122,33 @@ Results:
 
 ***
 
-### Finding Wall Heights
-
-We find the "height" of the walls, which is the distance between the top edge and bottom edge. This is useful because we can find the distance to any point on the wall if we know the height. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
-
-The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value which is 255. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
-
-***
-
 ### Finding Contours
 
-Right now, we only have two images containing only red pixels and only green pixels. The purpose of this step is to extract the pillars as an x coordinate, image width, and height. Similarly to the walls, we will be able to calculate the distance from the pillar with this information. The image width is used to remove this portion of the wall heights, as we know it is a pillar and not the wall.
+Right now, we only have two images containing only red pixels and only green pixels. The purpose of this step is to find a bounding box of the red/green pixels to represent the pillars. This bounding box has a center (x,y) coordinate, width, and height. With this information we can calculate the distance to the top point of the pillar. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
 
 Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border is added using `cv2.copyMakeBorder`. The edges are blurred using `cv2.medianBlur`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
 
 ***
 
+### Finding Wall Heights
+
+We find the "height" of the walls, which is the distance between the top edge and bottom edge. Similarly to the pillars, this information is used later to find the distance from the car to any point on the top boundary of the wall.
+
+The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value which is 255. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+
+***
+
 ### Finding Wall Lines
 
-This step turns the wall heights into some lines. Each line represents a straight wall. This allows us to seperate the left wall, center wall, and right wall from each other.
+This step turns the wall heights into some lines. Each line represents a straight wall.
 
-To find wall lines, we create a new image with only the bottom of the wall. For every obstacle, the nearby wall heights get set to 0 based on the size of the contour. Creating this image is optimized using `numpy.zeros`. The bottom of the wall is set to 255. We first create a list of indices so we can quickly set all the values to 255.
+To find wall lines, we create a new image with only the bottom of the wall. For every pillar, the nearby wall heights get set to 0 based on the size of the contour. Creating this image is optimized using `numpy.zeros`. The bottom of the wall is set to 255. We first create a list of indices so we can quickly set all the values to 255.
 
 Using `cv2.HoughLinesP`, we can find lines on this newly created image. After sorting the lines based on the x value, similar slope lines are merged.
 
 Results:
+
+The Wall Lines are the pink lines on the image. The shaded white area is the wall heights.
 
 | Left camera                                                    | Right camera                                                     |
 | -------------------------------------------------------------- | ---------------------------------------------------------------- |
@@ -154,7 +160,7 @@ Results:
 
 We can find the distance to any point on the top of the wall. Diagram 1 is a side view of the camera and the wall. Our cameras are positioned at the same height as the wall, so the top of the wall forms a straight line on the image. In diagram 1, the right line is the wall, which we know is 10cm tall. $d$ is the distance we want to calculate. $newf$ is the new focal length, which we will calculate later. $h$ is the height of the wall in pixels, which we get when we find the wall heights. The two triangles are similar, so $\frac{new f}{h} = \frac{d}{10cm}$. Isolating $d$ gives us $d = \frac{10cm \times newf}{h}$.
 
-To calculate $new f$, we need to know the base focal length. For our undistorted image, we use an approximation of 80px as the base focal length. Diagram 2 is a birds-eye view of the camera. $f$ is the base focal length, and $x$ is the x position of the wall relative to the center. Using the Pythagorean theorem, we get $new f = \sqrt{f^2 + x^2}$.
+To calculate $new f$, we need to know the base focal length. For our undistorted image, we use an approximation of 110px as the base focal length. Diagram 2 is a birds-eye view of the camera. $f$ is the base focal length, and $x$ is the x position of the wall relative to the center. Using the Pythagorean theorem, we get $new f = \sqrt{f^2 + x^2}$.
 
 <div align=center>
 
@@ -177,13 +183,15 @@ Results:
 
 ### Transforming Walls and Pillars
 
-It is important to know which wall is the center wall, the left wall, and the right wall. When the car is at an angle, the walls relative to the car will not be straight.
+It is important to know which wall is the center wall, the left wall, and the right wall. When the car is straight, the center wall is the wall in front of the car. On the image, the center wall is a horizontal line.
+
+When the car is at an angle, the walls relative to the car will not be perfectly horizontal or perfectly vertical.
 
 | Wall Classification                                      | Angled Walls                               |
 | -------------------------------------------------------- | ------------------------------------------ |
 | ![Wall Classification](/img/docs/wallClassification.png) | ![Angled Walls](/img/docs/wallsTilted.png) |
 
-In this image, the car sees the center wall at an angle of 45 degrees and the left wall also at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
+In this image to the right, the car sees the center wall at an angle of 45 degrees and the left wall also at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
 
 To solve this problem, we store the orientation of the car (relative to the mat). Before processing the walls, we rotate it based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
 
@@ -194,9 +202,13 @@ To solve this problem, we store the orientation of the car (relative to the mat)
 <!-- UPDATE!!! -->
 buh we need the orientation stuff
 
-We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is horizontal relative to the car, it is categorized as a center or back wall depending on if it is in front or in the back. If the wall is vertical, it is categorized as a left wall or right wall depending on if it is to the left or to the right.
+At this step, the wall lines have been turned into line segments that represent the real positions of the walls on the mat.
 
-Now, depending on how slanted the wall is, we can calculate our car direction. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees.
+We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is perpendicular relative to the driving direction, it is categorized as a center or back wall depending on if it is in front or in the back of the car. If the wall is parellel to the driving direction, it is categorized as a left wall or right wall depending on if it is to the left or to the right of the car.
+
+Now, depending on how slanted the wall is, we can calculate our car orientation. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees to the left in addition to the current orientation.
+
+The car orientation is thus updated.
 
 ***
 
