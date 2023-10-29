@@ -139,7 +139,7 @@ path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
 
 ## Code Documentation
 
-See [Code.md](./Code.md).
+See [CODE.md](./CODE.md).
 
 ***
 
