@@ -11,10 +11,11 @@
 ***
 
 # Contents
-* [Overview](#algorithm-overview)
-* [Outline](#outline)
-* [Image Processing](#image-processing)
-* [Simple Driver](#simple-driver)
+* [**Overview**](#algorithm-overview)
+    * [Pseudocode](#pseudocode)
+    * [Outline](#outline)
+* [**Image Processing**](#image-processing)
+* [**Simple Driver**](#simple-driver)
 
 ***
 
@@ -28,8 +29,32 @@ For motion planning, our controller finds a waypoint based on the pillar positio
 
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
+## Pseudocode
+
+The algorithm part of the code is a loop. Each iteration, it takes images, processes them, and then calculates a steering value.
+
+Each iteration takes about 80ms.
+
+```
+while (sections entered != 24): # 24 sections means 3 laps.
+    // Image processing for car localization
+    Crop the images
+    Undistort the images (how to add links to other files?)
+    Filter the image
+    Find wall heights
+    Find contours
+    Find wall lines
+    Merge & Convert wall lines and contours
+    Categorize Walls
+    Find Car Orientation
+    Filter Pillars
+    <!--Car steering control-->
+    Find lap direction
+    Calculate Steering
+```
+
 ## Outline
-* [Image Processing](#image-processing)
+* [**Image Processing**](#image-processing)
     1. [Crop the image](#crop-the-image)
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
@@ -40,7 +65,7 @@ Our program runs a constant update loop. All controller code can be found in `./
     8. [Categorize Walls](#categorizing-walls)
     9. [Find Car Orientation](#finding-car-orientation)
     10. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
-* [Steering and Motion Planning](#steering-and-motion-planning)
+* [**Steering and Motion Planning**](#steering-and-motion-planning)
     1. [Find Lap Direction](#finding-lap-direction)
     2. [Calculate Steering](#calculating-steering)
 
