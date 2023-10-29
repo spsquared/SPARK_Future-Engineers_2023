@@ -52,7 +52,7 @@ Our cameras output a distorted image, so before we can process the image, we mus
 
 
 
-At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [ASSEMBLY.md](./ASSEMBLY.md#) for instructions on how to get the distortion matrix.
+At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
 
 The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image from being cropped out.
 

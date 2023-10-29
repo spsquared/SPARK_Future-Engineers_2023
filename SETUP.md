@@ -6,7 +6,7 @@
 
 ***
 
-# Build Guide
+# Build & Setup Guide
 
 This is the build guide for SPARK's 2023 WRO Future Engineers solution - SPARK G2. It is segmented into ***TBD*** main steps, with more detailed steps within. It assumes you have necessary tools and miscellaneous materials including but not limited to: M2.5, M3 driver bits; a Dupont connector crimpange kit; a 3D printer; a soldering iron; 20-24 gauge wire; and M2.5, M3 flat/countersunk screws.
 
@@ -151,9 +151,7 @@ Some packages will need to be installed. [Jetson-GPIO](https://github.com/NVIDIA
 Use the following pip commands:
 
 ```
-pip3 install adafruit-circuitpython-servokit
-pip3 install adafruit-mpu6050
-pip3 install "python-socketio[client]"
+pip3 install adafruit-circuitpython-servokit adafruit-mpu6050 "python-socketio[client]"
 ```
 
 ### Text-Only, Auto-Login, & Run on Startup
@@ -204,7 +202,7 @@ If you wish to use the SPARK Control Panel, repeat the above steps to create a s
 ```
 [Service]
 WorkingDirectory=/filepath
-ExecStart=/usr/local/bin/node /filepath/Util/server.js
+ExecStart=/usr/bin/node /filepath/Util/server.js
 User=username
 
 [Install]
@@ -235,6 +233,15 @@ SPARK uses a debugging server (SPARK Control Panel) for quick development and re
 sudo apt install nodejs
 ```
 
+*NOTE: The default installation of node may be v12, which doesn't support some features. To install newer versions, try the following:*
+
+```
+sudo snap install node --channel=16 --classic
+sudo update-alternatives --install /usr/bin/node node /snap/bin/node 0
+```
+
+*This should install Node.js v16 and set it to be the main version of node used with the "node" command.*
+
 Navigate to `/Util/` and install dependencies.
 
 ```
@@ -262,7 +269,7 @@ const ip = '192.168.1.151';
 const auth_uuid = '214e7634-b7c3-4044-b297-533da8cfbe7f';
 ```
 
-To open the SPARK Control Panel and other utilities, use `node SPARK-Util/static.js` or open the batch file `/SPARK-Util/static.bat`. In any web browser (only Chrome tested), navigate to `localhost:8081` to access the SPARK Control Panel.
+To open the SPARK Control Panel and other utilities, run `node SPARK-Util/static.js` on a local terminal (your computer) or open the batch file `/SPARK-Util/static.bat`. In a web browser (only Chrome tested), navigate to `localhost:8081` to access the SPARK Control Panel.
 
 ### Camera Calibration
 
