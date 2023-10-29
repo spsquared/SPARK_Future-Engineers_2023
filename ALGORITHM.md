@@ -11,10 +11,10 @@
 ***
 
 # Contents
-* [Overview](#algorithm-overview)
-* [Outline](#outline)
-* [Image Processing](#image-processing)
-* [Simple Driver](#simple-driver)
+* [**Overview**](#algorithm-overview)
+* [**Outline**](#outline)
+* [**Image Processing**](#image-processing)
+* [**Simple Driver**](#simple-driver)
 
 ***
 
@@ -29,7 +29,7 @@ For motion planning, our controller finds a waypoint based on the pillar positio
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
 ## Outline
-* [Image Processing](#image-processing)
+* [**Image Processing**](#image-processing)
     1. Capture images
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
@@ -37,15 +37,14 @@ Our program runs a constant update loop. All controller code can be found in `./
     5. [Find contours](#finding-contours)
     6. [Find wall lines](#finding-wall-lines)
     7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
-* [Simple Driver](#simple-driver)
+* [**Simple Driver**](#simple-driver)
     1. [Find Lap Direction](#finding-lap-direction)
     2. [Categorize Walls](#categorizing-walls)
     1. [Find Car Orientation](#finding-car-orientation)
     3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
     4. [Calculate Steering](#calculating-steering)
-* SLAM Driver
-    1. Non-functional (but if it works it'll be really cool)
-    2. its borken
+<!-- * **SLAM Driver**
+    1. Non-functional (but if it works it'll be really cool) -->
 
 # Image Processing
 
