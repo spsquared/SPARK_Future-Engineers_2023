@@ -24,22 +24,19 @@ Our program runs a constant update loop. All controller code can be found in `./
 
 ## Outline
 * [Image Processing](#image-processing)
-    1. Capture images
+    1. [Crop the image](#crop-the-image)
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
     4. [Find wall heights](#finding-wall-heights)
     5. [Find contours](#finding-contours)
     6. [Find wall lines](#finding-wall-lines)
     7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
-* [Simple Driver](#simple-driver)
+    8. [Categorize Walls](#categorizing-walls)
+    9. [Find Car Orientation](#finding-car-orientation)
+    10. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
+* [Steering and Motion Planning](#steering-and-motion-planning)
     1. [Find Lap Direction](#finding-lap-direction)
-    2. [Categorize Walls](#categorizing-walls)
-    1. [Find Car Orientation](#finding-car-orientation)
-    3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
-    4. [Calculate Steering](#calculating-steering)
-* SLAM Driver
-    1. Non-functional (but if it works it'll be really cool)
-    2. its borken
+    2. [Calculate Steering](#calculating-steering)
 
 # Image Processing
 
@@ -47,17 +44,19 @@ All code for image processing is in `./Program/Controller/converter.py`.
 
 ***
 
+### Crop the image
+
+Because our camera is the same height as the walls, the walls appear as a flat line on the image. We crop out top half of the image.
+
 ### Undistorting
 
 Our cameras output a distorted image, so before we can process the image, we must undistort it.
-
-
 
 At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
 
 The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image from being cropped out.
 
-To speed up the undistorting, the top of the image is cropped before undistortion.
+**To speed up the undistorting, the top of the image is cropped before undistortion.**
 
 *All the results are of the left camera. The same calculations are done on the right camera, it is just not shown.*
 
@@ -143,7 +142,7 @@ Results:
 
 ***
 
-# Simple Driver
+# Steering and Motion Planning
 
 All code for the simple driver is in `./Program/Controller/simplecontroller.py`.
 

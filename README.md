@@ -62,7 +62,53 @@ SPARK G2 does not use any other sensors to percieve its environment - no LiDAR h
 
 <!-- wiring diagram -->
 
-## Software Design
+## Obstacle Management
+
+### Vehicle Self-Localization
+
+We need to first find out the orientation and position of the walls and pillars relative to the car. For this purpose we take images from the two cameras and extract the needed information. This iamge processing phase is composed of several steps.
+
+1. Crop the images
+2. Undistort the images (how to add links to other files?)
+3. [Filter](#filtering)
+4. [Find wall heights](#finding-wall-heights)
+5. [Find contours](#finding-contours)
+6. [Find wall lines](#finding-wall-lines)
+7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
+2. [Categorize Walls](#categorizing-walls)
+1. [Find Car Orientation](#finding-car-orientation)
+3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
+
+### Motion Planning Strategy
+
+The second step is to use this data to determine a steering value for the car.
+
+1. [Find Lap Direction](#finding-lap-direction)
+4. [Calculate Steering](#calculating-steering)
+
+### Pseudo Code
+
+The algorithm part of the code is a loop. Each iteration, it takes images, processes them, and then calculates a steering value.
+
+Each iteration takes about 80ms.
+
+```
+while (sections entered != 24): # 24 sections means 3 laps.
+    // Image processing for car localization
+    Crop the images
+    Undistort the images (how to add links to other files?)
+    Filter the image
+    Find wall heights
+    Find contours
+    Find wall lines
+    Merge & Convert wall lines and contours
+    Categorize Walls
+    Find Car Orientation
+    Filter Pillars
+    <!--Car steering control-->
+    Find lap direction
+    Calculate Steering
+```
 
 <!-- high-level overview - what architecture is used, part of SETUP.md i guess -->
 
