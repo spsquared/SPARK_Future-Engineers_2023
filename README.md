@@ -92,6 +92,47 @@ SPARK G2 does not use any other sensors to percieve its environment - no LiDAR h
 
 <!-- explain the sections of the codebase because its very confusing -->
 
+## [Algorithm](ALGORITHM.md)
+
+* [**Image Processing**](ALGORITHM.md#image-processing)
+    1. [Crop the image](ALGORITHM.md#crop-the-image)
+    2. [Undistort](ALGORITHM.md#undistorting)
+    3. [Filter](ALGORITHM.md#filtering)
+    4. [Find wall heights](ALGORITHM.md#finding-wall-heights)
+    5. [Find contours](ALGORITHM.md#finding-contours)
+    6. [Find wall lines](ALGORITHM.md#finding-wall-lines)
+    7. [Merge & Convert wall lines and contours](ALGORITHM.md#merge-contours--wall-lines)
+    8. [Categorize Walls](ALGORITHM.md#categorizing-walls)
+    9. [Find Car Orientation](ALGORITHM.md#finding-car-orientation)
+    10. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](ALGORITHM.md#filtering-traffic-signals)
+* [**Steering and Motion Planning**](ALGORITHM.md#steering-and-motion-planning)
+    1. [Find Lap Direction](ALGORITHM.md#finding-lap-direction)
+    2. [Calculate Steering](ALGORITHM.md#calculating-steering)
+
+## Pseudo Code
+
+The algorithm part of the code is a loop. Each iteration, it takes images, processes them, and then calculates a steering value.
+
+Each iteration takes about 80ms.
+
+```
+while (sections entered != 24): # 24 sections means 3 laps.
+    // Image processing for car localization
+    Crop the images
+    Undistort the images (how to add links to other files?)
+    Filter the image
+    Find wall heights
+    Find contours
+    Find wall lines
+    Merge & Convert wall lines and contours
+    Categorize Walls
+    Find Car Orientation
+    Filter Pillars
+    <!--Car steering control-->
+    Find lap direction
+    Calculate Steering
+```
+
 ***
 
 # Photos

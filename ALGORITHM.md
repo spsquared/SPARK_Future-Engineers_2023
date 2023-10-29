@@ -12,7 +12,8 @@
 
 # Contents
 * [**Overview**](#algorithm-overview)
-* [**Outline**](#outline)
+    * [Pseudocode](#pseudocode)
+    * [Outline](#outline)
 * [**Image Processing**](#image-processing)
 * [**Simple Driver**](#simple-driver)
 
@@ -28,41 +29,67 @@ For motion planning, our controller finds a waypoint based on the pillar positio
 
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
+## Pseudocode
+
+The algorithm part of the code is a loop. Each iteration, it takes images, processes them, and then calculates a steering value.
+
+Each iteration takes about 80ms.
+
+```
+while (sections entered != 24): # 24 sections means 3 laps.
+    // Image processing for car localization
+    Crop the images
+    Undistort the images (how to add links to other files?)
+    Filter the image
+    Find wall heights
+    Find contours
+    Find wall lines
+    Merge & Convert wall lines and contours
+    Categorize Walls
+    Find Car Orientation
+    Filter Pillars
+    <!--Car steering control-->
+    Find lap direction
+    Calculate Steering
+```
+
 ## Outline
 * [**Image Processing**](#image-processing)
-    1. Capture images
+    1. [Crop the image](#crop-the-image)
     2. [Undistort](#undistorting)
     3. [Filter](#filtering)
     4. [Find wall heights](#finding-wall-heights)
     5. [Find contours](#finding-contours)
     6. [Find wall lines](#finding-wall-lines)
     7. [Merge & Convert wall lines and contours](#merge-contours--wall-lines)
-* [**Simple Driver**](#simple-driver)
+    8. [Categorize Walls](#categorizing-walls)
+    9. [Find Car Orientation](#finding-car-orientation)
+    10. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
+* [**Steering and Motion Planning**](#steering-and-motion-planning)
     1. [Find Lap Direction](#finding-lap-direction)
-    2. [Categorize Walls](#categorizing-walls)
-    1. [Find Car Orientation](#finding-car-orientation)
-    3. [Filter Traffic Signals/Obstacles/Pillars/Game Objects](#filtering-traffic-signals)
-    4. [Calculate Steering](#calculating-steering)
-<!-- * **SLAM Driver**
-    1. Non-functional (but if it works it'll be really cool) -->
+    2. [Calculate Steering](#calculating-steering)
 
 # Image Processing
 
 All code for image processing is in `./Program/Controller/converter.py`.
 
+<!--image processing code has to be moved from simplecontroller to converter-->
+
 ***
+
+### Crop the image
+
+Because our camera is the same height as the walls, the walls appear as a flat line on the image. We crop out top half of the image.
 
 ### Undistorting
 
 Our cameras output a distorted image, so before we can process the image, we must undistort it.
 
-
-
 At the start of the program, cv2.fisheye.initUndistortRectifyMap is used with precalculated distortion matrices to create the remaps. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
 
 The undistort function calls `cv2.remap` to use the precalculated remaps to undistort the image. A new K matrix is used to partially zoom out the image to prevent too much of the image from being cropped out.
 
-To speed up the undistorting, the top of the image is cropped before undistortion.
+**To speed up the undistorting, the top of the image is cropped before undistortion.**
 
 *All the results are of the left camera. The same calculations are done on the right camera, it is just not shown.*
 
@@ -138,27 +165,13 @@ To calculate $new f$, we need to know the base focal length. For our undistorted
 Using this algorithm, which is in `getRawDistance`, we can convert the contours into x and y positions relative to the vehicle. For wall lines, we convert each endpoint and connect them together.
 
 
-*The contours and wall lines are merged from the left and right camera. This is why you see duplicate pillars.*
+**The contours and wall lines are merged from the left and right camera. This is why you see duplicate pillars.**
 
 Results:
 
 | Mapped Contours and Wall Lines                       |
 | ---------------------------------------------------- |
 | ![Mapped Contours and Wall Lines](/img/docs/map.png) |
-
-***
-
-# Simple Driver
-
-All code for the simple driver is in `./Program/Controller/simplecontroller.py`.
-
-***
-
-### Finding Lap Direction
-
-At the start of the program, we need to know if we are going clockwise or counterclockwise. This is done by searching for a jump in the wall. If a jump is detected, it means there is a gap there, allowing us to find the direction.
-
-For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
 ***
 
@@ -190,6 +203,20 @@ Now, depending on how slanted the wall is, we can calculate our car direction. F
 ### Filtering Traffic Signals
 
 We find the largest pillar. If there are multiple pillars around the same spot we take the average of their positions.
+
+***
+
+# Steering and Motion Planning
+
+All code for the Steering and Motion Planning is in `./Program/Controller/simplecontroller.py`.
+
+***
+
+### Finding Lap Direction
+
+At the start of the program, we need to know if we are going clockwise or counterclockwise. This is done by searching for a jump in the wall. If a jump is detected, it means there is a gap there, allowing us to find the direction.
+
+For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
 ***
 
