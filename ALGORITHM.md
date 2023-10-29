@@ -4,6 +4,12 @@
 
 </div>
 
+***
+
+**This file covers the algorithm used for obstacle management.**
+
+***
+
 # Contents
 * [Overview](#algorithm-overview)
 * [Outline](#outline)

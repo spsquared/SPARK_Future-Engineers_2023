@@ -13,6 +13,10 @@
 # Contents
 * [High-level Overview](#high-level-overview)
     * [Hardware Design](#hardware-design)
+        * [Chassis](#chassis)
+        * [Power & Control](#power--control)
+        * [Motors](#motors)
+        * [Sensors](#sensors)
     * [Software Design](#software-design)
     * [Photos](#photos)
 * [In-depth Algorithm Documentation](ALGORITHM.md)
@@ -20,6 +24,7 @@
     * [Parts List](#parts-list)
     * [Important Assembly Notes](#important-assembly-notes)
     * [Jetson Nano Setup](#jetson-nano-setup)
+        * [ohno]
 * [SPARK Utilities](#spark-utilities)
 * [Team Photos](#team-photos)
 * [Demonstration Videos](#demonstration-videos)
@@ -44,6 +49,8 @@ SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted 
 
 ***
 
+### Chassis
+
 The chassis consists of a lower base with vertical walls to mount the rear axle and upper platforms. It has space for the battery and an ESC (electronic speed controller) bay in the rear, and a compartment in the front for the steering mechanism. The rear axle is sourced from the Atom 2 GT12 pan car kit by Schumacher, and is mounted vertically to save space.
 
 The electronics platforms sit on top of the chassis base, and the main platform is also a structural component that provides rigidity to the chassis. Because the electronics are on top, they are easily accessible and wiring is fairly simple. The only exceptions are the ESC, which is in the rear, and the IMU (inertial measurement unit, used for measuring angles and velocity).
@@ -54,11 +61,29 @@ The electronics platforms sit on top of the chassis base, and the main platform 
 
 ***
 
+### Power & Control
+
+<!-- battery to regulator -->
+
+<!-- use what electronics to control motors? -->
+
+***
+
+### Motors
+
+<!-- servo and drive motor -->
+
+***
+
+### Sensors
+
 One major physical change is the addition of a second IMX219 wide-angle camera to the front of the car. Both cameras are angled 30 degrees to either side, with a field of view of 150 degrees for each camera. The cameras are mounted on a slider to ensure the accuraccy of the [distance calculations in the algorithm](./ALGORITHM.md#merge-contours--wall-lines).
 
 ![Cameras top-down](./img/docs/camera-angles.png)
 
 SPARK G2 does not use any other sensors to percieve its environment - no LiDAR here!
+
+<!-- IMU section i guess -->
 
 <!-- wiring diagram -->
 
