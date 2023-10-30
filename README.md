@@ -24,8 +24,8 @@
     * [Important Assembly Notes](#important-assembly-notes)
     * [Jetson Nano Setup](#jetson-nano-setup)
         * [ohno]
-* [**Team Photos**](#team-photos)
 * [**Demonstration Videos**](#demonstration-videos)
+* [**Team Photos**](#team-photos)
 * [**SPARK Utilities**](#spark-utilities)
     * [SPARK Control Panel](#spark-control-panel)
         * [Map View](#map-view)
@@ -182,6 +182,22 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 ***
 
+# Demonstration Videos
+
+|                                                                                                                                      |                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| [![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/) | [![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/) |
+
+***
+
+# Team Photos
+
+|                                     |                                 |
+| ----------------------------------- | ------------------------------- |
+| ![Team photo](./img/team-photo.jpg) | ![Rickroll](./img/rickroll.jpg) |
+
+***
+
 # SPARK Utilities
 
 We (team SPARK) have created our own utilities to remotely command and monitor our robot from our own computers. 
@@ -227,22 +243,6 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 ## SPARK Utility Setup
 
 <!-- from old readme, sort of also from setup -->
-
-***
-
-# Team Photos
-
-|                                     |                                 |
-| ----------------------------------- | ------------------------------- |
-| ![Team photo](./img/team-photo.jpg) | ![Rickroll](./img/rickroll.jpg) |
-
-***
-
-# Demonstration Videos
-
-|                                                                                                                                      |                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| [![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/) | [![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/) |
 
 ***
 
