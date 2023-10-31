@@ -108,6 +108,10 @@ We filter the images to isolate the red pillars and green pillars. We also extra
 
 We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue-Saturation-Value. Hue is the "color" of the color, going from 0 to 179, covering the rainbow. Saturation is how much of the hue is present, going from 0 to 255, with lower values appearing duller. Value is how dark the color is, from 0 to 255, with lower being darker. The image is converted into HSV mode using `cv2.cvtColor`. ([More information here](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html))
 
+![HSV Image](/img/docs/HSV.png)
+
+https://en.wikipedia.org/wiki/HSL_and_HSV#/media/File:HSV_color_solid_cylinder_saturation_gray.png
+
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
 Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2.GaussianBlur`. Then, using `cv2.Canny`, edges are detected in the image.
