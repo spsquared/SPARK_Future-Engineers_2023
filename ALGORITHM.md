@@ -92,7 +92,7 @@ We present a few examples to explain the processing steps. All the examples are 
 
 | Raw Image                       | Undistorted Image                          |
 | ------------------------------- | ------------------------------------------ |
-| ![raw IMAGE](/img/docs/raw.png) | ![cooked IMAGE](/img/docs/undistorted.png) |
+| ![raw IMAGE](./img/docs/raw.png) | ![cooked IMAGE](./img/docs/undistorted.png) |
 
 Because undistorting the image stretches out the edges, there are black gaps in the image on the top and bottom.
 
@@ -108,9 +108,7 @@ We filter the images to isolate the red pillars and green pillars. We also extra
 
 We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue-Saturation-Value. Hue is the "color" of the color, going from 0 to 179, covering the rainbow. Saturation is how much of the hue is present, going from 0 to 255, with lower values appearing duller. Value is how dark the color is, from 0 to 255, with lower being darker. The image is converted into HSV mode using `cv2.cvtColor`. ([More information here](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html))
 
-![HSV Image](/img/docs/HSV.png)
-
-https://en.wikipedia.org/wiki/HSL_and_HSV#/media/File:HSV_color_solid_cylinder_saturation_gray.png
+![HSV Image](./img/docs/hsv.png)
 
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
@@ -119,9 +117,9 @@ Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2
 Results:
 |                                                        |                                                                           |                                                    |
 | ------------------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------- |
-|                                                        | Undistorted image from previous![cooked IMAGE](/img/docs/undistorted.png) |                                                    |
-| Red pillar mask![red filtered](/img/docs/rLeftImg.png) | Green pillar mask![green filtered](/img/docs/gLeftImg.png)                | Wall edge mask![edges](/img/docs/leftEdgesImg.png) |
-|                                                        | Combined output to control panel![combined](/img/docs/filtered.png)       |                                                    |
+|                                                        | Undistorted image from previous![cooked IMAGE](./img/docs/undistorted.png) |                                                    |
+| Red pillar mask![red filtered](./img/docs/rLeftImg.png) | Green pillar mask![green filtered](./img/docs/gLeftImg.png)                | Wall edge mask![edges](./img/docs/leftEdgesImg.png) |
+|                                                        | Combined output to control panel![combined](./img/docs/filtered.png)       |                                                    |
 
 ***
 
@@ -155,7 +153,7 @@ The Wall Lines are the pink lines on the image. The shaded white area are the wa
 
 | Left camera                                                    | Right camera                                                     |
 | -------------------------------------------------------------- | ---------------------------------------------------------------- |
-| ![Left Contours and Wall Lines](/img/docs/filteredAllLeft.png) | ![Right Contours and Wall Lines](/img/docs/filteredAllRight.png) |
+| ![Left Contours and Wall Lines](./img/docs/filteredAllLeft.png) | ![Right Contours and Wall Lines](./img/docs/filteredAllRight.png) |
 
 ***
 
@@ -167,7 +165,7 @@ To calculate $new f$, we need to know the base focal length. For our undistorted
 
 <div align=center>
 
-![focal length](/img/docs/distance-calc.png)
+![focal length](./img/docs/distance-calc.png)
 
 </div>
 
@@ -180,7 +178,7 @@ Results:
 
 | Mapped Contours and Wall Lines                       |
 | ---------------------------------------------------- |
-| ![Mapped Contours and Wall Lines](/img/docs/map.png) |
+| ![Mapped Contours and Wall Lines](./img/docs/map.png) |
 
 ***
 
@@ -192,7 +190,7 @@ When the car is at an angle, the walls relative to the car will not be perfectly
 
 | Wall Classification                                      | Angled Walls                               |
 | -------------------------------------------------------- | ------------------------------------------ |
-| ![Wall Classification](/img/docs/wallClassification.png) | ![Angled Walls](/img/docs/wallsTilted.png) |
+| ![Wall Classification](./img/docs/wallClassification.png) | ![Angled Walls](./img/docs/wallsTilted.png) |
 
 In this image to the right, the car sees the center wall at an angle of 45 degrees and the left wall at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
 
@@ -233,7 +231,7 @@ At the start of the program, we need to know if we are going clockwise or counte
 
 | Jump in Wall Height                         
 | --------------------------------------------
-| ![Jump in Wall Height](/img/docs/gap.png) |
+| ![Jump in Wall Height](./img/docs/gap.png) |
 
 For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
@@ -273,7 +271,7 @@ We have 4 states the car can be in.
     
     | Red Pillar Turning                        |Green Pillar Turning
     | --------------------------------------------| --
-    | ![Red Pillar Turning](/img/docs/redTurning.png) |![Green Pillar Turning](/img/docs/greenTurning.png) |
+    | ![Red Pillar Turning](./img/docs/redTurning.png) |![Green Pillar Turning](./img/docs/greenTurning.png) |
 
 3. Steering for Pillars:
 
