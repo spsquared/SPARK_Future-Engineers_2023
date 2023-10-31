@@ -256,7 +256,10 @@ We have 4 states the car can be in.
 
 1. uTurning:
 
-    The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pilalr is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clcokwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
+    The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pillar is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clcokwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
+
+    We use the gyro to estimate that we have turned 180 degrees. When the gyro says the UTurn is done, it goes back to the other states.
+
 2. In Center Section:
 
     In this section, we have to turn based on the pillar in the next section.
