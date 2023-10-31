@@ -255,8 +255,10 @@ We have 4 states the car can be in.
 - Default case
 
 1. uTurning:
+
     The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pilalr is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clcokwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
-2. In Center Section
+2. In Center Section:
+
     In this section, we have to turn based on the pillar in the next section.
 
     If there is no pillar, we turn when the centre wall is close enough.
@@ -269,9 +271,13 @@ We have 4 states the car can be in.
     | Red Pillar Turning                        |Green Pillar Turning
     | --------------------------------------------| --
     | ![Red Pillar Turning](/img/docs/redTurning.png) |![Green Pillar Turning](/img/docs/greenTurning.png) |
-3. Steering for Pilkars
+
+3. Steering for Pillars:
+
     The car will calculate a waypoint 10cm behind the pillar and 15cm to the left or right of the pillar and steer towards this waypoint. If we are already to the right of a red pillar or to the left of a green pillar, the car will instead use the default case.
-4. Default Case
+
+4. Default Case:
+
     The car will check if the left wall or right wall is too close. If it is, it will steer away from the wall. If it is not, the car will try to keep its orientation aligned with the driving direction.
 
 
