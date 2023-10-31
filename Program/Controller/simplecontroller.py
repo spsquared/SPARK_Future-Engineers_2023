@@ -61,30 +61,20 @@ def setMode(sendServer: bool = None):
 
 def drive(manual: bool = False):
     global lastSteering
-# def drive(img):
-    totalStart = time.perf_counter()
-    start = time.perf_counter()
-    read = io.camera.io.camera.io.camera.io.camera.io.camera.read()
+    read = io.camera.read()
 
-    # cv2.imwrite("./raw.png", read[0])
-    # cv2.imwrite("./undistorted.png", converter.undistort(read[0]))
-    # print("camera: ", time.perf_counter() - start)
-    start = time.perf_counter()
-    # read = numpy.split(numpy.array(img), 2, axis=1)
+    # Filter and undistort
     leftEdgesImg, gLeftImg, rLeftImg = converter.filter(converter.undistort(read[0]))
     rightEdgesImg, gRightImg, rRightImg = converter.filter(converter.undistort(read[1]))
-    # cv2.imwrite("./leftEdgesImg.png", leftEdgesImg)
-    # cv2.imwrite("./gLeftImg.png", gLeftImg)
-    # cv2.imwrite("./rLeftImg.png", rLeftImg)
-    # print("filter + undistort: ", time.perf_counter() - start)
-    start = time.perf_counter()
-    # leftCoordinates, rightCoordinates = converter.getDistances(leftEdgesImg, rightEdgesImg)
 
-    leftHeights, rightHeights, leftWallStarts, rightWallStarts = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
+    # Get contours
     rLeftContours = converter.getContours(rLeftImg)
     gLeftContours = converter.getContours(gLeftImg)
     rRightContours = converter.getContours(rRightImg)
     gRightContours = converter.getContours(gRightImg)
+
+    # Get wall heights
+    leftHeights, rightHeights, leftWallStarts, rightWallStarts = converter.getRawHeights(leftEdgesImg, rightEdgesImg)
 
     rawLeftWalls = converter.getWalls(leftHeights.copy(), rLeftContours, gLeftContours)
     rawRightWalls = converter.getWalls(rightHeights.copy(), rRightContours, gRightContours)
@@ -93,10 +83,6 @@ def drive(manual: bool = False):
     gContours = converter.mergeContours(gLeftContours, gRightContours, leftHeights, rightHeights)
 
     corners, walls = converter.processWalls(rawLeftWalls, rawRightWalls)
-    # print("image processing: ", time.perf_counter() - start)
-    start = time.perf_counter()
-
-    # slam.carAngle = io.imu.angle()
 
     leftJump = 0
     leftJumpPillar = 0
@@ -432,6 +418,10 @@ def drive(manual: bool = False):
                 if transformedPillar[0] * pillarDirection < -45:
                     steering *= 2
         reason += " pillar"
+    def steerUTurn():
+        nonlocal steering
+        if slam.uTurnAroundPillar != 0:
+            steering = 100 * slam.uTurnAroundPillar
 
     if (centerWalls != 0 and centerWallDistance < 130) and (not slam.uTurning):
         if slam.carSectionCooldown <= 0 and slam.carSectionExited <= 0:
@@ -501,8 +491,7 @@ def drive(manual: bool = False):
                     slam.uTurnAroundPillar = 1
                 else:
                     slam.uTurnAroundPillar = -1
-        if slam.uTurnAroundPillar != 0:
-            steering = 100 * slam.uTurnAroundPillar
+        steerUTurn()
         if abs(slam.uTurnGyroAngle - io.imu.angle()) * 1.3 > math.pi:
             slam.uTurning = False
             slam.uTurnPillar = 0

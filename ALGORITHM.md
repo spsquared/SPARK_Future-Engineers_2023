@@ -71,7 +71,8 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 # Image Processing
 
-All code for image processing is in `/Program/Controller/`, mainly in `converter.py` and some in `simplecontroller.py`.
+Steps 1-7 for image processing is in `./Program/Controller/converter.py`.
+Steps 8-10 for image processing is in `./Program/Controller/controller.py`.
 
 ***
 
@@ -106,6 +107,10 @@ insert image
 We filter the images to isolate the red pillars and green pillars. We also extract the edges of the walls in this step.
 
 We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue-Saturation-Value. Hue is the "color" of the color, going from 0 to 179, covering the rainbow. Saturation is how much of the hue is present, going from 0 to 255, with lower values appearing duller. Value is how dark the color is, from 0 to 255, with lower being darker. The image is converted into HSV mode using `cv2.cvtColor`. ([More information here](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html))
+
+![HSV Image](/img/docs/HSV.png)
+
+https://en.wikipedia.org/wiki/HSL_and_HSV#/media/File:HSV_color_solid_cylinder_saturation_gray.png
 
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
@@ -226,24 +231,58 @@ All code for the Steering and Motion Planning is in `/Program/Controller/simplec
 
 At the start of the program, we need to know if we are going clockwise or counterclockwise. This is done by searching for a jump in the wall. If a jump is detected, it means there is a gap there, allowing us to find the direction.
 
+| Jump in Wall Height                         
+| --------------------------------------------
+| ![Jump in Wall Height](/img/docs/gap.png) |
+
 For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
 
 ***
 
 ### Calculating Steering
 
-We calculate the average distance to the left walls, center walls, and right walls. Based on the relative angles of the walls, we can calculate the angle of the car relative to the map. There are 3 cases for steering:
+We calculate the average distance to the left walls, center walls, and right walls.
 
-1. Center wall < 110cm
-2. We are Uturning
-3. Default case
+# No Obstacle Challenge
 
-In case 1, if there is no pillar detected, the Car will keep straight and turn when the center wall is less than 70cm away. If there is a pillar detected, the Car will turn when the pillar is close enough to pass in front or behind it.
+We run the same code, except without any pillar cases.
 
-<!-- NOT 3 POINT TURN ANYMORE!!! -->
+# Obstacle Challenge
+We have 4 states the car can be in.
+- Uturning
+- In Center Section
+- Steering for pillars
+- Default case
 
-In case 2, NOTHING BECAUSE ITS NOT 3 POINT TURN OOF uses a precalculated set of instructions for making the 3 point turn. The gyro is used to determine how far we have turned.
+1. uTurning:
 
-In case 3, if there is no pillar detected, the Car will keep straight. If there is a pillar, it will calculate a tangent to the circle of radius 20cm centered on the pillar. The car calculates the left tangent for green pillars and the right tangent for red pillars. Then, it tries to keep itself pointed towards that tangent point.
+    The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pillar is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clcokwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
+
+    We use the gyro to estimate that we have turned 180 degrees. When the gyro says the UTurn is done, it goes back to the other states.
+
+2. In Center Section:
+
+    In this section, we have to turn based on the pillar in the next section.
+
+    If there is no pillar, we turn when the centre wall is close enough.
+
+    If there is a red pillar and we are turning clockwise or there is a green pillar and we are turning counterclockwise, we will turn earlier than the pillar to pass on the correct side.
+
+    If there is a green pillar and we are turning clockwise or there is a red pillar and we are turning counterclockwise, we will turn later to pass behind the pillar.
+
+    
+    | Red Pillar Turning                        |Green Pillar Turning
+    | --------------------------------------------| --
+    | ![Red Pillar Turning](/img/docs/redTurning.png) |![Green Pillar Turning](/img/docs/greenTurning.png) |
+
+3. Steering for Pillars:
+
+    The car will calculate a waypoint 10cm behind the pillar and 15cm to the left or right of the pillar and steer towards this waypoint. If we are already to the right of a red pillar or to the left of a green pillar, the car will instead use the default case.
+
+4. Default Case:
+
+    The car will check if the left wall or right wall is too close. If it is, it will steer away from the wall. If it is not, the car will try to keep its orientation aligned with the driving direction.
+
+
 
 ***
