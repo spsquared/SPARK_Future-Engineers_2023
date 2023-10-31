@@ -67,7 +67,7 @@ The Jetson Nano uses an intermediate PWM control board to control the drive and 
 | Top-down view of SPARK G2 in Onshape            | Individual components                                         |
 | ----------------------------------------------- | ------------------------------------------------------------- |
 | ![Top-down in CAD](./img/docs/cad-top-down.png) | ![Individual components](./img/docs/regulator-pwm-nano.png)   |
-| Front of vehicle at top                         | (top-to-bottom) - PWM Driver, Voltage regulators, Jetson Nano |
+| Front of vehicle at top                         | (top-to-bottom) - PWM Driver, Voltage regulator, Jetson Nano |
 
 ## Motors
 
@@ -233,14 +233,6 @@ If you need a reference model we have our [OnShape document linked](https://cad.
 ## Jetson Nano Setup
 
 <!-- again mostly from setup.md, include calibration and uploading section from old readme -->
-
-***
-
-# Demonstration Videos
-
-|                                                                                                                                      |                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| [![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/) | [![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/) |
 
 ***
 
