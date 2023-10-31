@@ -16,6 +16,7 @@
     * [Power & Control](#power--control)
     * [Motors](#motors)
     * [Sensors](#sensors)
+    * [Wiring Diagram](#wiring-diagram)
 * [**Software Design**](#software-design)
 * [**Photos**](#photos)
 * [**In-depth Algorithm Documentation**](ALGORITHM.md)
@@ -55,18 +56,30 @@ The electronics platforms sit on top of the chassis base, and the main platform 
 | -------------------------------------------------- | ----------------------------------------------------------- |
 | ![Lower chassis base](./img/docs/chassis-base.png) | ![Chassis with platforms](./img/docs/chassis-platforms.png) |
 
+The wheels are made of 3D-printed rims with LEGO tires, and the front steering linkage is a custom design with an exaggerated [Ackerman steering geometry](https://en.wikipedia.org/wiki/Ackermann_steering_geometry). (This can be seen in the [Motors section](#motors))
 
 ## Power & Control
 
 The vehicle power is supplied by a single 3s LiPo battery, running at 12 Volts. This 12V power is run into three components in parallel: The ESC, 5V regulator, and 7.4V regulator. The regulators ensure that the Jetson Nano and servo do not get damaged from overvoltage, and the ESC can run directly off of the main 12V line.
 
-The Jetson Nano uses an intermediate PWM control board to control the ESCs.
+The Jetson Nano uses an intermediate PWM control board to control the drive and steering motors. The control board and Nano communicate through I2C, and that is converted to a PWM signal for the motors to interpret. The drive motor has an additional speed controller.
+
+| Top-down view of SPARK G2 in Onshape            | Individual components                                         |
+| ----------------------------------------------- | ------------------------------------------------------------- |
+| ![Top-down in CAD](./img/docs/cad-top-down.png) | ![Individual components](./img/docs/regulator-pwm-nano.png)   |
+| Front of vehicle at top                         | (top-to-bottom) - PWM Driver, Voltage regulators, Jetson Nano |
 
 ## Motors
 
-<!-- servo and drive motor -->
+SPARK is rear wheel drive, with a sensored brushless drive motor and high-quality servo from Savox. The drive motor is controlled by the brushless ESC (electronic speed controller), and has a sensor. Brushless motors allow for finer control at low speed, and the addition of a sensor helps too.
 
-<!-- picked motor and servo for speed -->
+It still would be better to use a lower kV motor (a slower motor) with an [ODrive](https://odriverobotics.com/) and encoder for even better low-speed control, but the current setup is sufficient.
+
+We choose to use the Savox SV1260MG for our steering servo because of its speed - with transit times of under 100ms, this servo would not limit our control of the vehicle. It can also run at higher voltages, meaning we can get more power out of it.
+
+| Drive motor                                    | Servo and steering                                           |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| ![Drive motor](./img/docs/cad-drive-motor.png) | ![Servo and steering mechanism](./img/docs/cad-steering.png) |
 
 ## Sensors
 
@@ -74,23 +87,19 @@ One major physical change is the addition of a second IMX219 wide-angle camera t
 
 ![Cameras top-down](./img/docs/camera-angles.png)
 
+In addition to the two wide-angle cameras, SPARK G2 has an IMU (inertial measurement unit) for measuring the angle of the vehicle. It also has the capability to measure linear acceleration, but we don't use that. It communicates over I2C directly with the Jetson Nano.
+
 SPARK G2 does not use any other sensors to percieve its environment - no LiDAR here!
 
-<!-- cameras used for the thing -->
+## Wiring Diagram
 
-<!-- IMU section i guess -->
-
-<!-- FIX IFX FIX -->
-
-![Wiring schematic](./img/docs/wiring-schematic.png)
+![Wiring diagram](./img/docs/wiring-diagram.png)
 
 ***
 
 # Software Design
 
-<!-- high-level overview - what architecture is used, part of SETUP.md i guess -->
-
-<!-- explain the sections of the codebase because its very confusing -->
+[**For a detailed explaination of the SPARK G2 algorithms, see Algorithm.md!**](ALGORITHM.md)
 
 ## [Algorithm](ALGORITHM.md)
 
@@ -145,13 +154,6 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 ***
 
-# Team Photos
-
-![Team photo](./img/team-photo.jpg)
-![Rickroll](./img/rickroll.jpg)
-
-***
-
 # Demonstration Videos
 
 <!-- UPDATE -->
@@ -167,14 +169,16 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 ***
 
-## Parts List
-
 You will need (at least) the following tools:
 * 3D printer or access to 3D printing service
 * Hex Allen drivers (key or bits)
 * Phillips head drivers
 * Crimping kit
 * Soldering iron
+
+***
+
+## Parts:
 
 * At least 0.8kg PLA filament
 * Parts from [Schumacher Atom 2 S2 1/12 GT12 Competition Pan Car Kit](https://www.amainhobbies.com/schumacher-atom-2-s2-1-12-gt12-competition-pan-car-kit-schk179/p1055346) (not sponsored)
@@ -194,12 +198,14 @@ You will need (at least) the following tools:
 * 2x [Arducam Raspberry Pi Official Camera Module V2, with 8 Megapixel IMX219 Wide Angle 175 Degree Replacement](https://www.amazon.com/Arducam-Raspberry-Official-Megapixel-Replacement/dp/B083PW4BLH/)
 * [Intel AX201 WiFi 6 BT 5.1 M.2 2230 with 10in RP-SMA Antenna](https://www.newegg.com/p/0XM-009Y-001C7) (not required but helpful)
 * [Noctua NF-A4x10 5V](https://noctua.at/en/products/fan/nf-a4x10-5v) (not required)
+* [Adafruit MPU-6050 6-DoF Accelerometer & Gyroscope Sensor (with STEMMA QT connector)](https://www.adafruit.com/product/3886)
+* [PCA9685 16 Channel PWM Driver](https://www.amazon.com/HiLetgo-PCA9685-Channel-12-Bit-Arduino/dp/B01D1D0CX2)
 * [HobbyWing QUICRUN 10BL60 Brushless ESC Sensored](https://www.hobbywingdirect.com/products/quicrun-10-sensored)
 * [HobbyWing QUICRUN 3650 Sensored Brushless Motor G2 (25.5T)](https://www.hobbywingdirect.com/collections/quicrun-brushless-motor-series-sensorless/products/quicrun-3650-sensored-2-pole-brushless-motor?variant=28166803089)
-* [Savox SV1261MG Digital Mini Servo](https://www.savoxusa.com/products/sv1261mg-mini-digital-high-voltage-aluminum-case-servo-0-095-277-7-4v)
+* [Savox SV1260MG Digital Mini Servo](https://www.savoxusa.com/products/savsv1260mg-mini-digital-high-voltage)
 * A LiPo balance charger with XT-60 connector, rated for 3S
 * [Zeee Premium Series 3S LiPo Battery 4200mAh 11.4V 120C with XT60 Plug](https://www.amazon.com/Zeee-Premium-Compatible-Helicopter-Airplane/dp/B09CMLSK67)
-* 2x [DC-DC 5A Adjustable Buck Converter](https://www.amazon.com/Adjustable-Converter-1-25-36v-Efficiency-Regulator/dp/B079N9BFZC)
+* 2x [XL4015E1 DC-DC 5A Adjustable Buck Converter](https://www.amazon.com/Adjustable-Converter-1-25-36v-Efficiency-Regulator/dp/B079N9BFZC)
 * [DC Digital Voltometer](https://www.amazon.com/bayite-Digital-Voltmeter-Display-Motorcycle/dp/B00YALUXH0/)
 * [Male 5.5mm DC Barrel Connectors](https://www.amazon.com/Pigtails-Female-Connector-Pigtail-Security/dp/B08PYWN3T7/)
 * [Panel-Mountable Female XT60 Connectors](https://www.amazon.com/XT60E-M-Mountable-Connector-Models-Multicopter/dp/B07YJMCDC3)
@@ -217,7 +223,13 @@ You will need (at least) the following tools:
 
 ## Important Assembly Notes
 
+If you need a reference model we have our [OnShape document linked](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590). (The ESC and IMU have not been modeled. The ESC goes in the rear, within the raised rectangle. The IMU should be mounted to the 4 unpopulated holes with M2.5 screws.)
+
+### [**We HIGHLY recommend that you visit this document!**](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590)
+
 <!-- mostly pulled from setup.md, clear up any misconceptions about the build process -->
+
+<!-- also remember that parts must have the correct mounting pattern, different vendors have different boards! -->
 
 ## Jetson Nano Setup
 
@@ -235,7 +247,7 @@ You will need (at least) the following tools:
 
 # Team Photos
 
-|                                     |                                 |
+| Team Photo                          | the other thing                 |
 | ----------------------------------- | ------------------------------- |
 | ![Team photo](./img/team-photo.jpg) | ![Rickroll](./img/rickroll.jpg) |
 
