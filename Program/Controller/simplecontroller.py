@@ -432,6 +432,10 @@ def drive(manual: bool = False):
                 if transformedPillar[0] * pillarDirection < -45:
                     steering *= 2
         reason += " pillar"
+    def steerUTurn():
+        nonlocal steering
+        if slam.uTurnAroundPillar != 0:
+            steering = 100 * slam.uTurnAroundPillar
 
     if (centerWalls != 0 and centerWallDistance < 130) and (not slam.uTurning):
         if slam.carSectionCooldown <= 0 and slam.carSectionExited <= 0:
@@ -501,8 +505,7 @@ def drive(manual: bool = False):
                     slam.uTurnAroundPillar = 1
                 else:
                     slam.uTurnAroundPillar = -1
-        if slam.uTurnAroundPillar != 0:
-            steering = 100 * slam.uTurnAroundPillar
+        steerUTurn()
         if abs(slam.uTurnGyroAngle - io.imu.angle()) * 1.3 > math.pi:
             slam.uTurning = False
             slam.uTurnPillar = 0

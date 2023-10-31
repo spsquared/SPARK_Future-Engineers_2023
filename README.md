@@ -93,7 +93,7 @@ SPARK G2 does not use any other sensors to percieve its environment - no LiDAR h
 
 <!-- explain the sections of the codebase because its very confusing -->
 
-## [Algorithm](ALGORITHM.md)
+## [Obstacle Management Algorithm](ALGORITHM.md)
 
 * [**Image Processing**](ALGORITHM.md#image-processing)
     1. [Crop the image](ALGORITHM.md#crop-the-image)
