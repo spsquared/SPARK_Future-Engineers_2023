@@ -23,15 +23,15 @@
 
 One  and motion planning. Our code processes the camera image and uses it to find the position of the walls relative to the car and the position of the pillars. Using this information, we can figure out where we are supposed to go next and steer accordingly.
 
-The main consideration for our algorithm is to balance localization accuracy and speed. For localization accuracy, our target is to know which section we are in, and how far away the walls and pillars are. We need to know which section we are in to count how many laps we has completed, and to know when to uturn. We need to know how far away the car is from walls and pillars for collision avoidance.
+The main consideration for our algorithm is to balance localization accuracy and speed. For localization accuracy, our target is to know which section we are in, and how far away the walls and pillars are. We need to know which section we are in to count how many laps we have completed, and to know when to U-turn. We need to know how far away the car is from walls and pillars for collision avoidance.
 
-For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer towards the waypoint. The waypoint will be updated every iteration. For the uturn, the car will turn around the first pillar in the section.
+For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer toward the waypoint. The waypoint will be updated every iteration. For the U-turn, the car will turn around the first pillar in the section.
 
 Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
 
 ## Pseudocode
 
-The algorithm part of the code is a loop. Each iteration, it takes images, processes them, and then calculates a steering value.
+The algorithm part of the code is a loop. For each iteration, it takes images, processes them, and then calculates a steering value.
 
 Each iteration takes about 80ms.
 
@@ -44,7 +44,7 @@ while (sections entered != 24): # 24 sections means 3 laps.
     Find wall heights
     Find contours
     Find wall lines
-    Merge & Convert wall lines and contours
+    Merge and Convert wall lines and contours
     Categorize Walls
     Find Car Orientation
     Filter Pillars
@@ -78,7 +78,7 @@ Steps 8-10 for image processing is in `./Program/Controller/controller.py`.
 
 ### Crop the image
 
-Because our camera is the same height as the top boundary of the walls, the top of the walls appear as a flat line on the image. We crop out along the top boundary of the wall. This reduces noise in the background, as well as speeding up our processing.
+Because our camera is the same height as the top boundary of the walls, the top of the walls appears as a flat line in the image. We crop out along the top boundary of the wall. This reduces noise in the background, as well as speeding up our processing.
 
 ### Undistorting
 
@@ -106,7 +106,7 @@ insert image
 
 We filter the images to isolate the red pillars and green pillars. We also extract the edges of the walls in this step.
 
-We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue Saturation Value. Hue is the hue of the color, going from 0 to 179. Saturation is is how much of the hue is present, going from 0 to 255. Value is how dark the color is, also going from 0 to 255. The image is converted into HSV mode using `cv2.cvtColor`. https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html
+We found that it was easier and more robust to distinguish between very faint green colors and the wall when the image was in HSV mode. HSV stands for Hue-Saturation-Value. Hue is the "color" of the color, going from 0 to 179, covering the rainbow. Saturation is how much of the hue is present, going from 0 to 255, with lower values appearing duller. Value is how dark the color is, from 0 to 255, with lower being darker. The image is converted into HSV mode using `cv2.cvtColor`. ([More information here](https://docs.opencv.org/4.x/df/d9d/tutorial_py_colorspaces.html))
 
 Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
@@ -123,7 +123,7 @@ Results:
 
 ### Finding Contours
 
-Right now, we only have two images containing only red pixels and only green pixels. The purpose of this step is to find a bounding box of the red/green pixels to represent the pillars. This bounding box has a center (x,y) coordinate, width, and height. With this information we can calculate the distance to the top point of the pillar. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
+Right now, we only have two images containing only red pixels and only green pixels. The purpose of this step is to find a bounding box of the red/green pixels to represent the pillars. This bounding box has a center (x,y) coordinate, width, and height. With this information, we can calculate the distance to the top point of the pillar. The algorithm to do this will be explained in [Merge Contours & Wall Lines](#merge-contours--wall-lines).
 
 Using `cv2.Canny`, edges can be found on the masked red or green image. To make sure `cv2.Canny` functions, a border is added using `cv2.copyMakeBorder`. The edges are blurred using `cv2.medianBlur`. Now, `cv2.findContours` can be used to find the contours on the image of edges. After finding the contours, using `cv2.contourArea` and `cv2.moments`, we can get the area and position of the contour. If the contour is smaller than `minContourSize`, or if the contour is above the walls, it gets thrown out.
 
@@ -133,7 +133,7 @@ Using `cv2.Canny`, edges can be found on the masked red or green image. To make 
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. Similarly to the pillars, this information is used later to find the distance from the car to any point on the top boundary of the wall.
 
-The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first value which is 255. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first largest value, which is at the edge of the wall. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
 ***
 
@@ -147,7 +147,7 @@ Using `cv2.HoughLinesP`, we can find lines on this newly created image. After so
 
 Results:
 
-The Wall Lines are the pink lines on the image. The shaded white area is the wall heights.
+The Wall Lines are the pink lines on the image. The shaded white area are the wall heights.
 
 | Left camera                                                    | Right camera                                                     |
 | -------------------------------------------------------------- | ---------------------------------------------------------------- |
@@ -182,7 +182,7 @@ Results:
 
 ### Transforming Walls and Pillars
 
-It is important to know which wall is the center wall, the left wall, and the right wall. When the car is straight, the center wall is the wall in front of the car. On the image, the center wall is a horizontal line.
+It is important to know which wall is the center wall, the left wall, and the right wall. When the car is straight, the center wall is the wall in front of the car. In the image, the center wall is a horizontal line.
 
 When the car is at an angle, the walls relative to the car will not be perfectly horizontal or perfectly vertical.
 
@@ -190,9 +190,9 @@ When the car is at an angle, the walls relative to the car will not be perfectly
 | -------------------------------------------------------- | ------------------------------------------ |
 | ![Wall Classification](/img/docs/wallClassification.png) | ![Angled Walls](/img/docs/wallsTilted.png) |
 
-In this image to the right, the car sees the center wall at an angle of 45 degrees and the left wall also at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
+In this image to the right, the car sees the center wall at an angle of 45 degrees and the left wall at an angle of 45 degrees. Now, the car doesn't know which wall is the center wall.
 
-To solve this problem, we store the orientation of the car (relative to the mat). Before processing the walls, we rotate it based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
+To solve this problem, we store the orientation of the car (relative to the mat). Before processing the walls, we rotate them based on the last orientation. This makes it easy to categorize the walls. Updating the orientation is discussed below.
 
 ***
 
@@ -203,7 +203,7 @@ buh we need the orientation stuff
 
 At this step, the wall lines have been turned into line segments that represent the real positions of the walls on the mat.
 
-We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is perpendicular relative to the driving direction, it is categorized as a center or back wall depending on if it is in front or in the back of the car. If the wall is parellel to the driving direction, it is categorized as a left wall or right wall depending on if it is to the left or to the right of the car.
+We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is perpendicular relative to the driving direction, it is categorized as a center or back wall depending on if it is in front or in the back of the car. If the wall is parallel to the driving direction, it is categorized as a left wall or right wall depending on if it is to the left or to the right of the car.
 
 Now, depending on how slanted the wall is, we can calculate our car orientation. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees to the left in addition to the current orientation.
 
@@ -219,7 +219,7 @@ We find the largest pillar. If there are multiple pillars around the same spot w
 
 # Steering and Motion Planning
 
-All code for the Steering and Motion Planning is in `./Program/Controller/simplecontroller.py`.
+All code for the Steering and Motion Planning is in `/Program/Controller/simplecontroller.py`.
 
 ***
 
