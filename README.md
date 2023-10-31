@@ -156,10 +156,9 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 # Demonstration Videos
 
-<!-- UPDATE -->
-
-[![WRO 2023 Future Engineers Internationals - Demonstration Run - No Traffic Signals](./img/docs/thumbnail0.jpg)](https://youtu.be/)
-[![WRO 2023 Future Engineers Internationals - Demonstration Run - Traffic Signals](./img/docs/thumbnail1.jpg)](https://youtu.be/)
+| Open Challenge                                                                                                                                       | Obstacle Challenge (no U-turn)                                                                                                                                                    | Obstacle Challenge (U-turn)                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Open Challenge](./img/docs/demo-video-open.png)](https://youtu.be/1Tk8J1Zt5vI) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - No U turn](./img/docs/demo-video-obstacle-no-uturn.png)](https://youtu.be/uySmueLLGK8) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - U turn](./img/docs/demo-video-obstacle-uturn.png)](https://youtu.be/UDNGXfyl8ww) |
 
 ***
 
