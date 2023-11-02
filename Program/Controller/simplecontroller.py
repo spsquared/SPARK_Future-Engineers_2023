@@ -461,12 +461,14 @@ def drive(manual: bool = False):
     if (not slam.uTurning) and slam.uTurnStart <= 0 and slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 100:
         if transformedPillar[4] == RED_PILLAR:
             slam.uTurnAroundPillar = -1
+            slam.uTurnPillar = RED_PILLAR
         else:
             slam.uTurnAroundPillar = 1
+            slam.uTurnPillar = GREEN_PILLAR
     # if slam.carSections > 7:
     #     slam.uTurnPillar = 0
 
-    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 5 and ((transformedPillar[0] != None and transformedPillar[1] < 25)):
+    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 5 and slam.carSectionCooldown > 0 and ((transformedPillar[0] != None and transformedPillar[1] < 25)):
         if slam.uTurning == False and slam.uTurnStart <= 0:
             slam.uTurnStart = 6
     
