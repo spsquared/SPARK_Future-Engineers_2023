@@ -24,7 +24,13 @@
     * [Parts List](#parts-list)
     * [Important Assembly Notes](#important-assembly-notes)
     * [Jetson Nano Setup](#jetson-nano-setup)
-        * [ohno]
+        * [General Information](#general-jetson-nano-information)
+        * [OS Installation](#os-installation)
+        * [SSHFS & Static IP](#sshfs--static-ip)
+        * [GPIO & I2C](#enable-gpio-and-i2c)
+        * [Package Installation](#package-installation)
+        * [Calibration](#calibration)
+        * [Running Programs](#running-programs)
 * [**Demonstration Videos**](#demonstration-videos)
 * [**Team Photos**](#team-photos)
 * [**SPARK Utilities**](#spark-utilities)
@@ -146,6 +152,8 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 # Photos
 
+*(Click to view detail)*
+
 |                                                                               |                                                                               |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [![Front view](./img/docs/view-front-low.png)](./img/docs/view-front.png)     | [![Back view](./img/docs/view-back-low.png)](./img/docs/view-back.png)     |
@@ -226,13 +234,207 @@ If you need a reference model we have our [OnShape document linked](https://cad.
 
 ### [**We HIGHLY recommend that you visit this document!**](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590)
 
-<!-- mostly pulled from setup.md, clear up any misconceptions about the build process -->
+Follow the diagram below to wire the button and indicator LEDs. *(Click to view detail)*
 
-<!-- also remember that parts must have the correct mounting pattern, different vendors have different boards! -->
+[![Button and indicator LED wiring](./img/docs/led-button-wiring-low.png)](./img/docs/led-button-wiring.png)
+
+*Note: For I2C connectors, Yellow should be SCL and blue should be SDA; there is no set standard.*
+
+For soldering, we recommend soldering the regulators to their own connectors **in parallel**, and using that as a pass-through to the ESC. The female connectors should be used on the ESC inputs and regulator input, and the male connector on the pass through end of the regulator wires. See the diagram below.
+
+![Wiring for regulator passthrough](./img/docs/power-layout.png)
+
+Follow the quick start guide for the ESC to solder the motor connections. Brief summary: solder A, B, and C connectors to the motor (or supplied connectors). Ensure the sensor wire is secure before mounting motor and ESC.
+
+**WARNING:** DO NOT CONNECT THE ESC 3-PIN DIRECTLY TO THE SERVO DRIVER! IT WILL BACKDRIVE THE REGULATOR AND BREAK IT! ONLY CONNECT THE PWM PIN (white)!
+
+The images below show the correct pins on the Jetson Nano to plug the connectors onto. **Always double-check your connectors!**
+
+ *(Click to view detail)*
+
+| Pinout sheet                                                                                                                                              | Jetson Nano                                                            | PWM driver                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [![Pinout screenshot](./img/docs/pinout-sheet.png)](https://docs.google.com/spreadsheets/d/1WAe1DtCbWhLoC4L6yzJYvS99iHG4yAiWakqxsy8os7s/edit?usp=sharing) | [![Connectors on Jetson Nano](./img/docs/pinout-1-low.png)](./img/docs/pinout-1.png) | [![Connectors on PWM driver](./img/docs/pinout-2-low.png)](./img/docs/pinout-2.png) |
+
 
 ## Jetson Nano Setup
 
-<!-- again mostly from setup.md, include calibration and uploading section from old readme -->
+**This section is a walkthrough of the software environment setup.**
+
+### General Jetson Nano Information
+
+SPARK G2 is designed to run on a Jetson Nano with Ubuntu 18.04, with the Jetpack SDK installed. This means that Python should already be installed. The program is mainly written in Python, with some code in JavaScript for the SPARK Utilities.
+
+Here are the most important subsections in this section:
+* [General Information](#general-jetson-nano-information)
+* [OS Installation](#os-installation)
+* [Package Installation](#package-installation)
+* [Running Programs](#running-programs)
+
+### OS Installation
+
+Visit [Yahboom](http://www.yahboom.net/)'s [setup and tutorial repository](http://www.yahboom.net/study/jetson-nano) to begin setting up the [Jetson Nano 4GB](https://category.yahboom.net/collections/jetson/products/jetson-nano-sub). Follow steps 1.1-1.7 in "Development setup > SUB Version".
+
+> http://www.yahboom.net/study/jetson-nano <!-- not the right way to use markdown quote but oh well -->
+
+This guide should install the default Ubuntu 18.04 with Jetpack SDK, with Python 3.6 pre-installed.
+
+***
+
+### SSHFS & Static IP
+
+After setting up the board, follow step 2.1 in section "Basic Settings" to log into your Jetson Nano. **Keep PuTTY open**, as it will be used for the rest of the setup process. **Also keep the IP**.
+
+Make sure a **static IP is set** to the board to make SSH and file transfer easier. Go to your router settings and [assign a DHCP reservation (PCmag)](https://www.pcmag.com/how-to/how-to-set-up-a-static-ip-address) (or a straight static IP) to your Jetson Nano. **Save this IP** in your PuTTY settings and SSHFS mounting.
+
+For remote file transfer, install sshfs (linux only), or use [sshfs-win](https://github.com/winfsp/sshfs-win) from WinFsp. Follow instructions to mount the Jetson Nano to a network drive. Now upload all contents of the `/Program/` folder into a new folder on the Jetson Nano. **Remember the directory of the folder**, this will be used later.
+
+***This method should be used to upload programs.***
+
+**The *entire* `Program` directory must be uploaded in order for the program to run. Ensure the `path` constant in `startup.py` is defined properly.**
+
+***
+
+### Enable GPIO and I2C
+
+The enable GPIO and I2C, create a new user group, and add your user to it.
+
+```
+sudo groupadd -f -r gpio
+sudo usermod -a -G gpio your_user_name
+```
+
+Copy `99-gpio.rules` from `/dist/` in the project folder to `/etc/udev/rules.d/` on the Jetson Nano. Then enable the rule.
+
+```
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+You may need to enable permissions for I2C
+
+```
+sudo usermod -a -G i2c your_user_name
+```
+
+**Reboot the Nano to apply changes.**
+
+***
+
+### Text-Only, Auto-Login, & Run on Startup
+
+Switch the Jetson Nano to text-only mode (gui is almost useless for this application and only causes unneccesary slowness).
+
+```
+sudo systemctl set-default multi-user.target
+```
+
+Autologin must be done to avoid having to plug in a monitor and keyboard to start ssh and run programs. The following accomplishes it:
+
+```
+sudo systemctl edit getty@tty1
+```
+
+A temporary editor will appear. Place the following text in it, replacing "your_user_name" with your user name.
+
+```
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -f your_user_name' -a your_user_name --noclear %I $TERM
+```
+
+Save and close the editor with `:wqa`.
+
+To run the program on startup, first obtain the directory of the program folder uploaded earlier. Create `spark_startup.service` in `/etc/systemd/system` and place the following in the contents, replacing "/filepath/" with the absolute directory of the folder (begins with a "/").
+
+```
+[Service]
+WorkingDirectory=/filepath
+ExecStart=/usr/bin/python3 -u /filepath/startup.py
+User=username
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Save the file and add permissions to it.
+
+```
+sudo chmod 644 /etc/systemd/system/spark_startup.service
+systemctl enable /etc/systemd/system/spark_startup.service
+```
+
+If you wish to use the SPARK Control Panel, repeat the above steps to create a second startup service (`spark_server.service`). (Be sure to also install Node.js per the [package installation section](#package-installation)!) The contents should look like the below:
+
+```
+[Service]
+WorkingDirectory=/filepath
+ExecStart=/usr/bin/node /filepath/Util/server.js
+User=username
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Make sure to add the same permissions as `spark_startup.service`.
+
+Reboot the Jetson Nano to test if these changes worked. No GUI should appear and you shuld be automatically logged in.
+
+Enable run-on-startup by editing `run-on-startup.txt` in the folder. Replace the first line with `true`.
+
+Go to `startup.py`, and change `path` to the absolute filepath of your directory (same as filepath in the previous steps)
+
+Example:
+
+```
+path = '/home/nano/Documents/SPARK_FutureEngineers_2023/'
+```
+
+**Reboot the Jetson Nano again.**
+
+***
+
+### Package Installation
+
+Some packages will need to be installed. [Jetson-GPIO](https://github.com/NVIDIA/jetson-gpio), socket.io-client, [adafruit-servokit](https://github.com/adafruit/Adafruit_CircuitPython_ServoKit), and [adafruit-mpu6050](https://github.com/adafruit/Adafruit_MPU6050) must be installed (Jetson-GPIO may be pre-installed on some versions). Additionally, [cv2](https://pypi.org/project/opencv-python/), an integral part of many robotics programs, must be installed.
+
+Use the following pip command:
+
+```
+pip3 install adafruit-circuitpython-servokit adafruit-mpu6050 "python-socketio[client]" opencv-python
+```
+
+*Note: This may take a while.*
+
+Additionally, [Node.js](https://nodejs.org/) should be installed to use the SPARK Control Panel. *We highly recommend this is done!*
+
+```
+sudo apt install nodejs
+```
+
+*NOTE: The default installation of node may be v12, which doesn't support some features. To install newer versions, try the following:*
+
+```
+sudo snap install node --channel=16 --classic
+sudo update-alternatives --install /usr/bin/node node /snap/bin/node 0
+```
+
+*This should install Node.js v16 and set it to be the main version of node used with the "node" command.*
+
+Navigate to `/Util/` and install dependencies.
+
+```
+npm install
+```
+
+***
+
+### Calibration
+
+***
+
+### Running Programs
+
+<!-- no_server flag -->
 
 ***
 
@@ -288,7 +490,32 @@ SPARK Randomizer is a tool to use when the card-drawing, coin-flipping, headache
 
 ## SPARK Utility Setup
 
-<!-- from old readme, sort of also from setup -->
+SPARK Utilities run on a separate Node.js process and are not necessary. If you want access to the SPARK Control Panel you must install Node.js and dependencies.
+
+**See [the package installation section](#package-installation) to install Node.js.**
+
+For the authentication system to work properly (not actual authentication, just a UUID exchange to prevent people from sending bogus signals) `auth.json` must be created in `/Util/`.
+
+```
+vim auth.json
+```
+
+The contents should be a single UUID:
+
+```
+"214e7634-b7c3-4044-b297-533da8cfbe7f"
+```
+
+This UUID should also be present on client devices, along with the IP of the car (set earlier). On the client devices, create `/SPARK-Util/SPARK-Control/config.js`.
+
+Example:
+
+```
+const ip = '192.168.1.151';
+const auth_uuid = '214e7634-b7c3-4044-b297-533da8cfbe7f';
+```
+
+To open the SPARK Control Panel and other utilities, run `node SPARK-Util/static.js` on a local terminal (your computer) or open the batch file `/SPARK-Util/static.bat`. In a web browser (only Chrome tested), navigate to `localhost:8081` to access the SPARK Control Panel.
 
 ***
 
