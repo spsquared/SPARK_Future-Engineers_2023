@@ -149,11 +149,13 @@ Using `cv2.HoughLinesP`, we can find lines on this newly created image. After so
 
 Results:
 
-The Wall Lines are the pink lines on the image. The shaded white area are the wall heights.
+The wall lines are the pink lines on the image. The white shaded areas are the wall heights.
 
 | Left camera                                                    | Right camera                                                     |
 | -------------------------------------------------------------- | ---------------------------------------------------------------- |
 | ![Left Contours and Wall Lines](./img/docs/filteredAllLeft.png) | ![Right Contours and Wall Lines](./img/docs/filteredAllRight.png) |
+
+*Note: The wall lines in the SPARK Control panel do not perfectly align with the actual locations of the lines due to offsets added to the wall search code. They are still representative of the walls, though.*
 
 ***
 

@@ -146,11 +146,11 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 # Photos
 
-|                                |                                  |
-| ------------------------------ | -------------------------------- |
-| ![front](./img/docs/front.jpg) | ![back](./img/docs/back.jpg)     |
-| ![left](./img/docs/left.jpg)   | ![right](./img/docs/right.jpg)   |
-| ![top](./img/docs/top.jpg)     | ![bottom](./img/docs/bottom.jpg) |
+|                                                                               |                                                                               |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [![Front view](./img/docs/view-front-low.png)](./img/docs/view-front.png)     | [![Back view](./img/docs/view-back-low.png)](./img/docs/view-back.png)     |
+| [![Side left view](./img/docs/view-left-low.png)](./img/docs/view-left.png) | [![Side Right view](./img/docs/view-right-low.png)](./img/docs/view-right.png) |
+| [![Top view](./img/docs/view-top-low.png)](./img/docs/view-top.png)       | [![Bottom view](./img/docs/view-bottom-low.png)](./img/docs/view-bottom.png)    |
 
 ***
 
