@@ -430,6 +430,8 @@ npm install
 
 ### Calibration
 
+You need to calibrate the cameras for the undistortion to work properly. To do this, you need to take a couple of images of a chessboard using the SPARK Control Panel. Delete all the images in `/images`, and paste the images you took. Now, you need to run the first program of `calibrate.py`. This should print out the required D and K matrix. Now you can paste these matrices into the second program. Look in the `output` folder and check the images to make sure the undistortion is working. There should be some black gaps on the top and bottom of the image, because undistorting the image stretches the corners. Make sure the lines on the chessboard are straight. Now you can paste the matrices into `converter.py` and it shoudl work.
+
 ***
 
 ### Running Programs
