@@ -430,11 +430,26 @@ npm install
 
 ### Calibration
 
+You need to calibrate the cameras for the undistortion to work properly. To do this, you need to take a couple of images of a chessboard using the SPARK Control Panel. Delete all the images in `/images`, and paste the images you took. Now, you need to run the first program of `calibrate.py`. This should print out the required D and K matrix. Now you can paste these matrices into the second program. Look in the `output` folder and check the images to make sure the undistortion is working. There should be some black gaps on the top and bottom of the image, because undistorting the image stretches the corners. Make sure the lines on the chessboard are straight. Now you can paste the matrices into `converter.py` and it shoudl work.
+
 ***
 
 ### Running Programs
 
-<!-- no_server flag -->
+To run a program, connect to the vehicle using PuTTY and navigate to the `/Program/` folder. Then, use one of the following two commands to run a program.
+
+```
+python3 manualdrive.py
+python3 autodrive.py
+```
+
+`manualdrive.py` is a testing program that **requires** the SPARK Control Panel - it will crash if SPARK Utilities are not set up! Once started, go to the [SPARK Control Panel](#spark-control-panel) and your computer will automatically connect to the vehicle if configured. For more information, see the [section on the Control Panel](#spark-control-panel).
+
+`autodrive.py` is the competition program. It can be run with the SPARK Utility server for debugging, but during competitions, or when testing without the server, can be run headless (without user interface). Simply add the flag `no_server` to disable the server. **This is how the program is run during competitions**
+
+```
+python3 autodrive.py no_server
+```
 
 ***
 
@@ -464,11 +479,19 @@ SPARK Control Panel is our own testing and debugging software. It allows us to l
 
 </div>
 
+On the left side of the screen, there are controls and camera views. There are buttons to run programs at the top, along with the indicator LEDS that reflect the ones on the vehicle.
+
+Below that, there are camera controls. There are options to view and save image streams or individual images, with filtering enabled. A recent addition allows you to also run the algorithm on frames from wherever.
+
+At the bottom, there are options to toggle different displays on the Control Panel. Hover over them to get a description of their function.
+
+There are also buttons to import and export sessions, as well as save a screenshot of the current frame from the cameras.
+
 ***
 
 ### Map View
 
-<!-- overview of what the control panel shows in a typical monitoring session -->
+The map on the right side of the screen is the most important addition to the SPARK Control Panel.
 
 ***
 
