@@ -27,7 +27,7 @@ The main consideration for our algorithm is to balance localization accuracy and
 
 For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer toward the waypoint. The waypoint will be updated every iteration. For the U-turn, the car will turn around the first pillar in the section.
 
-Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into two main modules: The `converter`, which pre-process images; and the `controller`, which does some processing and steering and motion planning.
+Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into two main modules: The `converter`, which pre-process images; and the `controller`, which does some processing and steering and motion planning. We have `slam code but we don't use it because it's borken`.
 
 ## Pseudocode
 
