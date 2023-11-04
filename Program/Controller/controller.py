@@ -42,6 +42,7 @@ if UTURN_ON_GREEN:
 
 # speed !!!!
 speed = 75
+speed = 80
 # speed = 100
 lastSteering = 0
 

@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Program.Controller import controller as controller
+from Controller import controller as controller
 from Controller import converter
 import traceback
 import cv2

@@ -1,11 +1,12 @@
 from IO import io
 from Util import server
-from Program.Controller import controller as controller
+from Controller import controller as controller
 import time
 import sys
 import traceback
 running = True
 actuallyRunning = True
+
 def main():
     global running, actuallyRunning
     try:
@@ -46,6 +47,7 @@ def main():
         server.on('stop', stop)
         io.drive.throttle(controller.speed)
         io.imu.setAngle(0)
+        print("starting run")
         while running and actuallyRunning:
             running = controller.drive()
             if infinite: running = True
