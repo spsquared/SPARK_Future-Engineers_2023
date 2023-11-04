@@ -41,7 +41,7 @@ if UTURN_ON_GREEN:
     print("[!] [!] [!] [!] Uturn on green mode is on! [!] [!] [!] [!]") # oh noes uturn on green is on
 
 # speed !!!!
-speed = 80
+speed = 75
 # speed = 100
 lastSteering = 0
 
@@ -52,7 +52,7 @@ MAX_SPEED = 299792458 * meter / second
 if (speed > MAX_SPEED):
     print("ERROR !!!!! SPEED EXCEEDS MAX SPEED !!! BUG FIX NOW")
 
-# slam.carSections = 7
+# slam.carSections = 4
 
 useServer = True
 def setMode(sendServer: bool = None):
@@ -208,8 +208,8 @@ def drive(manual: bool = False):
                 distance = abs(yIntercept) / math.sqrt(slope**2 + 1)
                 angle = math.atan2(slope, 1)
 
-                if abs(angle) < 45 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
-                    if abs(wall[2][X]) > 80 and abs(wall[3][X]) > 80:
+                if abs(angle) < 30 / 180 * math.pi and wall[2][Y] - wall[2][X] * slope > 10:
+                    if abs(wall[2][X]) > 80 and abs(wall[3][X]) > 80 and abs(wall[2][X] + wall[3][X]) > 160:
                         wallType = UNKNOWN
                     else:
                         wallType = CENTER
@@ -241,10 +241,16 @@ def drive(manual: bool = False):
 
             angle += slam.carAngle
             
-            if distance > 200:
+            if distance > 200 and wallType != CENTER:
                 processedWalls.append([UNKNOWN, distance, angle])
                 continue
             if abs(wall[2][X]) > 100 and abs(wall[3][X]) > 100 and abs(wall[2][Y]) < 50 and abs(wall[3][Y]) < 50:
+                processedWalls.append([UNKNOWN, distance, angle])
+                continue
+            if pow(wall[2][X] - wall[3][X], 2) + pow(wall[2][Y] - wall[3][Y], 2) < 64 and wallType != LEFT + slam.carDirection + 1:
+                processedWalls.append([UNKNOWN, distance, angle])
+                continue
+            if pow(wall[2][X], 2) + pow(wall[2][Y], 2) > 150 * 150 and pow(wall[3][X], 2) + pow(wall[3][Y], 2) > 150 * 150:
                 processedWalls.append([UNKNOWN, distance, angle])
                 continue
             
@@ -346,7 +352,7 @@ def drive(manual: bool = False):
     if slam.uTurnPillar == UTURN_PILLAR:
         carAngleSteering /= 2
     
-    reason = "none"
+    reason = ""
 
     def steerAwayFromWalls():
         nonlocal steering, carAngleSteering, reason
@@ -372,7 +378,7 @@ def drive(manual: bool = False):
                 steering += -(leftWallDistance - 30)
             elif slam.carDirection == COUNTER_CLOCKWISE and rightWalls != 0:
                 steering += rightWallDistance - 30
-        elif awayFromWalls:
+        if awayFromWalls:
             steerAwayFromWalls()
         reason += " normal"
     def steerCenter():
@@ -398,7 +404,7 @@ def drive(manual: bool = False):
 
         if transformedPillar[0] * pillarDirection > -15:
             if transformedPillar[1] > 10:
-                waypointX = transformedPillar[0] + 15 * pillarDirection
+                waypointX = transformedPillar[0] + 20 * pillarDirection
                 waypointY = transformedPillar[1] - 10
                 # atan2 is X, Y
                 # do not change
@@ -407,6 +413,10 @@ def drive(manual: bool = False):
                     steering /= 2
                 if transformedPillar[0] * pillarDirection > 30:
                     steering *= 2
+                if centerWalls != 0 and centerWallDistance < 125:
+                    steering *= 0.5
+                if transformedPillar[2] < 30:
+                    steering += -slam.carAngle * carAngleSteering / 2
             else:
                 steering = 40 * pillarDirection
         else:
@@ -432,6 +442,8 @@ def drive(manual: bool = False):
                 slam.carSectionExited = 6
                 if slam.carSections == 7 and slam.uTurnPillar == UTURN_PILLAR:
                     slam.carSectionExited = 2
+                if slam.carSections == 8:
+                    slam.uTurnPillar = 0
     if (centerWalls == 0 or centerWallDistance > 150) and slam.carSectionEntered == 1:
         slam.carSectionExited -= 1
         if slam.carSectionExited == 0 and (not slam.uTurning):
@@ -446,10 +458,10 @@ def drive(manual: bool = False):
         # slam.carSections += 1
         slam.carSectionEntered = 1
         processWalls()
-    elif slam.carSectionEntered == 2 and carAngle * slam.carDirection < -20 / 180 * math.pi and slam.carAngle * slam.carDirection > -13 / 180 * math.pi and (not slam.uTurning):
+    elif slam.carSectionEntered == 2 and carAngle * slam.carDirection < -20 / 180 * math.pi and carAngle != 0 and ((slam.carAngle - carAngle) * slam.carDirection > 7 / 180 * math.pi or carAngle * slam.carDirection < -60 / 180 * math.pi) and (not slam.uTurning):
         slam.carSectionEntered = 1
     
-    inMiddleSection = slam.carSectionExited <= 0 and (centerWalls != 0 and ((not NO_PILLARS) or slam.carSectionCooldown <= 4))
+    inMiddleSection = slam.carSectionExited <= 0 and (centerWalls != 0 and centerWallDistance < 160)
     
     if slam.carSections == 12 and inMiddleSection:
         io.drive.steer(0)
@@ -458,7 +470,7 @@ def drive(manual: bool = False):
     
     if slam.carSections == 7 and slam.carSectionEntered == 0 and transformedPillar[0] != None and transformedPillar[2] < 60 and transformedPillar[1] < 20:
         slam.uTurnPillar = transformedPillar[4]
-    if (not slam.uTurning) and slam.uTurnStart <= 0 and slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 100:
+    if (not slam.uTurning) and slam.uTurnStart <= 0 and slam.carSectionEntered == 0 and slam.carSectionCooldown > 0 and slam.carSections == 8 and transformedPillar[0] != None and transformedPillar[2] < 75:
         if transformedPillar[4] == RED_PILLAR:
             slam.uTurnAroundPillar = -1
             slam.uTurnPillar = RED_PILLAR
@@ -468,7 +480,7 @@ def drive(manual: bool = False):
     # if slam.carSections > 7:
     #     slam.uTurnPillar = 0
 
-    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 5 and slam.carSectionCooldown > 0 and ((transformedPillar[0] != None and transformedPillar[1] < 25)):
+    if slam.carSections == 8 and slam.uTurnPillar == UTURN_PILLAR and slam.carSectionExited <= 5 and slam.carSectionCooldown > 0 and slam.carSectionEntered != 2 and ((transformedPillar[0] != None and transformedPillar[1] < 25)):
         if slam.uTurning == False and slam.uTurnStart <= 0:
             slam.uTurnStart = 6
     
@@ -497,13 +509,14 @@ def drive(manual: bool = False):
         if abs(slam.uTurnGyroAngle - io.imu.angle()) * 1.3 > math.pi:
             slam.uTurning = False
             slam.uTurnPillar = 0
+            slam.uTurnStart = 20200202
             # slam.carAngle += math.pi
             slam.carDirection *= -1
             slam.carSectionCooldown = 10
             # slam.carSections += 1
             processWalls()
         # print("oof no u turn code")
-    elif centerWalls != 0 and centerWallDistance < 100 and slam.carSectionEntered != 1:
+    elif centerWalls != 0 and centerWallDistance < 110 and slam.carSectionEntered != 1:
         if transformedPillar[0] == None or abs(transformedPillar[0]) > 120:
             if slam.uTurnPillar == UTURN_PILLAR:
                 if centerWallDistance < 65:
@@ -525,7 +538,7 @@ def drive(manual: bool = False):
                 steerCenter()
             elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[1] < 20:
                 steerCenter()
-            elif centerWallDistance < 65:
+            elif centerWallDistance < 55:
                 steerCenter() 
         elif ((not RIGHT_ON_RED) and transformedPillar[4] == GREEN_PILLAR) or (RIGHT_ON_RED and transformedPillar[4] == RED_PILLAR):
             if slam.uTurnPillar == UTURN_PILLAR:
@@ -538,17 +551,19 @@ def drive(manual: bool = False):
                 steerCenter()
             elif slam.carDirection == CLOCKWISE and transformedPillar[1] < 20:
                 steerCenter()
-            elif centerWallDistance < 65:
+            elif centerWallDistance < 55:
                 steerCenter()
         if steering == 0:
             if transformedPillar[0] == None:
                 steering = -slam.carAngle * carAngleSteering
+            else:
+                steering = -slam.carAngle * carAngleSteering / 2
             # elif slam.carDirection == CLOCKWISE and transformedPillar[4] == GREEN_PILLAR and transformedPillar[0] * slam.carDirection < 40:
             #     steering = -75 * slam.carDirection - carAngle * 40
             # elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[4] == RED_PILLAR and transformedPillar[0] * slam.carDirection < 40:
             #     steering = -75 * slam.carDirection - carAngle * 40
     else:
-        if transformedPillar[0] == None or transformedPillar[1] < 10 or (leftWalls != 0 and transformedPillar[0] < -leftWallDistance + 10) or (rightWalls != 0 and transformedPillar[0] > rightWallDistance - 10) or abs(transformedPillar[0]) > 80 or (centerWalls > 0 and centerWallDistance - transformedPillar[1] < 50):
+        if transformedPillar[0] == None or transformedPillar[1] < 10 or (leftWalls != 0 and transformedPillar[0] < -leftWallDistance + 23) or (rightWalls != 0 and transformedPillar[0] > rightWallDistance - 23) or abs(transformedPillar[0]) > 80 or (centerWalls > 0 and centerWallDistance - transformedPillar[1] < 90 and centerWallDistance > 130):
             # if leftWalls != 0 and rightWalls != 0:
             #     steering = (rightWallDistance - leftWallDistance) / (rightWallDistance + leftWallDistance) * 50 - carAngle * 80
             steerNormal(True)

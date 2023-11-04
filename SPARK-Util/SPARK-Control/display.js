@@ -135,9 +135,9 @@ function display() {
         drawLandmarks(data.landmarks);
         if (historyControls.drawRaw) drawRawLandmarks(data.rawLandmarks, data.pos);
         if (historyControls.drawWalls) drawWalls(data.walls, data.pos);
+        drawCar(data.pos, data.steering);
         if (historyControls.drawDistances) drawDistances(data.rawLandmarks, data.walls, data.pos);
         if (historyControls.drawWaypoints) drawWaypoints(data.waypoints, data.pos);
-        drawCar(data.pos, data.steering);
         if (historyControls.rawDump) appendRawDump(data.rawDump);
     } else {
         ctx0.clearRect(0, 0, 544, 308);

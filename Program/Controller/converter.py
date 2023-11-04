@@ -19,8 +19,8 @@ imageHeight = 308
 focalLength = 100
 focalLength = 80
 focalLength = 100
-# focalLength = 105
-focalLength = 110
+focalLength = 105
+# focalLength = 110
 wallHeightOffset = 3
 wallHeight = 10
 cameraOffsetX = 3
@@ -92,7 +92,9 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = [176, 174, 169, 167, 165, 165, 164, 164]
+# undistortedWallStartLeft = [176, 174, 169, 167, 165, 165, 164, 164]
+# undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
+undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
 undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
 
 maximumTopWallHeightLeft = 4 - 1
@@ -319,8 +321,8 @@ def processWall(lines, dir):
         else:
             corner1 = getRawDistance(x1, y1, dir)
             corner2 = getRawDistance(x2, y2, dir)
-        # if math.sqrt((corner1[0] - corner2[0])**2 + (corner1[1] - corner2[1])**2) < 10:
-        #     continue
+        if math.sqrt((corner1[0] - corner2[0])**2 + (corner1[1] - corner2[1])**2) > 200:
+            continue
         if math.sqrt((corner1[0])**2 + (corner1[1])**2) > 190 and math.sqrt((corner2[0])**2 + (corner2[1])**2) > 190:
             continue
         walls.append([corner1, corner2])
