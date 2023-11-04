@@ -18,11 +18,9 @@ imageWidth = 544
 imageHeight = 308
 focalLength = 100
 focalLength = 80
-focalLength = 100
 focalLength = 105
-# focalLength = 110
 wallHeightOffset = 3
-wallHeight = 10
+wallHeight = 9
 cameraOffsetX = 3
 cameraOffsetY = 10
 
@@ -92,8 +90,10 @@ def undistort(imgIn: numpy.ndarray):
 # distance scanner
 wallStartLeft = 164
 wallStartRight = 154
-undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
-undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
+# undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
+# undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
+undistortedWallStartLeft = [31, 30, 29, 28, 28, 27, 27, 27]
+undistortedWallStartRight = [17, 18, 19, 20, 20, 19, 19, 18]
 
 maximumTopWallHeightLeft = 4 - 1
 maximumTopWallHeightRight = 4 - 1
