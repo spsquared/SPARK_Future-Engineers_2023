@@ -92,64 +92,22 @@ wallStartLeft = 164
 wallStartRight = 154
 # undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
 # undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
-undistortedWallStartLeft = [31, 30, 29, 28, 28, 27, 27, 27]
-undistortedWallStartRight = [17, 18, 19, 20, 20, 19, 19, 18]
+undistortedWallStartLeft = [33, 32, 31, 28, 28, 27, 27, 27]
+undistortedWallStartRight = [17, 18, 19, 20, 20, 20, 19, 18]
+
+for i in range(8):
+    undistortedWallStartLeft[i] += undistortCrop
+    undistortedWallStartRight[i] += undistortCrop
 
 maximumTopWallHeightLeft = 4 - 1
 maximumTopWallHeightRight = 4 - 1
 
-wallEnd = imageHeight
+wallEnd = imageHeight + undistortCrop
 contourStart = 160
 distanceTable = [[], []]
 halfWidth = int(imageWidth / 2)
 quarterWidth = int(imageWidth / 4)
 eighthWidth = int(imageWidth / 8)
-def generateDistanceTable():
-    # generate the mesh of undistorted points using an ungodly long line of numpy
-    newMatrixEstimation = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, (imageWidth, imageHeight), numpy.eye(3), K, balance=1)
-    leftHeightRange = wallEnd - wallStartLeft + 1
-    rightHeightRange = wallEnd - wallStartRight + 1
-    leftPoints = []
-    rightPoints = []
-    for imgx in range(imageWidth):
-        for height in range(leftHeightRange):
-            leftPoints.append((imgx, wallStartLeft + height))
-        for height in range(rightHeightRange):
-            rightPoints.append((imgx, wallStartRight + height))
-    leftPoints = numpy.apply_along_axis(lambda p: p[0], 1, cv2.fisheye.undistortPoints(numpy.array([leftPoints], dtype=numpy.float32), K, D, None, newMatrixEstimation, K, criteria=(cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 500, 1e-6)))
-    rightPoints = numpy.apply_along_axis(lambda p: p[0], 1, cv2.fisheye.undistortPoints(numpy.array([rightPoints], dtype=numpy.float32), K, D, None, newMatrixEstimation, K, criteria=(cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 500, 1e-6)))
-    print(leftPoints)
-    # pre-calculate locations for x and height of walls
-    for imgx in range(imageWidth):
-        distanceTable[LEFT].append([])
-        distanceTable[RIGHT].append([])
-        distanceTable[LEFT][imgx].append((-1, -1, -1, -1))
-        leftTopIndex = imgx * leftHeightRange
-        rightTopIndex = imgx * rightHeightRange
-        for height in range(1, leftHeightRange):
-            dist = wallHeight * math.sqrt((focalLength ** 2) + ((leftPoints[leftTopIndex][X] - halfWidth) ** 2)) / (leftPoints[leftTopIndex + height][Y] - undistortedWallStartLeft)
-            angle = math.atan2(halfWidth - leftPoints[leftTopIndex][X], focalLength) + (math.pi * 2 / 3)
-            x = -cameraOffsetX + math.cos(angle) * dist
-            y = cameraOffsetY + math.sin(angle) * dist
-            cDist = math.sqrt((x ** 2) + (y ** 2))
-            cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-            distanceTable[LEFT][imgx].append((x, y, cDist, cAngle))
-        distanceTable[RIGHT][imgx].append((-1, -1, -1, -1))
-        for height in range(1, rightHeightRange):
-            dist = wallHeight * math.sqrt((focalLength ** 2) + ((rightPoints[rightTopIndex][X] - halfWidth) ** 2)) / (rightPoints[rightTopIndex + height][Y] - undistortedWallStartRight)
-            angle = math.atan2(halfWidth - rightPoints[rightTopIndex][X], focalLength) + (math.pi / 3)
-            x = cameraOffsetX + math.sin(angle) * dist
-            y = cameraOffsetY + math.cos(angle) * dist
-            cDist = math.sqrt((x ** 2) + (y ** 2))
-            cAngle = (math.atan2(y, x) + math.pi / 2) % (math.pi * 2) - math.pi
-            distanceTable[RIGHT][imgx].append((x, y, cDist, cAngle))
-    distanceTable[LEFT] = numpy.array(distanceTable[LEFT])
-    distanceTable[RIGHT] = numpy.array(distanceTable[RIGHT])
-# generateDistanceTable()
-# ADFDSAFSAFSADF DSAFSA FSAD FSAF SAF DSAF cv2.undistortPoints IS BROKEN !1!!! !! !! ! BUG BORK BUH FIXXXXXX NOWWWWWWWWWWWWW!!!!!!!!!!!!!!!!!!!
-# and cv2.fisheye.undistortPoints just crashes and returns [[[-1000000, -1000000]]]
-# and the remap is unusable
-
 leftImgSinAngles = []
 leftImgCosAngles = []
 rightImgSinAngles = []
@@ -200,50 +158,7 @@ def getRawHeights(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
         wallStartsRight = numpy.append(wallStartsRight, undistortedWallStartRight[i] - undistortCrop - top)
 
 
-    # croppedRightBottom1 = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight1 - undistortCrop:wallEnd - undistortCrop,:halfWidth], 0, 1),cropEndArray2))
-    # croppedRightTop1 = numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight1 - undistortCrop - maximumTopWallHeight:undistortedWallStartRight1 - undistortCrop,:halfWidth],0), 0, 1),cropEndArray2))
-    # croppedRightBottom2 = numpy.hstack((numpy.swapaxes(rightEdgesIn[undistortedWallStartRight2 - undistortCrop:wallEnd - undistortCrop,halfWidth:], 0, 1),cropEndArray2))
-    # croppedRightTop2 = numpy.hstack((numpy.swapaxes(numpy.flip(rightEdgesIn[undistortedWallStartRight2 - undistortCrop - maximumTopWallHeight:undistortedWallStartRight2 - undistortCrop,halfWidth:],0), 0, 1),cropEndArray2))
-
-
-    # # find the bottom edge of the wall
-    # rawHeightsLeft = numpy.append(numpy.append(numpy.array(numpy.argmax(croppedLeftBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedLeftBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop2, axis=1), dtype="int")),numpy.array(numpy.argmax(croppedLeftBottom3, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedLeftTop3, axis=1), dtype="int"))
-    # rawHeightsRight = numpy.append(numpy.array(numpy.argmax(croppedRightBottom1, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop1, axis=1), dtype="int"),numpy.array(numpy.argmax(croppedRightBottom2, axis=1), dtype="int") + numpy.array(numpy.argmax(croppedRightTop2, axis=1), dtype="int"))
-
     return [numpy.array(rawHeightsLeft,dtype="int") + 1, numpy.array(rawHeightsRight,dtype="int") + 1, wallStartsLeft, wallStartsRight]
-def mergeHeights(rawHeightsLeft: numpy.ndarray, rawHeightsRight: numpy.ndarray):
-    return 'oof'
-def getDistances(leftEdgesIn: numpy.ndarray, rightEdgesIn: numpy.ndarray):
-    raise NotImplementedError()
-    global distanceTable
-    
-    # crop and then flip
-    croppedLeft = numpy.swapaxes(leftEdgesIn[wallStartLeft + wallStartBuffer:wallEnd], 0, 1)
-    croppedRight = numpy.swapaxes(rightEdgesIn[wallStartRight + wallStartBuffer:wallEnd], 0, 1)
-
-    # find the bottom edge of the wall
-    rawHeightsLeft = numpy.array(numpy.argmax(croppedLeft, axis=1), dtype="float") + wallStartBuffer
-    rawHeightsRight = numpy.array(numpy.argmax(croppedRight, axis=1), dtype="float") + wallStartBuffer
-
-    # convert heights to coordinates
-    leftCoordinates = numpy.apply_along_axis(lambda a: distanceTable[0][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsLeft, range(imageWidth)), 1))
-    rightCoordinates = numpy.apply_along_axis(lambda a: distanceTable[1][int(a[1])][int(a[0])], 1, numpy.stack((rawHeightsRight, range(imageWidth)), 1))
-
-    return [leftCoordinates, rightCoordinates]
-def mergeDistances(leftCoordinates: numpy.ndarray, rightCoordinates: numpy.ndarray):
-    # merge
-    coordinates = numpy.concatenate((leftCoordinates, rightCoordinates))
-
-    # sort coordinates by angle
-    dtype = [('x', coordinates.dtype), ('y', coordinates.dtype), ('dist', coordinates.dtype), ('theta', coordinates.dtype)]
-    ref = coordinates.ravel().view(dtype)
-    ref.sort(order=['theta', 'dist', 'x', 'y'])
-
-    return coordinates
-def getDistance(imgx: int, height: int, dir: int):
-    raise NotImplementedError()
-    global distanceTable
-    return distanceTable[max(dir, 0)][imgx][int(height)]
 def getRawDistance(imgx: int, height: int, dir: int):
     if height == 0:
         return [-1.0, -1.0, -1.0, -1.0]
