@@ -29,6 +29,7 @@
         * [SSHFS & Static IP](#sshfs--static-ip)
         * [GPIO & I2C](#enable-gpio-and-i2c)
         * [Package Installation](#package-installation)
+        * [Camera Profile Fix](#camera-profile-fix)
         * [Calibration](#calibration)
         * [Running Programs](#running-programs)
 * [**Demonstration Videos**](#demonstration-videos)
@@ -166,7 +167,7 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 | Open Challenge                                                                                                                                       | Obstacle Challenge (no U-turn)                                                                                                                                                    | Obstacle Challenge (U-turn)                                                                                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Open Challenge](./img/docs/demo-video-open.png)](https://youtu.be/1Tk8J1Zt5vI) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - No U turn](./img/docs/demo-video-obstacle-no-uturn.png)](https://youtu.be/uySmueLLGK8) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - U turn](./img/docs/demo-video-obstacle-uturn.png)](https://youtu.be/UDNGXfyl8ww) |
+| [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Open Challenge](./img/docs/demo-video-open.png)](https://youtu.be/1Tk8J1Zt5vI) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - No U turn](./img/docs/demo-video-obstacle-no-uturn.png)](https://youtu.be/DUGlUvpnOEw) | [![SPARK WRO Future Engineers 2023 Internationals Demonstration Run - Obstacle Challenge - U turn](./img/docs/demo-video-obstacle-uturn.png)](https://youtu.be/UDNGXfyl8ww) |
 
 ***
 
@@ -428,11 +429,26 @@ npm install
 
 ***
 
+### Camera Profile Fix
+
+You may encounter pink fringing on the cameras. If that happens, take the following steps to fix it:
+
+Copy `camera_overrides.isp` from `/dist/` in the project folder to `/var/nvidia/nvcam/settings/` on the Jetson Nano.
+
+Give the overrides permissions with the next two:
+
+```
+sudo chmod 664 /var/nvidia/nvcam/settings/camera_overrides.isp
+sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
+```
+
+***
+
 ### Calibration
 
 You need to calibrate the cameras for the undistortion to work properly. To do this, you need to take a couple of images of a chessboard using the SPARK Control Panel. Delete all the images in `/images`, and paste the images you took. Now, you need to run the first program of `calibrate.py`. This should print out the required D and K matrix. Now you can paste these matrices into the second program. Look in the `output` folder and check the images to make sure the undistortion is working. There should be some black gaps on the top and bottom of the image, because undistorting the image stretches the corners. Make sure the lines on the chessboard are straight. Now you can paste the matrices into `converter.py` and it shoudl work.
 
-You also need to calibrate the wall heights. Run the Control Panel and take a Filtered image. Open this image in Paint 3d. You need to split the image into 8ths manually and find how far down the walls are.
+You also need to calibrate the wall heights. Run the Control Panel and take a filtered image. Open this image in Paint 3d. You need to split the image into 8ths manually and find how far down the walls are.
 
 ***
 
@@ -499,7 +515,35 @@ The map on the right side of the screen is the most important addition to the SP
 
 ### Changing Parameters
 
-<!-- pull from odl readme, shorten a bit and make more concise -->
+It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply open the dropdown menu above the map on the right-hand side of the screen, change the HSV sliders, and click the "Capture" button with the "Filter" option enabled on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
+
+Example:
+
+```
+rm = redMin = (0, 90, 70)
+rM = redMax = (20, 255, 255)
+gm = greenMin = (50, 50, 50)
+gM = greenMax = (105, 255, 255)
+```
+
+You can update the defaults in `/SPARK-Control/index.js` as well in `initcolors`
+
+Example:
+
+```
+const initcolors = [
+    [
+        [20, 255, 255],
+        [0, 90, 70]
+    ],
+    [
+        [105, 255, 255],
+        [50, 50, 50]
+    ],
+];
+```
+
+**Don't forget to upload the `Program` folder again!**
 
 ***
 
