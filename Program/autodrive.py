@@ -1,6 +1,6 @@
 from IO import io
 from Util import server
-from Controller import simplecontroller as controller
+from Program.Controller import controller as controller
 import time
 import sys
 import traceback
