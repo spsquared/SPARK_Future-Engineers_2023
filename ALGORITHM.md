@@ -27,7 +27,7 @@ The main consideration for our algorithm is to balance localization accuracy and
 
 For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer toward the waypoint. The waypoint will be updated every iteration. For the U-turn, the car will turn around the first pillar in the section.
 
-Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into three main modules: The `converter`, which pre-process images; `slam`, which is a modified SLAM (Simultaneous Localization and Mapping) algorithm with limited landmark locations; and `controller`, divided into `slamcontroller`, `simplecontroller`, and `borkencontroller` (`borkencontroller` has not been tested and `slamcontroller` is currently also borked).
+Our program runs a constant update loop. All controller code can be found in `./Program/Controller/`, and is divided into two main modules: The `converter`, which pre-process images; and the `controller`, which does some processing and steering and motion planning.
 
 ## Pseudocode
 
@@ -223,7 +223,7 @@ We find the largest pillar. If there are multiple pillars around the same spot w
 
 # Steering and Motion Planning
 
-All code for the Steering and Motion Planning is in `/Program/Controller/simplecontroller.py`.
+All code for the Steering and Motion Planning is in `/Program/Controller/controller.py`.
 
 ***
 
@@ -243,7 +243,7 @@ For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we
 
 We calculate the average distance to the left walls, center walls, and right walls.
 
-# No Obstacle Challenge
+# Open Challenge
 
 We run the same code, except without any pillar cases.
 
@@ -256,7 +256,7 @@ We have 4 states the car can be in.
 
 1. uTurning:
 
-    The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pillar is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clcokwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
+    The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pillar is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clockwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
 
     We use the gyro to estimate that we have turned 180 degrees. When the gyro says the UTurn is done, it goes back to the other states.
 
