@@ -24,15 +24,15 @@ img {
 
 #banner1 {
     position: absolute;
-    top: 16px;
-    left: 16px;
+    top: 8px;
+    left: 8px;
     height: 80px;
     image-rendering: pixelated;
 }
 #banner2 {
     position: absolute;
-    top: 16px;
-    left: 336px;
+    top: 8px;
+    left: 102px;
     height: 80px;
     image-rendering: pixelated;
 }
