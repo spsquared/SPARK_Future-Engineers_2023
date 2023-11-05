@@ -21,9 +21,9 @@
 
 # Algorithm Overview
 
-One  and motion planning. Our code processes the camera image and uses it to find the position of the walls relative to the car and the position of the pillars. Using this information, we can figure out where we are supposed to go next and steer accordingly.
+This year we added a lot more motion planning to our algorithm. Our code processes the camera image and uses it to find the position of the walls relative to the car and the position of the pillars. Using this information, we can figure out where we are supposed to go next and steer accordingly.
 
-The main consideration for our algorithm is to balance localization accuracy and speed. For localization accuracy, our target is to know which section we are in, and how far away the walls and pillars are. We need to know which section we are in to count how many laps we have completed, and to know when to U-turn. We need to know how far away the car is from walls and pillars for collision avoidance.
+The main consideration for our algorithm is to balance localization accuracy and speed. For localization accuracy, our target is to know which section we are in, and how far away the walls and pillars are. We need to know which section we are in to count how many laps we have completed and to know when to U-turn. We need to know how far away the car is from walls and pillars for collision avoidance.
 
 For motion planning, our controller finds a waypoint based on the pillar position and wall position, and the car will steer toward the waypoint. The waypoint will be updated every iteration. For the U-turn, the car will turn around the first pillar in the section.
 
@@ -71,8 +71,8 @@ while (sections entered != 24): # 24 sections means 3 laps.
 
 # Image Processing
 
-Steps 1-7 for image processing is in `./Program/Controller/converter.py`.
-Steps 8-10 for image processing is in `./Program/Controller/controller.py`.
+Steps 1-7 for image processing are in `./Program/Controller/converter.py`.
+Steps 8-10 for image processing are in `./Program/Controller/controller.py`.
 
 ***
 
@@ -82,7 +82,7 @@ Because our camera is the same height as the top boundary of the walls, the top 
 
 ### Undistorting
 
-Because our camera is a fisheye camera (wide angle), our cameras output a distorted image. Before we can process the image, we must undistort it.
+Because we use a fisheye camera (wide angle), our cameras output a distorted image. This causes certain objects to appear closer than they actually are. Before we can process the image, we must undistort it.
 
 At the start of the program, `cv2.fisheye.initUndistortRectifyMap` is used with precalculated distortion matrices to create the remaps. We used a checkerboard image to calculate the distortion matrices D and K. See [SETUP.md](./SETUP.md#) for instructions on how to get the distortion matrix.
 
@@ -110,7 +110,7 @@ We found that it was easier and more robust to distinguish between very faint gr
 
 ![HSV Image](./img/docs/hsv.png)
 
-Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged together with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
+Using `cv2.inRange`, a mask for red colors and green colors is created to filter out the traffic lights. For red pillars, two calls of `cv2.inRange` is necessary because the hue value has 180 to be red as well as 0. The two masks created for red are merged with `cv2.bitwise_or`. The masks are then blurred to remove noise using `cv2.medianBlur`.
 
 Using `cv2.cvtColor`, the image is turned into grayscale, and blurred using `cv2.GaussianBlur`. Then, using `cv2.Canny`, edges are detected in the image.
 
@@ -135,7 +135,7 @@ Using `cv2.Canny`, edges can be found on the masked red or green image. To make 
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. Similarly to the pillars, this information is used later to find the distance from the car to any point on the top boundary of the wall.
 
-The edges image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first largest value, which is at the edge of the wall. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+The edge image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first largest value, which is at the edge of the wall. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
 ***
 
@@ -202,12 +202,9 @@ To solve this problem, we store the orientation of the car (relative to the mat)
 
 ### Categorizing Walls
 
-<!-- UPDATE!!! -->
-buh we need the orientation stuff
-
 At this step, the wall lines have been turned into line segments that represent the real positions of the walls on the mat.
 
-We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is perpendicular relative to the driving direction, it is categorized as a center or back wall depending on if it is in front or in the back of the car. If the wall is parallel to the driving direction, it is categorized as a left wall or right wall depending on if it is to the left or to the right of the car.
+We have 5 possible categories of Walls: Left, Center, Right, Back, and Unknown. If the wall is perpendicular relative to the driving direction, it is categorized as a center or back wall depending on if it is in front or the back of the car. If the wall is parallel to the driving direction, it is categorized as a left wall or right wall depending on if it is to the left or the right of the car.
 
 Now, depending on how slanted the wall is, we can calculate our car orientation. For example, if the center wall is tilted 5 degrees to the right, we know our car is also tilted 5 degrees to the left in addition to the current orientation.
 
@@ -235,7 +232,7 @@ At the start of the program, we need to know if we are going clockwise or counte
 | --------------------------------------------
 | ![Jump in Wall Height](./img/docs/gap.png) |
 
-For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise we are going counterclockwise.
+For the first 9 frames, we search for a jump in the wall. Using `numpy.diff`, we can find differences in the wall heights. After this, we split the two images from both cameras into 4 images. The left camera image gets split at 3/4 and the right camera gets split at 1/4. The left parts are used to detect a gap on the left, while the right parts are used to detect a gap on the right. Now, we use `numpy.argmax` to find the first large difference on all 4 images. We add the difference of the indices for the left and the indices for the right to `carDirectionGuess`. If `carDirectionGuess` is greater than 0, then we are going clockwise, otherwise, we are going counterclockwise.
 
 ***
 
@@ -249,22 +246,22 @@ We run the same code, except without any pillar cases.
 
 # Obstacle Challenge
 We have 4 states the car can be in.
-- Uturning
+- U-turning
 - In Center Section
 - Steering for pillars
 - Default case
 
-1. uTurning:
+1. **U-Turning**
 
     The car uses the pillar it sees before the uTUrn starts to know which direction to turn. This pillar is stored in `slam.uTurnAroundPillar`. If it is red, we turn counterclockwise around it. If it is green, we turn clockwise around it. Our steering value is 100 if we are turning clockwise, and -100 if we are turning counterclockwise.
 
     We use the gyro to estimate that we have turned 180 degrees. When the gyro says the UTurn is done, it goes back to the other states.
 
-2. In Center Section:
+2. **In Center Section**
 
     In this section, we have to turn based on the pillar in the next section.
 
-    If there is no pillar, we turn when the centre wall is close enough.
+    If there is no pillar, we turn when the center wall is close enough.
 
     If there is a red pillar and we are turning clockwise or there is a green pillar and we are turning counterclockwise, we will turn earlier than the pillar to pass on the correct side.
 
@@ -275,14 +272,12 @@ We have 4 states the car can be in.
     | --------------------------------------------| --
     | ![Red Pillar Turning](./img/docs/redTurning.png) |![Green Pillar Turning](./img/docs/greenTurning.png) |
 
-3. Steering for Pillars:
+3. **Steering for Pillars**
 
-    The car will calculate a waypoint 10cm behind the pillar and 15cm to the left or right of the pillar and steer towards this waypoint. If we are already to the right of a red pillar or to the left of a green pillar, the car will instead use the default case.
+    The car will calculate a waypoint 10cm behind the pillar and 15cm to the left or right of the pillar and steer towards this waypoint. If we are already to the right of a red pillar or the left of a green pillar, the car will instead use the default case.
 
-4. Default Case:
+4. **Default Case**
 
     The car will check if the left wall or right wall is too close. If it is, it will steer away from the wall. If it is not, the car will try to keep its orientation aligned with the driving direction.
-
-
 
 ***
