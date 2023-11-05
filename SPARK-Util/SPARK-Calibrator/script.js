@@ -128,7 +128,7 @@ function connect() {
 };
 window.addEventListener('load', connect);
 
-var addCapture = function() {
+var addCapture = function(images) {
     let encoding = images[2] ? 'data:image/png;base64,' : 'data:image/jpeg;base64,';
     image0 = new Image();
     image1 = new Image();
@@ -140,5 +140,5 @@ var addCapture = function() {
 }
 socket.on('capture', addCapture); // 0 is jpeg, 1 is png
 capture.onclick = function() {
-    socket.emit('capture', { save: false, filter: true, colors: false });
+    socket.emit('capture', { save: false, filter: true, undistort: true, colors: false });
 }
