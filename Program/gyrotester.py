@@ -5,7 +5,7 @@ def main():
     io.setStatusBlink(2)
     try:
         while True:
-            print(io.imu.angle)
+            print(io.imu.angle())
             time.sleep(0.2)
     except KeyboardInterrupt:
         io.close()
