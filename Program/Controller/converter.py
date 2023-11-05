@@ -92,8 +92,8 @@ wallStartLeft = 164
 wallStartRight = 154
 # undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
 # undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
-undistortedWallStartLeft = [33, 32, 31, 28, 28, 27, 27, 27]
-undistortedWallStartRight = [17, 18, 19, 20, 20, 20, 19, 18]
+undistortedWallStartLeft = [35, 33, 30, 29, 28, 27, 27, 27]
+undistortedWallStartRight = [17, 19, 19, 20, 20, 20, 19, 18]
 
 for i in range(8):
     undistortedWallStartLeft[i] += undistortCrop
