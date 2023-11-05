@@ -32,10 +32,9 @@ def main():
         def capture(data):
             try:
                 if data[0]['save'] == True:
-                    if data[0]['filter'] == True:
-                        if data[0]['colors'] != False:
-                            converter.setColors(data[0]['colors'], True)
-                    io.camera.capture(data[0]['filter'], True)
+                    if data[0]['colors'] != False:
+                        converter.setColors(data[0]['colors'], True)
+                    io.camera.capture(data[0]['filter'], data[0]['undistort'], True)
                 else:
                     if data[0]['filter'] == True:
                         if data[0]['colors'] != False:
@@ -48,6 +47,7 @@ def main():
                                 0,
                                 0
                             ]
+                            server.emit('capture', encoded)
                         else:
                             encoded = [
                                 base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])))[1]).decode(),
@@ -56,16 +56,26 @@ def main():
                                 0,
                                 0
                             ]
-                        server.emit('capture', encoded)
+                            server.emit('capture', encoded)
                     else:
-                        encoded = [
-                            base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
-                            base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
-                            0,
-                            0,
-                            0
-                        ]
-                        server.emit('capture', encoded)
+                        if data[0]['undistort'] == True:
+                            encoded = [
+                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
+                                0,
+                                0,
+                                0
+                            ]
+                            server.emit('capture', encoded)
+                        else:
+                            encoded = [
+                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[0]), quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[1]), quality)[1]).decode(),
+                                0,
+                                0,
+                                0
+                            ]
+                            server.emit('capture', encoded)
             except Exception as err:
                 traceback.print_exc()
                 io.error()
@@ -79,14 +89,14 @@ def main():
                 else:
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
-                    io.camera.startSaveStream(data[0]['filter'], True)
+                    io.camera.startSaveStream(data[0]['filter'], data[0]['undistort'], True)
             else:
                 if not streaming:
                     io.camera.stopStream()
                 else:
                     if data[0]['filter'] == True:
                         converter.setColors(data[0]['colors'], True)
-                    io.camera.startStream(data[0]['filter'])
+                    io.camera.startStream(data[0]['filter'], data[0]['undistort'])
         def predictStream(data):
             nonlocal predictStreaming
             predictStreaming = not predictStreaming

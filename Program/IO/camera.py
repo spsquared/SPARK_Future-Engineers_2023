@@ -62,11 +62,14 @@ if not os.path.exists(os.path.abspath('filtered_out/')):
 __serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 
 # single image save
-def capture(filter: bool = False, sendServer: bool = True):
+def capture(filter: bool = False, undistort: bool = False, sendServer: bool = True):
     try:
         name = str(round(time.time()*1000))
         if filter:
-            filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
+            imgs = __currentImages
+            if undistort:
+                imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
+            filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured (filtered) ' + name + '.png')
@@ -80,12 +83,15 @@ def capture(filter: bool = False, sendServer: bool = True):
                 server.emit('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
-            cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((__currentImages[0], __currentImages[1]), axis=1))
+            imgs = __currentImages
+            if undistort:
+                imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
+            cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((imgs[0], imgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured ' + name + '.png')
                 encoded = [
-                    base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
-                    base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
+                    base64.b64encode(cv2.imencode('.jpg', imgs[0], __serverQuality)[1]).decode(),
+                    base64.b64encode(cv2.imencode('.jpg', imgs[1], __serverQuality)[1]).decode(),
                     0,
                     0,
                     0
@@ -103,14 +109,16 @@ def capture(filter: bool = False, sendServer: bool = True):
 __streamThread = None
 __streaming = False
 __totalCaptured = 0
-__streamFiltering = False
-__streamServing = False
 __streamSaving = False
-def startSaveStream(filter: bool = False, sendServer: bool = True):
-    global __streamThread, __streaming, __streamServing, __streamFiltering, __streamSaving
+__streamFiltering = False
+__streamUndistorting = False
+__streamServing = False
+def startSaveStream(filter: bool = False, undistort: bool = False, sendServer: bool = True):
+    global __streamThread, __streaming, __streamServing, __streamSaving, __streamFiltering, __streamUndistorting
     if not __streaming:
         __streaming = True
         __streamFiltering = filter
+        __streamUndistorting = undistort
         __streamSaving = True
         __streamServing = sendServer
         name = str(round(time.time()*1000))
@@ -125,7 +133,10 @@ def startSaveStream(filter: bool = False, sendServer: bool = True):
                 while __streaming:
                     start = time.time()
                     if filter:
-                        filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
+                        imgs = __currentImages
+                        if undistort:
+                            imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
+                        filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
                         cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if sendServer:
                             encoded = [
@@ -136,11 +147,14 @@ def startSaveStream(filter: bool = False, sendServer: bool = True):
                             ]
                             server.emit('capture', encoded)
                     else:
-                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate((__currentImages[0], __currentImages[1]), axis=1))
+                        imgs = __currentImages
+                        if undistort:
+                            imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
+                        cv2.imwrite('image_out/' + name + '/' + str(index) + '.png', numpy.concatenate((imgs[0], imgs[1]), axis=1))
                         if sendServer:
                             encoded = [
-                                base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
-                                base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', imgs[0], __serverQuality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', imgs[1], __serverQuality)[1]).decode(),
                                 0,
                                 1
                             ]

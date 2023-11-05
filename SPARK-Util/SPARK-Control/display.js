@@ -626,8 +626,10 @@ socket.on('data', addData);
 // controls 2: electric boogaloo
 const streamModSave = document.getElementById('streamModSave');
 const streamModFilter = document.getElementById('streamModFilter');
+const streamModUndistort = document.getElementById('streamModUndistort');
 const captureModSave = document.getElementById('captureModSave');
 const captureModFilter = document.getElementById('captureModFilter');
+const captureModUndistort = document.getElementById('captureModUndistort');
 const stream = document.getElementById('stream');
 const capture = document.getElementById('capture');
 const predict = document.getElementById('predict');
@@ -638,12 +640,14 @@ socket.on('streamState', (state) => {
     streamToggle.checked = state[0];
     streamModFilter.checked = state[1];
     streamModSave.checked = state[2];
+    streamModUndistort.checked = state[3];
     if (streamToggle.checked) {
         stream.style.backgroundColor = 'red';
         stream.style.borderColor = 'firebrick';
         stream.innerText = 'STOP STREAM';
         streamModFilter.disabled = true;
         streamModSave.disabled = true;
+        streamModUndistort.disabled = true;
         sounds.start();
     } else {
         stream.style.backgroundColor = '';
@@ -651,6 +655,7 @@ socket.on('streamState', (state) => {
         stream.innerText = 'START STREAM';
         streamModFilter.disabled = false;
         streamModSave.disabled = false;
+        streamModUndistort.disabled = false;
         sounds.stop();
     }
 });
@@ -670,10 +675,10 @@ socket.on('predictStreamState', (state) => {
 });
 stream.onclick = () => {
     streamToggle.checked = !streamToggle.checked;
-    socket.emit('stream', { save: streamModSave.checked, filter: streamModFilter.checked, colors: getColors() });
+    socket.emit('stream', { save: streamModSave.checked, filter: streamModFilter.checked, undistort: streamModUndistort.checked, colors: getColors() });
 };
 capture.onclick = () => {
-    socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, colors: getColors() });
+    socket.emit('capture', { save: captureModSave.checked, filter: captureModFilter.checked, undistort: captureModUndistort.checked, colors: getColors() });
 };
 predict.onclick = () => {
     streamToggle.checked = !streamToggle.checked;
