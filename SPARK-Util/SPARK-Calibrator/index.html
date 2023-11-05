@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPARK Calibrater</title>
+    <link rel="icon" href="/common/favicon.png" type="image/png">
+    <link rel="stylesheet" href="./style.css">
+    <script src="./../SPARK-Control/config.js"></script>
+    <script>
+        // don't worry about it
+        new Function(function buh() {
+            try {
+                ip = null;
+                auth_uuid = null;
+            } catch (err) {
+                return;
+            } finally {
+                window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            }
+        }.toString())();
+    </script>
+    <script src="./../SPARK-Control/socket.io.min.js"></script>
+    <script src="./script.js" defer></script>
+    <script src="/common/sound.js" defer></script>
+</head>
+<body>
+    <img id="banner1" src="/common/banner.png">
+    <img id="banner2" src="/common/logo.png">
+    <button id="upload" class="largeButton">Upload Image</button>
+    <button id="capture" class="largeButton">Capture Image</button>
+    <label id="darkModeLabel" for="darkMode">Dark Mode:</label>
+    <input id="darkMode" type="checkbox">
+    <canvas id="canvas"></canvas>
+    <table id = "table">
+        <tr>
+            <td>
+                <b>LEFT:</b>
+            </td>
+            <td>
+                <input id="left1">
+            </td>
+            <td>
+                <input id="left2">
+            </td>
+            <td>
+                <input id="left3">
+            </td>
+            <td>
+                <input id="left4">
+            </td>
+            <td>
+                <input id="left5">
+            </td>
+            <td>
+                <input id="left6">
+            </td>
+            <td>
+                <input id="left7">
+            </td>
+            <td>
+                <input id="left8">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>RIGHT:</b>
+            </td>
+            <td>
+                <input id="right1">
+            </td>
+            <td>
+                <input id="right2">
+            </td>
+            <td>
+                <input id="right3">
+            </td>
+            <td>
+                <input id="right4">
+            </td>
+            <td>
+                <input id="right5">
+            </td>
+            <td>
+                <input id="right6">
+            </td>
+            <td>
+                <input id="right7">
+            </td>
+            <td>
+                <input id="right8">
+            </td>
+        </tr>
+    </table>
+    <!-- <script src="/common/logoIntro.js"></script> -->
+</body>
+</html>

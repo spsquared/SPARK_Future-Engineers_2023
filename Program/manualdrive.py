@@ -33,11 +33,13 @@ def main():
             try:
                 if data[0]['save'] == True:
                     if data[0]['filter'] == True:
-                        converter.setColors(data[0]['colors'], True)
+                        if data[0]['colors'] != False:
+                            converter.setColors(data[0]['colors'], True)
                     io.camera.capture(data[0]['filter'], True)
                 else:
                     if data[0]['filter'] == True:
-                        converter.setColors(data[0]['colors'], True)
+                        if data[0]['colors'] != False:
+                            converter.setColors(data[0]['colors'], True)
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[0])))[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', cv2.merge(converter.filter(io.camera.read()[1])))[1]).decode(),
