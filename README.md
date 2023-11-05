@@ -47,7 +47,7 @@
 
 # Hardware Design
 
-SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like the motors, cameras, and controller boards. For a full component list, see [SETUP.md](./SETUP.md#parts-list). CAD models can be found in `/dist/3d-models/`, and have all been [modeled in Onshape here](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590).
+SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted to it, like motors, cameras, and controller boards. For a full component list, see [SETUP.md](./SETUP.md#parts-list). CAD models can be found in `/dist/3d-models/`, and have all been [modeled in Onshape here](https://cad.onshape.com/documents/82dd14d30b814e8846567203/w/34e1b6a4058ed5fbde8ef66a/e/47aa4028e09ec17a24a63590).
 
 ![SPARK G2 chassis with electronics in CAD software](./img/docs/cad-car.png)
 
@@ -55,7 +55,7 @@ SPARK G2 consists of a 3D-printed chassis with off-the-shelf components mounted 
 
 ## Chassis
 
-The chassis consists of a lower base with vertical walls to mount the rear axle and upper platforms. It has space for the battery and an ESC (electronic speed controller) bay in the rear, and a compartment in the front for the steering mechanism. The rear axle is sourced from the Atom 2 GT12 pan car kit by Schumacher, and is mounted vertically to save space.
+The chassis consists of a lower base with vertical walls to mount the rear axle and upper platforms. It has space for the battery and ESC (electronic speed controller) bay in the rear, and a compartment in the front for the steering mechanism. The rear axle is sourced from the Atom 2 GT12 pan car kit by Schumacher and is mounted vertically to save space.
 
 The electronics platforms sit on top of the chassis base, and the main platform is also a structural component that provides rigidity to the chassis. Because the electronics are on top, they are easily accessible and wiring is fairly simple. The only exceptions are the ESC, which is in the rear, and the IMU (inertial measurement unit, used for measuring angles and velocity).
 
@@ -78,11 +78,11 @@ The Jetson Nano uses an intermediate PWM control board to control the drive and 
 
 ## Motors
 
-SPARK is rear wheel drive, with a sensored brushless drive motor and high-quality servo from Savox. The drive motor is controlled by the brushless ESC (electronic speed controller), and has a sensor. Brushless motors allow for finer control at low speed, and the addition of a sensor helps too.
+SPARK is rear-wheel drive, with a sensored brushless drive motor and high-quality servo from Savox. The drive motor is controlled by the brushless ESC (electronic speed controller) and has a sensor. Brushless motors allow for finer control at low speeds, and the addition of a sensor helps too.
 
 It still would be better to use a lower kV motor (a slower motor) with an [ODrive](https://odriverobotics.com/) and encoder for even better low-speed control, but the current setup is sufficient.
 
-We choose to use the Savox SV1260MG for our steering servo because of its speed - with transit times of under 100ms, this servo would not limit our control of the vehicle. It can also run at higher voltages, meaning we can get more power out of it.
+We chose to use the Savox SV1260MG for our steering servo because of its speed - with transit times of under 100ms, this servo would not limit our control of the vehicle. It can also run at higher voltages, meaning we can get more power out of it.
 
 | Drive motor                                    | Servo and steering                                           |
 | ---------------------------------------------- | ------------------------------------------------------------ |
@@ -96,7 +96,7 @@ One major physical change is the addition of a second IMX219 wide-angle camera t
 
 In addition to the two wide-angle cameras, SPARK G2 has an IMU (inertial measurement unit) for measuring the angle of the vehicle. It also has the capability to measure linear acceleration, but we don't use that. It communicates over I2C directly with the Jetson Nano.
 
-SPARK G2 does not use any other sensors to percieve its environment - no LiDAR here!
+SPARK G2 does not use any other sensors to perceive its environment - no LiDAR here!
 
 ## Wiring Diagram
 
@@ -140,7 +140,7 @@ while (sections entered != 24): # 24 sections means 3 laps.
     Find wall heights
     Find contours
     Find wall lines
-    Merge & Convert wall lines and contours
+    Merge and Convert wall lines and contours
     Categorize Walls
     Find Car Orientation
     Filter Pillars
@@ -239,13 +239,13 @@ Follow the diagram below to wire the button and indicator LEDs. *(Click to view 
 
 [![Button and indicator LED wiring](./img/docs/led-button-wiring-low.png)](./img/docs/led-button-wiring.png)
 
-*Note: For I2C connectors, Yellow should be SCL and blue should be SDA; there is no set standard.*
+*Note: For I2C connectors, Yellow should be SCL, and blue should be SDA; there is no set standard.*
 
-For soldering, we recommend soldering the regulators to their own connectors **in parallel**, and using that as a pass-through to the ESC. The female connectors should be used on the ESC inputs and regulator input, and the male connector on the pass through end of the regulator wires. See the diagram below.
+For soldering, we recommend soldering the regulators to their own connectors **in parallel**, and using that as a pass-through to the ESC. The female connectors should be used on the ESC inputs and regulator input, and the male connector on the pass-through end of the regulator wires. See the diagram below.
 
 ![Wiring for regulator passthrough](./img/docs/power-layout.png)
 
-Follow the quick start guide for the ESC to solder the motor connections. Brief summary: solder A, B, and C connectors to the motor (or supplied connectors). Ensure the sensor wire is secure before mounting motor and ESC.
+Follow the quick start guide for the ESC to solder the motor connections. Summary: solder A, B, and C connectors to the motor (or supplied connectors). Ensure the sensor wire is secure before mounting the motor and ESC.
 
 **WARNING:** DO NOT CONNECT THE ESC 3-PIN DIRECTLY TO THE SERVO DRIVER! IT WILL BACKDRIVE THE REGULATOR AND BREAK IT! ONLY CONNECT THE PWM PIN (white)!
 
@@ -276,7 +276,7 @@ Here are the most important subsections in this section:
 
 Visit [Yahboom](http://www.yahboom.net/)'s [setup and tutorial repository](http://www.yahboom.net/study/jetson-nano) to begin setting up the [Jetson Nano 4GB](https://category.yahboom.net/collections/jetson/products/jetson-nano-sub). Follow steps 1.1-1.7 in "Development setup > SUB Version".
 
-> http://www.yahboom.net/study/jetson-nano <!-- not the right way to use markdown quote but oh well -->
+> http://www.yahboom.net/study/jetson-nano <!-- not the right way to use markdown quotes but oh well -->
 
 This guide should install the default Ubuntu 18.04 with Jetpack SDK, with Python 3.6 pre-installed.
 
@@ -284,21 +284,21 @@ This guide should install the default Ubuntu 18.04 with Jetpack SDK, with Python
 
 ### SSHFS & Static IP
 
-After setting up the board, follow step 2.1 in section "Basic Settings" to log into your Jetson Nano. **Keep PuTTY open**, as it will be used for the rest of the setup process. **Also keep the IP**.
+After setting up the board, follow step 2.1 in the "Basic Settings" section to log into your Jetson Nano. **Keep PuTTY open**, as it will be used for the rest of the setup process. **Also keep the IP**.
 
 Make sure a **static IP is set** to the board to make SSH and file transfer easier. Go to your router settings and [assign a DHCP reservation (PCmag)](https://www.pcmag.com/how-to/how-to-set-up-a-static-ip-address) (or a straight static IP) to your Jetson Nano. **Save this IP** in your PuTTY settings and SSHFS mounting.
 
-For remote file transfer, install sshfs (linux only), or use [sshfs-win](https://github.com/winfsp/sshfs-win) from WinFsp. Follow instructions to mount the Jetson Nano to a network drive. Now upload all contents of the `/Program/` folder into a new folder on the Jetson Nano. **Remember the directory of the folder**, this will be used later.
+For remote file transfer, install sshfs (Linux only), or use [sshfs-win](https://github.com/winfsp/sshfs-win) from WinFsp. Follow instructions to mount the Jetson Nano to a network drive. Now upload all contents of the `/Program/` folder into a new folder on the Jetson Nano. **Remember the directory of the folder**, this will be used later.
 
 ***This method should be used to upload programs.***
 
-**The *entire* `Program` directory must be uploaded in order for the program to run. Ensure the `path` constant in `startup.py` is defined properly.**
+**The *entire* `Program` directory must be uploaded for the program to run. Ensure the `path` constant in `startup.py` is defined properly.**
 
 ***
 
 ### Enable GPIO and I2C
 
-The enable GPIO and I2C, create a new user group, and add your user to it.
+Enable GPIO and I2C, create a new user group, and add your user to it.
 
 ```
 sudo groupadd -f -r gpio
@@ -323,7 +323,7 @@ sudo usermod -a -G i2c your_user_name
 
 ### Text-Only, Auto-Login, & Run on Startup
 
-Switch the Jetson Nano to text-only mode (gui is almost useless for this application and only causes unneccesary slowness).
+Switch the Jetson Nano to text-only mode (A GUI is almost useless for this application and only causes unnecessary slowness).
 
 ```
 sudo systemctl set-default multi-user.target
@@ -378,7 +378,7 @@ WantedBy=multi-user.target
 
 Make sure to add the same permissions as `spark_startup.service`.
 
-Reboot the Jetson Nano to test if these changes worked. No GUI should appear and you shuld be automatically logged in.
+Reboot the Jetson Nano to test if these changes worked. No GUI should appear and you should be automatically logged in.
 
 Enable run-on-startup by editing `run-on-startup.txt` in the folder. Replace the first line with `true`.
 
@@ -412,14 +412,14 @@ Additionally, [Node.js](https://nodejs.org/) should be installed to use the SPAR
 sudo apt install nodejs
 ```
 
-*NOTE: The default installation of node may be v12, which doesn't support some features. To install newer versions, try the following:*
+*NOTE: The default installation of Node.js may be v12, which doesn't support some features. To install newer versions, try the following:*
 
 ```
 sudo snap install node --channel=16 --classic
 sudo update-alternatives --install /usr/bin/node node /snap/bin/node 0
 ```
 
-*This should install Node.js v16 and set it to be the main version of node used with the "node" command.*
+*This should install Node.js v16 and set it to be the main version of Node.js used with the "node" command.*
 
 Navigate to `/Util/` and install dependencies.
 
@@ -435,7 +435,7 @@ You may encounter pink fringing on the cameras. If that happens, take the follow
 
 Copy `camera_overrides.isp` from `/dist/` in the project folder to `/var/nvidia/nvcam/settings/` on the Jetson Nano.
 
-Give the overrides permissions with the next two:
+Give the override permissions with the next two:
 
 ```
 sudo chmod 664 /var/nvidia/nvcam/settings/camera_overrides.isp
@@ -446,9 +446,9 @@ sudo chown root:root /var/nvidia/nvcam/settings/camera_overrides.isp
 
 ### Calibration
 
-You need to calibrate the cameras for the undistortion to work properly. To do this, you need to take a couple of images of a chessboard using the SPARK Control Panel. Delete all the images in `/images`, and paste the images you took. Now, you need to run the first program of `calibrate.py`. This should print out the required D and K matrix. Now you can paste these matrices into the second program. Look in the `output` folder and check the images to make sure the undistortion is working. There should be some black gaps on the top and bottom of the image, because undistorting the image stretches the corners. Make sure the lines on the chessboard are straight. Now you can paste the matrices into `converter.py` and it shoudl work.
+You need to calibrate the cameras for the undistortion to work properly. To do this, you need to take a couple of images of a chessboard using the SPARK Control Panel. Delete all the images in `/images`, and paste the images you took. Now, you need to run the first program of `calibrate.py`. This should print out the required D and K matrix. Now you can paste these matrices into the second program. Look in the `output` folder and check the images to make sure the undistortion is working. There should be some black gaps on the top and bottom of the image because undistorting the image stretches the corners. Make sure the lines on the chessboard are straight. Now you can paste the matrices into `converter.py` and it should work.
 
-You also need to calibrate the wall heights. Run the Control Panel and start manual drive. Now, open the SPARK-Calibrator and click Capture Image. Adjust the wall starts so that they are near the top of the wall. Paste the new values into `converter.py`.
+You also need to calibrate the wall heights. Run the Control Panel and start `manualdrive`. Now, open the SPARK-Calibrator and click Capture Image. Adjust the wall starts so that they are near the top of the wall. Paste the new values into `converter.py`.
 
 ***
 
@@ -463,7 +463,7 @@ python3 autodrive.py
 
 `manualdrive.py` is a testing program that **requires** the SPARK Control Panel - it will crash if SPARK Utilities are not set up! Once started, go to the [SPARK Control Panel](#spark-control-panel) and your computer will automatically connect to the vehicle if configured. For more information, see the [section on the Control Panel](#spark-control-panel).
 
-`autodrive.py` is the competition program. It can be run with the SPARK Utility server for debugging, but during competitions, or when testing without the server, can be run headless (without user interface). Simply add the flag `no_server` to disable the server. **This is how the program is run during competitions**
+`autodrive.py` is the competition program. It can be run with the SPARK Utility server for debugging, but during competitions, or when testing without the server, it can be run headless (without a user interface). Simply add the flag `no_server` to disable the server. **This is how the program is run during competitions**
 
 ```
 python3 autodrive.py no_server
@@ -481,7 +481,7 @@ python3 autodrive.py no_server
 
 # SPARK Utilities
 
-We (team SPARK) have created our own utilities to remotely command and monitor our robot from our own computers. 
+We (team SPARK) have created our own utilities to remotely command and monitor our robot from our computers. 
 
 **This section covers installing and using these utilities.**
 
@@ -489,7 +489,7 @@ We (team SPARK) have created our own utilities to remotely command and monitor o
 
 ## SPARK Control Panel
 
-SPARK Control Panel is our own testing and debugging software. It allows us to log detailed information about the program's internal workings and present it in a graphical format. SPARK Utilities work wirelessly, so as long as the network is configured correctly ([setup instructions](#spark-utility-setup)) SPARK Control Panel can communicate with the robot.
+SPARK Control Panel is our own testing and debugging software. It allows us to log detailed information about the program's internal workings and present it in a graphical format. SPARK Utilities work wirelessly, so as long as the network is configured correctly ([setup instructions](#spark-utility-setup)) the SPARK Control Panel can communicate with the robot.
 
 <div align=center>
 
@@ -499,7 +499,7 @@ SPARK Control Panel is our own testing and debugging software. It allows us to l
 
 On the left side of the screen, there are controls and camera views. There are buttons to run programs at the top, along with the indicator LEDS that reflect the ones on the vehicle.
 
-Below that, there are camera controls. There are options to view and save image streams or individual images, with filtering enabled. A recent addition allows you to also run the algorithm on frames from wherever.
+Below that, there are camera controls. There are options to view and save image streams or individual images, with filtering enabled. A recent addition allows you to run the algorithm on frames from wherever.
 
 At the bottom, there are options to toggle different displays on the Control Panel. Hover over them to get a description of their function.
 
@@ -515,7 +515,7 @@ The map on the right side of the screen is the most important addition to the SP
 
 ### Changing Parameters
 
-It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply open the dropdown menu above the map on the right-hand side of the screen, change the HSV sliders, and click the "Capture" button with the "Filter" option enabled on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
+It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply open the dropdown menu above the map on the right-hand side of the screen, change the HSV sliders, and click the "Capture" button with the "Filter" option enabled to see the effects of your changes. Afterwards, locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
 
 ![HSV Sliders on control panel](./img/docs/spark-control-sliders.png)
 
@@ -592,9 +592,9 @@ To open the SPARK Control Panel and other utilities, run `node SPARK-Util/static
 
 # Lessons Learned
 
-* We learned that you need to use `numpy` or `cv2` for almost all the image processing, because python for loops are way too slow.
+* We learned that you need to use `numpy` or `cv2` for almost all the image processing because python `for` loops are way too slow.
 * We learned that simplicity is almost always better:
-* We started by trying SLAM (Simultaneous Localization And Mapping) for our car, which turns out to be unneccessary for our purpose. So we instead switched to a simplified version, which keeps only a rough location and orientation of the vehicle. This turns out to be a good balance between speed and accuracy.
+* We started by trying SLAM (Simultaneous Localization And Mapping) for our car, which turned out to be unnecessary for our purpose. So we instead switched to a simplified version, which keeps only a rough location and orientation of the vehicle. This turns out to be a good balance between speed and accuracy.
 * We originally wanted to emulate a LiDAR using the cameras, generating a point cloud, and using SLAM and such, but directly undistorting the image instead of the points and using simpler image-based algorithms (like Hough lines) was easier and more efficient.
 * We learned that sending too quickly oscillating inputs to the servo will cause it to stop responding, because of a built-in safety protection. We fixed this by adding input smoothing.
 * We learned that keeping an XSS bug is not a good idea.
@@ -603,7 +603,7 @@ To open the SPARK Control Panel and other utilities, run `node SPARK-Util/static
 
 # LiPo Battery Safety Notice
 
-While LiPo batteries are the safest form of portable, affordable, high density energy storage, there are still precautions to be taken when working with them. Lithium is a highly volatile element, and will react with the water vapor in the air if exposed to it.
+While LiPo batteries are the safest form of portable, affordable, high-density energy storage, there are still precautions to be taken when working with them. Lithium is a highly volatile element and will react with the water vapor in the air if exposed to it.
 
 1. **Do not** puncture, deform, short, or heat LiPo batteries above 26° C (80° F) (299.15 K)
 2. Store and charge LiPos in a *fireproof container* **away** from flammable materials and water
@@ -613,7 +613,7 @@ While LiPo batteries are the safest form of portable, affordable, high density e
 6. Dropping a battery can cause sufficient damage to rupture a cell and cause shorts
 7. Overdischarging a LiPo battery can cause **permanent damage**
 
-If a LiPo battery goes below its minimum voltage (stated in the manual included or 3.3v multiplied by the amount of cells connected in series) it can cause **permanent internal damage**. This damage is not visible until after further use, when it can swell, or potentially burst and **cause a FIRE**.
+If a LiPo battery goes below its minimum voltage (stated in the manual included or 3.3v multiplied by the number of cells connected in series) it can cause **permanent internal damage**. This damage is not visible until after further use, when it can swell, or potentially burst and **cause a FIRE**.
 
 **Read all safety notes and instructions included with LiPo batteries before use.**
 
