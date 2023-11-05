@@ -253,12 +253,13 @@ function updateControllers() {
             let laststeering = controls.steering;
             controls.throttle = Math.abs(controller.axes[1]) < 0.05 ? 0 : Math.round(controller.axes[1] * -100);
             controls.steering = Math.abs(controller.axes[2]) < 0.1 ? 0 :Math.round(controller.axes[2] * 100);
-            updateButtonState(controller.buttons, 0, () => captureModFilter.checked = !captureModFilter.checked);
-            updateButtonState(controller.buttons, 1, () => captureModSave.checked = !captureModSave.checked);
-            updateButtonState(controller.buttons, 2, () => streamModFilter.checked = !streamModFilter.checked);
-            updateButtonState(controller.buttons, 3, () => streamModSave.checked = !streamModSave.checked);
-            updateButtonState(controller.buttons, 8, () => capture.click());
-            updateButtonState(controller.buttons, 9, () => stream.click());
+            // yeah this is all useless
+            // updateButtonState(controller.buttons, 0, () => captureModFilter.checked = !captureModFilter.checked);
+            // updateButtonState(controller.buttons, 1, () => captureModSave.checked = !captureModSave.checked);
+            // updateButtonState(controller.buttons, 2, () => streamModFilter.checked = !streamModFilter.checked);
+            // updateButtonState(controller.buttons, 3, () => streamModSave.checked = !streamModSave.checked);
+            // updateButtonState(controller.buttons, 8, () => capture.click());
+            // updateButtonState(controller.buttons, 9, () => stream.click());
             if (lastthrottle != controls.throttle || laststeering != controls.steering) controls.updated = true;
             break;
         }
