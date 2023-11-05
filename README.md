@@ -517,6 +517,8 @@ The map on the right side of the screen is the most important addition to the SP
 
 It's possible to use SPARK Control to change the filter colors to adjust to the environment. Simply open the dropdown menu above the map on the right-hand side of the screen, change the HSV sliders, and click the "Capture" button with the "Filter" option enabled on to see the effects of your changes. Afterwards locate the color assignments in `/Program/Controller/converter.py` and change them to match your environment.
 
+![HSV Sliders on control panel](./img/docs/spark-control-sliders.png)
+
 Example:
 
 ```
