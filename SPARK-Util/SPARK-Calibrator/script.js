@@ -33,6 +33,14 @@ var startInputs = [35, 33, 30, 29, 28, 27, 27, 27, 17, 19, 19, 20, 20, 20, 19, 1
 
 var refresh = function() {
     if (image0 == null) {
+        if (darkMode.checked) {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, 544 * 2, 308);
+        }
+        else {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, 544 * 2, 308);
+        }
         return;
     }
     ctx.fillStyle = "#000000";
@@ -41,14 +49,24 @@ var refresh = function() {
     if (image1 != null) {
         ctx.drawImage(image1, 544, 0);
     }
-    ctx.globalCompositeOperation = "difference";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 544 * 2, 308);
-    ctx.globalCompositeOperation = "source-over";
+    if (!darkMode.checked) {
+        ctx.globalCompositeOperation = "difference";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, 544 * 2, 308);
+        ctx.globalCompositeOperation = "source-over";
+    }
     ctx.fillStyle = "#0000ff99";
     for (var i = 0; i < 16; i++) {
         ctx.fillRect(i * 544 / 8, Number(inputs[i].value), 544 / 8, 1);
     }
+};
+
+if (localStorage.getItem("darkMode") == "true") {
+    darkMode.checked = true;
+}
+darkMode.oninput = function() {
+    localStorage.setItem("darkMode", darkMode.checked);
+    refresh();
 };
 
 for (var i in inputs) {
