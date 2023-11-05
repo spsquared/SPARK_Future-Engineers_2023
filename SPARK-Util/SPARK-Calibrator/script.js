@@ -63,6 +63,7 @@ var refresh = function() {
 
 if (localStorage.getItem("darkMode") == "true") {
     darkMode.checked = true;
+    refresh();
 }
 darkMode.oninput = function() {
     localStorage.setItem("darkMode", darkMode.checked);
