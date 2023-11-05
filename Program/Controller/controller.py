@@ -491,6 +491,8 @@ def drive(manual: bool = False):
 
         if slam.carSections == 12 and slam.carSectionExited <= 0 and (centerWalls != 0 and centerWallDistance < 200):
             io.drive.steer(0)
+            io.drive.throttle(-100)
+            time.sleep(1) # fix this? too long
             io.drive.throttle(0)
             return False
     
