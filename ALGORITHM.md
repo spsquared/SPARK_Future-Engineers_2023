@@ -135,7 +135,7 @@ Using `cv2.Canny`, edges can be found on the masked red or green image. To make 
 
 We find the "height" of the walls, which is the distance between the top edge and bottom edge. Similarly to the pillars, this information is used later to find the distance from the car to any point on the top boundary of the wall.
 
-The edge image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first largest value, which is at the edge of the wall. If no 255 values are found, `numpy.​argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
+The edge image is cropped to remove areas on the top and bottom of the image. The left camera is slightly tilted, so some areas of the left image get set to 0. `numpy.argmax` will find the index of the largest element in each subarray of the image. However, because the image only contains values of 0 and 255, `numpy.argmax` will return the first largest value, which is at the edge of the wall. If no 255 values are found, `numpy.argmax` returns 0, which is a problem. To fix this, an array filled with a value of 255 is stacked to the end of the image using `numpy.hstack`.
 
 ***
 
