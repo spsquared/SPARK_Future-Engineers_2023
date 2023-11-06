@@ -30,9 +30,9 @@ NO_PILLARS = False
 if NO_PILLARS:
     print("[!] [!] [!] [!] No pillar mode is on! [!] [!] [!] [!]") # oh noes no pillar mode is on
 
-RIGHT_ON_RED = False
-if RIGHT_ON_RED:
-    print("[!] [!] [!] [!] Right on red mode is on! [!] [!] [!] [!]") # oh noes right on red is on
+LEFT_ON_RED = False
+if LEFT_ON_RED:
+    print("[!] [!] [!] [!] Left on red mode is on! [!] [!] [!] [!]") # oh noes left on red is on
 
 UTURN_ON_GREEN = False
 UTURN_PILLAR = RED_PILLAR
@@ -414,7 +414,7 @@ def drive(manual: bool = False):
         if transformedPillar[4] == GREEN_PILLAR:
             pillarDirection = -1
         
-        if RIGHT_ON_RED:
+        if LEFT_ON_RED:
             pillarDirection *= -1
 
         if transformedPillar[0] * pillarDirection > -15:
@@ -564,7 +564,7 @@ def drive(manual: bool = False):
             else:
                 if centerWallDistance < 75:
                     steerCenter()
-        elif ((not RIGHT_ON_RED) and transformedPillar[4] == RED_PILLAR) or (RIGHT_ON_RED and transformedPillar[4] == GREEN_PILLAR):
+        elif ((not LEFT_ON_RED) and transformedPillar[4] == RED_PILLAR) or (LEFT_ON_RED and transformedPillar[4] == GREEN_PILLAR):
             if slam.uTurnPillar == UTURN_PILLAR:
                 if slam.carDirection == CLOCKWISE:
                     steerCenter()
@@ -579,7 +579,7 @@ def drive(manual: bool = False):
                 steering += 20 - (-20 - transformedPillar[0]) * 4
             elif centerWallDistance < 55:
                 steerCenter() 
-        elif ((not RIGHT_ON_RED) and transformedPillar[4] == GREEN_PILLAR) or (RIGHT_ON_RED and transformedPillar[4] == RED_PILLAR):
+        elif ((not LEFT_ON_RED) and transformedPillar[4] == GREEN_PILLAR) or (LEFT_ON_RED and transformedPillar[4] == RED_PILLAR):
             if slam.uTurnPillar == UTURN_PILLAR:
                 if slam.carDirection == COUNTER_CLOCKWISE:
                     steerCenter()
