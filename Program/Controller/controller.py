@@ -480,7 +480,7 @@ def drive(manual: bool = False):
         
         inMiddleSection = slam.carSectionExited <= 0 and (centerWalls != 0 and centerWallDistance < 160)
         
-        if slam.carSectionEntered == 2 and (centerWalls == 0 or centerWallDistance > 150):
+        if slam.carSectionEntered == 2 and (centerWalls == 0 or centerWallDistance > 130):
             slam.carSectionExited -= 1
             if slam.carSectionExited == 0:
                 slam.carSections += 1
@@ -531,7 +531,7 @@ def drive(manual: bool = False):
     
     if slam.uTurning:
         slam.carAngle = 0
-        slam.carSectionEntered = 0;
+        slam.carSectionEntered = 0
         if slam.uTurnAroundPillar == 0:
             if leftWalls != 0 and rightWalls != 0:
                 if leftWallDistance < rightWallDistance:
@@ -542,13 +542,13 @@ def drive(manual: bool = False):
         if abs(slam.uTurnGyroAngle - io.imu.angle()) > math.pi / 1.25:
             slam.uTurning = False
             slam.uTurnPillar = 0
-            slam.uTurnStart = -20200202
-            slam.carSections = 8;
-            slam.carSectionExited = 0;
+            slam.uTurnStart = -20232023 # big number
+            slam.carSections = 8
+            slam.carSectionExited = 0
             slam.carSectionEntered = 0
             # slam.carAngle += math.pi
             slam.carDirection *= -1
-            slam.carSectionCooldown = 10
+            slam.carSectionCooldown = -1
             # slam.carSections += 1
             processWalls()
         # print("oof no u turn code")
@@ -590,7 +590,7 @@ def drive(manual: bool = False):
             elif slam.carDirection == CLOCKWISE and transformedPillar[1] < 15 and centerWallDistance - transformedPillar[1] < 80:
                 steerCenter()
             elif slam.carDirection == CLOCKWISE and -transformedPillar[0] > -20 and slam.carAngle > 0:
-                steering -= 20 + (20 - transformedPillar[0]) * 4
+                steering += -20 - (20 - transformedPillar[0]) * 4
             elif centerWallDistance < 55:
                 steerCenter()
         if steering == 0:

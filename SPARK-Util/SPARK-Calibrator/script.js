@@ -29,7 +29,7 @@ upload.onclick = function() {
 };
 
 var inputs = [left1, left2, left3, left4, left5, left6, left7, left8, right1, right2, right3, right4, right5, right6, right7, right8];
-var startInputs = [35, 33, 30, 29, 28, 27, 27, 27, 17, 16, 17, 18, 19, 19, 18, 17];
+var startInputs = [35, 33, 30, 29, 28, 27, 27, 27, 17, 18, 18, 18, 19, 19, 18, 17];
 
 var refresh = function() {
     if (image0 == null) {
