@@ -8,10 +8,10 @@ import math
 # converts images into data usable for SLAM and driving
 
 # colors
-rm = redMin = (0, 90, 70)
-rM = redMax = (20, 255, 255)
-gm = greenMin = (50, 50, 50)
-gM = greenMax = (105, 255, 255)
+rm = redMin = (0, 0, 5)
+rM = redMax = (22, 255, 125)
+gm = greenMin = (50, 50, 30)
+gM = greenMax = (115, 255, 255)
 
 # camera constants
 imageWidth = 544
@@ -92,8 +92,10 @@ wallStartLeft = 164
 wallStartRight = 154
 # undistortedWallStartLeft = [176, 174, 172, 169, 167, 165, 164, 164]
 # undistortedWallStartRight = [158, 158, 159, 159, 159, 159, 159, 159]
+# undistortedWallStartLeft = [35, 33, 30, 29, 28, 27, 27, 27]
+# undistortedWallStartRight = [17, 19, 19, 20, 20, 20, 19, 18]
 undistortedWallStartLeft = [35, 33, 30, 29, 28, 27, 27, 27]
-undistortedWallStartRight = [17, 19, 19, 20, 20, 20, 19, 18]
+undistortedWallStartRight = [17, 16, 17, 18, 19, 19, 18, 17]
 
 for i in range(8):
     undistortedWallStartLeft[i] += undistortCrop

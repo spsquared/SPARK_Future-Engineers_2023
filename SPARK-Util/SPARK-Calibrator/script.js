@@ -29,7 +29,7 @@ upload.onclick = function() {
 };
 
 var inputs = [left1, left2, left3, left4, left5, left6, left7, left8, right1, right2, right3, right4, right5, right6, right7, right8];
-var startInputs = [35, 33, 30, 29, 28, 27, 27, 27, 17, 19, 19, 20, 20, 20, 19, 18];
+var startInputs = [35, 33, 30, 29, 28, 27, 27, 27, 17, 16, 17, 18, 19, 19, 18, 17];
 
 var refresh = function() {
     if (image0 == null) {
@@ -49,15 +49,15 @@ var refresh = function() {
     if (image1 != null) {
         ctx.drawImage(image1, 544, 0);
     }
+    ctx.fillStyle = "#ffff0099";
+    for (var i = 0; i < 16; i++) {
+        ctx.fillRect(i * 544 / 8, Number(inputs[i].value), 544 / 8, 1);
+    }
     if (!darkMode.checked) {
         ctx.globalCompositeOperation = "difference";
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, 544 * 2, 308);
         ctx.globalCompositeOperation = "source-over";
-    }
-    ctx.fillStyle = "#0000ff99";
-    for (var i = 0; i < 16; i++) {
-        ctx.fillRect(i * 544 / 8, Number(inputs[i].value), 544 / 8, 1);
     }
 };
 

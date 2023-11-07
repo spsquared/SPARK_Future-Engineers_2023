@@ -65,10 +65,10 @@ __serverQuality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
 def capture(filter: bool = False, undistort: bool = False, sendServer: bool = True):
     try:
         name = str(round(time.time()*1000))
+        imgs = __currentImages
+        if undistort:
+            imgs = [converter.undistort(imgs[0]), converter.undistort(imgs[1])]
         if filter:
-            imgs = __currentImages
-            if undistort:
-                imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
             filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
             cv2.imwrite('filtered_out/' + name + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
             if sendServer:
@@ -83,9 +83,6 @@ def capture(filter: bool = False, undistort: bool = False, sendServer: bool = Tr
                 server.emit('capture', encoded)
             print('Captured (filtered) ' + name + '.png')
         else:
-            imgs = __currentImages
-            if undistort:
-                imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
             cv2.imwrite('image_out/' + name + '.png', numpy.concatenate((imgs[0], imgs[1]), axis=1))
             if sendServer:
                 server.emit('message', 'Captured ' + name + '.png')
@@ -132,10 +129,10 @@ def startSaveStream(filter: bool = False, undistort: bool = False, sendServer: b
                 index = 0
                 while __streaming:
                     start = time.time()
+                    imgs = __currentImages
+                    if undistort:
+                        imgs = [converter.undistort(imgs[0]), converter.undistort(imgs[1])]
                     if filter:
-                        imgs = __currentImages
-                        if undistort:
-                            imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
                         filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
                         cv2.imwrite('filtered_out/' + name + '/' + str(index) + '.png', numpy.concatenate((filteredImgs[0], filteredImgs[1]), axis=1))
                         if sendServer:
@@ -202,7 +199,7 @@ def startStream(filter: bool = False, undistort: bool = False):
                     start = time.time()
                     imgs = __currentImages
                     if undistort:
-                        imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
+                        imgs = [converter.undistort(imgs[0]), converter.undistort(imgs[1])]
                     if filter:
                         filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
                         encoded = [
@@ -245,7 +242,7 @@ def stopStream():
         return True
     return False
 def streamState():
-    return [__streaming, __streamFiltering, __streamSaving]
+    return [__streaming, __streamFiltering, __streamSaving, __streamUndistorting]
 
 __thread = Thread(target = __update)
 __thread.start()

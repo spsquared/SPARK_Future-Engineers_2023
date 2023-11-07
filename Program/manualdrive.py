@@ -60,8 +60,8 @@ def main():
                     else:
                         if data[0]['undistort'] == True:
                             encoded = [
-                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
-                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[0]), quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[1]), quality)[1]).decode(),
                                 0,
                                 0,
                                 0
@@ -69,8 +69,8 @@ def main():
                             server.emit('capture', encoded)
                         else:
                             encoded = [
-                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[0]), quality)[1]).decode(),
-                                base64.b64encode(cv2.imencode('.jpg', converter.undistort(io.camera.read()[1]), quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[0], quality)[1]).decode(),
+                                base64.b64encode(cv2.imencode('.jpg', io.camera.read()[1], quality)[1]).decode(),
                                 0,
                                 0,
                                 0

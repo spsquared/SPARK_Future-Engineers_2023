@@ -159,8 +159,6 @@ def drive(manual: bool = False):
     rightWallAngle = 0
 
     carAngle = 0
-    # drCarX = slam.carX + math.cos(slam.carAngle) * slam.carSpeed
-    # drCarY = slam.carY + math.sin(slam.carAngle) * slam.carSpeed
 
     def processWalls():
         nonlocal processedWalls, centerWalls, leftWalls, rightWalls, centerWallDistance, leftWallDistance, rightWallDistance, centerWallAngle, leftWallAngle, rightWallAngle, carAngle, walls
@@ -492,7 +490,8 @@ def drive(manual: bool = False):
         if slam.carSections == 12 and slam.carSectionExited <= 0 and (centerWalls != 0 and centerWallDistance < 200):
             io.drive.steer(0)
             io.drive.throttle(-100)
-            time.sleep(1) # fix this? too long
+            # time.sleep(1) # fix this? too long
+            time.sleep(0.5)
             io.drive.throttle(0)
             return False
     
