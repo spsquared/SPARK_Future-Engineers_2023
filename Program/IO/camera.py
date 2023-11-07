@@ -186,11 +186,12 @@ def stopSaveStream():
         __totalCaptured = 0
         return True
     return False
-def startStream(filter: bool = False):
-    global __streamThread, __streaming, __streamServing, __streamFiltering, __streamSaving
+def startStream(filter: bool = False, undistort: bool = False):
+    global __streamThread, __streaming, __streamServing, __streamSaving, __streamFiltering, __streamUndistorting
     if not __streaming:
         __streaming = True
         __streamFiltering = filter
+        __streamUndistorting = undistort
         __streamSaving = False
         __streamServing = True
         def loop():
@@ -199,8 +200,11 @@ def startStream(filter: bool = False):
                 index = 0
                 while __streaming:
                     start = time.time()
+                    imgs = __currentImages
+                    if undistort:
+                        imgs = [converter.undistort(imgs[0]), converter.undistort[imgs[1]]]
                     if filter:
-                        filteredImgs = [cv2.merge(converter.filter(read()[0])), cv2.merge(converter.filter(read()[1]))]
+                        filteredImgs = [cv2.merge(converter.filter(imgs[0])), cv2.merge(converter.filter(imgs[1]))]
                         encoded = [
                             base64.b64encode(cv2.imencode('.png', filteredImgs[0])[1]).decode(),
                             base64.b64encode(cv2.imencode('.png', filteredImgs[1])[1]).decode(),
@@ -210,8 +214,8 @@ def startStream(filter: bool = False):
                         server.emit('capture', encoded)
                     else:
                         encoded = [
-                            base64.b64encode(cv2.imencode('.jpg', __currentImages[0], __serverQuality)[1]).decode(),
-                            base64.b64encode(cv2.imencode('.jpg', __currentImages[1], __serverQuality)[1]).decode(),
+                            base64.b64encode(cv2.imencode('.jpg', imgs[0], __serverQuality)[1]).decode(),
+                            base64.b64encode(cv2.imencode('.jpg', imgs[1], __serverQuality)[1]).decode(),
                             0,
                             1
                         ]

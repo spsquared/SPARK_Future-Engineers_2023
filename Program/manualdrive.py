@@ -163,6 +163,9 @@ def main():
                     break
                 elif msg != '':
                     server.emit('unsafemessage', msg)
+        else:
+            while running:
+                time.sleep(1)
     except KeyboardInterrupt:
         print('\nSTOPPING PROGRAM. DO NOT INTERRUPT.')
     except Exception as err:
