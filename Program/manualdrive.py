@@ -151,6 +151,7 @@ def main():
             sys.exit(0)
         io.imu.setAngle(0)
         server.on('stop', stop)
+        acceptTerminalInput = False
         if acceptTerminalInput:
             while running:
                 msg = input()
