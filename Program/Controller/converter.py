@@ -97,7 +97,7 @@ wallStartRight = 154
 # undistortedWallStartLeft = [35, 33, 30, 29, 28, 27, 27, 27]
 # undistortedWallStartRight = [17, 19, 19, 20, 20, 20, 19, 18]
 undistortedWallStartLeft = [35, 33, 30, 29, 28, 27, 27, 27]
-undistortedWallStartRight = [17, 18, 18, 18, 19, 19, 18, 17]
+undistortedWallStartRight = [19, 19, 19, 19, 19, 19, 18, 17]
 
 for i in range(8):
     undistortedWallStartLeft[i] += undistortCrop
@@ -107,7 +107,7 @@ maximumTopWallHeightLeft = 4 - 1
 maximumTopWallHeightRight = 4 - 1
 
 wallEnd = imageHeight + undistortCrop
-contourStart = 160
+contourStart = [25, 15]
 distanceTable = [[], []]
 halfWidth = int(imageWidth / 2)
 quarterWidth = int(imageWidth / 4)
@@ -264,8 +264,8 @@ def processWalls(leftLines, rightLines):
     rightCorners, rightWalls = processWall(rightLines, 1)
     return [leftCorners + rightCorners, leftWalls + rightWalls]
 
-def getContours(imgIn: numpy.ndarray):
-    edges = cv2.Canny(cv2.medianBlur(cv2.copyMakeBorder(imgIn[contourStart - undistortCrop:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=0), 3), 30, 200)
+def getContours(imgIn: numpy.ndarray, dir):
+    edges = cv2.Canny(cv2.medianBlur(cv2.copyMakeBorder(imgIn[contourStart[dir]:], 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=0), 3), 30, 200)
 
     contours, hierarchy = cv2.findContours(edges, 
         cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
