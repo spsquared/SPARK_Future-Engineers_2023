@@ -577,7 +577,7 @@ def drive(manual: bool = False):
                 elif slam.carDirection == COUNTER_CLOCKWISE:
                     if centerWallDistance < 60:
                         steerCenter()
-            elif slam.carDirection == CLOCKWISE and transformedPillar[1] < 65 and centerWallDistance - transformedPillar[1] < 80:
+            elif slam.carDirection == CLOCKWISE and transformedPillar[1] < 60 and centerWallDistance - transformedPillar[1] < 80:
                 steerCenter()
             elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[1] < 15 and centerWallDistance - transformedPillar[1] < 80:
                 steerCenter()
@@ -592,7 +592,7 @@ def drive(manual: bool = False):
                 elif slam.carDirection == CLOCKWISE:
                     if centerWallDistance < 60:
                         steerCenter()
-            elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[1] < 65 and centerWallDistance - transformedPillar[1] < 80:
+            elif slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[1] < 60 and centerWallDistance - transformedPillar[1] < 80:
                 steerCenter()
             elif slam.carDirection == CLOCKWISE and transformedPillar[1] < 15 and centerWallDistance - transformedPillar[1] < 80:
                 steerCenter()
