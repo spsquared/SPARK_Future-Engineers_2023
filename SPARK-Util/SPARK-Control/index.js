@@ -80,6 +80,7 @@ socket.on('#programStarting', (mode) => {
     runManual.disabled = true;
     runAuto.disabled = true;
     statusRunning.style.animationName = 'blink';
+    document.querySelectorAll('.killPrograms').forEach(button => button.remove());
 });
 socket.on('#programRunning', () => {
     appendLog('Program running', 'lime');
@@ -87,6 +88,7 @@ socket.on('#programRunning', () => {
     runAuto.disabled = true;
     runStop.disabled = false;
     statusRunning.style.animationName = 'blink';
+    document.querySelectorAll('.killPrograms').forEach(button => button.remove());
     socket.emit('getStreamState');
     socket.emit('getColors');
     socket.emit('idManual');
