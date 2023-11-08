@@ -105,7 +105,7 @@ function runProgram(mode) {
         }
     }
     io.emit('#programStarting', mode);
-    const program = subprocess.spawn('python3', [path.resolve(mode == 'manual' ? 'manualdrive.py' : 'autodrive.py'), mode == 'manual' ? 'no_terminal' : '']);
+    const program = subprocess.spawn('python3', [path.resolve(mode == 'manual' ? 'manualdrive.py' : 'autodrive.py'), mode == 'manual' ? 'no_terminal' : 'wait_for_button']);
     program.stdout.setEncoding('utf8');    
     program.stderr.setEncoding('utf8');
     program.stdout.on('data', (chunk) => {

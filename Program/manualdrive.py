@@ -20,6 +20,7 @@ def main():
                 if arg == 'no_terminal':
                     acceptTerminalInput = False
         server.open()
+        controller.setMode(manual = True)
         io.setStatusBlink(2)
         quality = [int(cv2.IMWRITE_JPEG_QUALITY), 10]
         streaming = False
@@ -106,7 +107,7 @@ def main():
                     try:
                         while predictStreaming:
                             start = time.time()
-                            controller.drive(True)
+                            controller.drive()
                             time.sleep(max(0.1-(time.time()-start), 0))
                     except Exception as err:
                         traceback.print_exc()

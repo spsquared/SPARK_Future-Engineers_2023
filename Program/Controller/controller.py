@@ -26,7 +26,7 @@ COUNTER_CLOCKWISE = -1
 # WARNING !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
 # WARNNIG !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
 # WARNING !!!!! DO NOT TURN ON NO PILLAR MODE WITH PILLARS
-NO_PILLARS = False
+NO_PILLARS = True
 if NO_PILLARS:
     print("[!] [!] [!] [!] No pillar mode is on! [!] [!] [!] [!]") # oh noes no pillar mode is on
 
@@ -61,12 +61,13 @@ if (speed > MAX_SPEED):
 # slam.carSections = 6
 
 useServer = True
-def setMode(sendServer: bool = None):
+manual = False
+def setMode(sendServer: bool = None, manual: bool = False):
     global useServer
     if sendServer != None: useServer = sendServer
 
-def drive(manual: bool = False):
-    global lastSteering
+def drive():
+    global lastSteering, manual
     read = io.camera.read()
 
     # Filter and undistort
@@ -448,7 +449,6 @@ def drive(manual: bool = False):
             steering = 100 * slam.uTurnAroundPillar
 
     if not slam.uTurning:
-
         if centerWalls != 0 and centerWallDistance < 130:
             if slam.carSectionCooldown <= 0 and slam.carSectionExited <= 0:
                 slam.carSectionTimer += 2
@@ -469,12 +469,20 @@ def drive(manual: bool = False):
                 slam.carSectionEntered = 0
                 slam.carSectionCooldown = 10
         
-        if slam.carSectionEntered == 2 and carAngle != 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
-            slam.carAngle -= slam.carDirection * math.pi / 2
-            # slam.carSections += 1
-            slam.carSectionEntered = 1
-            processWalls()
-            reason += " turn 1"
+        if NO_PILLARS:
+            if slam.carSectionEntered == 2 and carAngle != 0 and slam.carAngle * slam.carDirection > 60 / 180 * math.pi:
+                slam.carAngle -= slam.carDirection * math.pi / 2
+                # slam.carSections += 1
+                slam.carSectionEntered = 1
+                processWalls()
+                reason += " turn 1"
+        else:
+            if slam.carSectionEntered == 2 and carAngle != 0 and slam.carAngle * slam.carDirection > 40 / 180 * math.pi:
+                slam.carAngle -= slam.carDirection * math.pi / 2
+                # slam.carSections += 1
+                slam.carSectionEntered = 1
+                processWalls()
+                reason += " turn 1"
         # elif slam.carSectionEntered == 2 and carAngle * slam.carDirection < -20 / 180 * math.pi and carAngle != 0 and ((slam.carAngle - carAngle) * slam.carDirection > 7 / 180 * math.pi or carAngle * slam.carDirection < -60 / 180 * math.pi) and (transformedPillar[0] == None or (((slam.carDirection == CLOCKWISE and transformedPillar[4] == RED_PILLAR) or (slam.carDirection == COUNTER_CLOCKWISE and transformedPillar[4] == GREEN_PILLAR)) and transformedPillar[2] < 50)) and (not slam.uTurning):
         #     slam.carSectionEntered = 1
         #     reason += " turn 2"
@@ -619,7 +627,7 @@ def drive(manual: bool = False):
     
 
     # print("driving: ", time.perf_counter() - start)
-    start = time.perf_counter()
+    # start = time.perf_counter()
 
     if useServer:
         data = {
