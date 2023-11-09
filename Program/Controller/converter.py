@@ -109,7 +109,6 @@ maximumTopWallHeightRight = 4 - 1
 
 wallEnd = imageHeight + undistortCrop
 contourStart = [25, 15]
-distanceTable = [[], []]
 halfWidth = int(imageWidth / 2)
 quarterWidth = int(imageWidth / 4)
 eighthWidth = int(imageWidth / 8)
