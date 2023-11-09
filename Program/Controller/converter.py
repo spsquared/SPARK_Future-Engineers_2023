@@ -14,7 +14,8 @@ import math
 # gM = greenMax = (115, 255, 255)
 rm = redMin = (0, 0, 70)
 rM = redMax = (22, 255, 125)
-gm = greenMin = (50, 0, 30)
+# gm = greenMin = (50, 0, 30)
+gm = greenMin = (50, 0, 40)
 gM = greenMax = (115, 255, 255)
 
 # camera constants
